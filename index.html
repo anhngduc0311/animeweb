@@ -18,8 +18,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="/src/style.css">
-  <!-- HLS.js for Live Master Streaming -->
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
+  <link rel="stylesheet" href="/src/refinement.css">
 </head>
 <body>
   <!-- ==========================================
@@ -31,11 +30,11 @@
       <a href="#" class="brand" id="brand-link">
         <div class="brand-icon">L</div>
         <span class="brand-text">Linime</span>
-        <span class="brand-badge">PRO</span>
+        <span class="brand-badge">ANIME</span>
       </a>
 
       <!-- Navigation Links -->
-      <ul class="nav-links">
+      <ul class="nav-links" id="main-navigation">
         <li><a href="#" class="nav-link active" data-nav="home">Trang chủ</a></li>
         <li><a href="#section-trending" class="nav-link" data-nav="trending">Thịnh hành</a></li>
         <li><a href="#section-recent" class="nav-link" data-nav="recent">Mới cập nhật</a></li>
@@ -74,7 +73,7 @@
         </button>
 
         <!-- Mobile Menu Toggle -->
-        <button class="icon-btn mobile-menu-btn" id="mobile-toggle-btn" aria-label="Menu di động">
+        <button class="icon-btn mobile-menu-btn" id="mobile-toggle-btn" aria-label="Menu di động" aria-controls="main-navigation" aria-expanded="false">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="3" y1="12" x2="21" y2="12"></line>
             <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -96,6 +95,7 @@
 
     <div class="container">
       <div class="spotlight-content">
+        <p class="spotlight-eyebrow"><span></span> TÂM ĐIỂM HÔM NAY</p>
         <div class="spotlight-meta-top" id="spotlight-meta">
           <span class="tag-status" id="spotlight-status">ĐANG PHÁT SÓNG</span>
           <span class="tag-score" id="spotlight-score">★ 8.7</span>
@@ -146,6 +146,14 @@
        MAIN CATALOG CONTENT
        ========================================== -->
   <main class="container">
+    <nav class="discovery-bar" aria-label="Khám phá anime">
+      <div class="discovery-heading"><span>Thế giới anime của bạn</span><p>Tìm câu chuyện tiếp theo.</p></div>
+      <div class="discovery-links">
+        <a href="#section-trending">Đang thịnh hành <span>↗</span></a>
+        <a href="#section-recent">Mới cập nhật <span>↗</span></a>
+        <a href="#section-movies">Đêm phim lẻ <span>↗</span></a>
+      </div>
+    </nav>
     <!-- Continue Watching Section (Dynamic) -->
     <section class="home-section" id="section-continue-watching" style="display: none;">
       <div class="section-header">
@@ -448,11 +456,7 @@
     <div class="player-header">
       <div class="player-title">
         <span id="player-anime-name">One Piece</span>
-        <div class="server-tabs" id="server-selector">
-          <button class="server-tab active" data-server-idx="0">VIP 1 (Trực tiếp)</button>
-          <button class="server-tab" data-server-idx="1">Server 2 (YouTube HD)</button>
-          <button class="server-tab" data-server-idx="2">Server 3 (Dự phòng)</button>
-        </div>
+        <span class="server-tab active">Anikoto / MegaPlay</span>
       </div>
       <button class="icon-btn" id="close-player-btn" aria-label="Đóng trình phát">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -468,7 +472,7 @@
           <source src="" type="video/mp4">
           Trình duyệt của bạn không hỗ trợ phát video HTML5.
         </video>
-        <iframe class="video-element" id="youtube-iframe" style="display: none; width: 100%; height: 100%; border: none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <iframe class="video-element" id="anime-iframe" title="Trình phát Anikoto / MegaPlay" referrerpolicy="strict-origin-when-cross-origin" style="display: none; width: 100%; height: 100%; border: none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
         <!-- Custom Controls Overlay -->
         <div class="custom-controls" id="player-controls">
@@ -517,13 +521,8 @@
       <div class="watch-bottom-panel" id="watch-bottom-panel">
         <!-- Quick toggles row -->
         <div class="watch-quick-bar">
-          <label class="quick-toggle"><input type="checkbox" id="chk-autoplay" checked> <span>Tự phát</span></label>
-          <label class="quick-toggle"><input type="checkbox" id="chk-autoskip" checked> <span>Tự bỏ qua</span></label>
           <label class="quick-toggle"><input type="checkbox" id="chk-autonext" checked> <span>Tự chuyển tập</span></label>
-          <label class="quick-toggle"><input type="checkbox" id="chk-skipfiller"> <span>Bỏ qua tập phụ</span></label>
-          <button class="quick-btn" id="btn-shortcuts">⌨ Phím tắt</button>
           <button class="quick-btn" id="btn-light">💡 Tắt đèn</button>
-          <button class="quick-btn" id="btn-orig-player">🖥 Trình phát gốc</button>
         </div>
 
         <!-- Navigation row -->
@@ -539,8 +538,6 @@
             </div>
           </div>
           <div class="nav-right">
-            <button class="action-pill-btn" id="btn-watch-together">👥 Xem cùng nhau</button>
-            <button class="action-pill-btn" id="btn-report">🚩 Báo lỗi</button>
           </div>
         </div>
 
@@ -548,17 +545,8 @@
         <div class="watch-servers-box">
           <h3 class="current-ep-heading" id="current-ep-heading">1. Episode 1</h3>
           <div class="servers-groups">
-            <div class="server-group">
-              <span class="group-label">⚡ NỘI BỘ</span>
-              <div class="server-buttons">
-                <button class="prov-btn" data-provider="Yuki">Yuki</button>
-                <button class="prov-btn" data-provider="Zuna">Zuna</button>
-                <button class="prov-btn" data-provider="Sora">Sora</button>
-                <button class="prov-btn" data-provider="Zenith">Zenith</button>
-              </div>
-            </div>
-            <div class="server-group">
-              <span class="group-label">🖥 BÊN NGOÀI</span>
+<div class="server-group">
+              <span class="group-label">NGUỒN PHÁT</span>
               <div class="server-buttons">
                 <button class="prov-btn active" data-provider="Megaplay">Megaplay</button>
               </div>

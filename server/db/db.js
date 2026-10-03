@@ -200,20 +200,6 @@ export async function getGenreAnimes() {
   return result;
 }
 
-// Map trailer YouTube embed IDs cho từng anime
-const ANIME_YOUTUBE_STREAMS = {
-  21: 'https://www.youtube.com/embed/l_98KBvycqg?autoplay=1',
-  195516: 'https://www.youtube.com/embed/6N8fK8mHqQ0?autoplay=1',
-  113415: 'https://www.youtube.com/embed/oI9KvdgD4v4?autoplay=1',
-  101922: 'https://www.youtube.com/embed/yB2Gf91kO3c?autoplay=1',
-  154587: 'https://www.youtube.com/embed/qgQunxD0qLk?autoplay=1',
-  171627: 'https://www.youtube.com/embed/6d3n_N2uUjI?autoplay=1',
-  151807: 'https://www.youtube.com/embed/qWw7k5qR0qg?autoplay=1',
-  16498: 'https://www.youtube.com/embed/M_OauHnAFc8?autoplay=1',
-  21519: 'https://www.youtube.com/embed/xU47nhruN-Q?autoplay=1',
-  20954: 'https://www.youtube.com/embed/nfK6UgLra7g?autoplay=1'
-};
-
 export async function getAnimeById(id) {
   const res = await pool.query('SELECT * FROM animes WHERE id = $1', [id]);
   if (res.rows.length === 0) return null;
@@ -228,48 +214,10 @@ export async function getAnimeEpisodes(animeId) {
     [animeId]
   );
   
-  const youtubeUrl = ANIME_YOUTUBE_STREAMS[animeId] || 'https://www.youtube.com/embed/l_98KBvycqg?autoplay=1';
-
-  // Nếu trong database chưa có tập nào thì tự tạo tập 1 mặc định
-  if (res.rows.length === 0) {
-    return [
-      {
-        number: 1,
-        title: 'Tập 1: Khởi Đầu Hành Trình',
-        duration: '24:00',
-        servers: [
-          { name: 'Server VIP 1 (Trực tiếp)', quality: '1080p', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', type: 'mp4' },
-          { name: 'Server 2 (YouTube Anime HD)', quality: '1080p', url: youtubeUrl, type: 'embed' },
-          { name: 'Server 3 (Dự phòng Fast)', quality: '720p', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4' }
-        ]
-      }
-    ];
-  }
-
   return res.rows.map(ep => ({
     number: ep.episode_number,
     title: ep.title,
-    duration: ep.duration,
-    servers: [
-      {
-        name: 'Server VIP 1 (Trực tiếp)',
-        quality: '1080p',
-        url: ep.video_url || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-        type: 'mp4'
-      },
-      {
-        name: 'Server 2 (YouTube Anime HD)',
-        quality: '1080p',
-        url: youtubeUrl,
-        type: 'embed'
-      },
-      {
-        name: 'Server 3 (Dự phòng Fast)',
-        quality: '720p',
-        url: 'https://vjs.zencdn.net/v/oceans.mp4',
-        type: 'mp4'
-      }
-    ]
+    duration: ep.duration
   }));
 }
 
