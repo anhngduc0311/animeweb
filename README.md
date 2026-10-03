@@ -19,6 +19,14 @@ Build with `npm run build`. Check the streaming adapter with
 
 ## Video provider
 
+The player also offers **Vietsub** via KKPhim (`https://phimapi.com`). The
+backend caches searches and details for five minutes and requires a unique
+matching title, year and animation type. Season numbers are preserved during
+matching. Only the provider's `Vietsub` server and exact requested episode are
+used; unavailable titles produce an explicit error instead of switching seasons.
+This source uses its own iframe; MegaPlay progress tracking and auto-next are
+not available on it. Use the previous/next episode buttons manually.
+
 Playback uses [Anikoto / MegaPlay](https://megaplay.buzz/api). No requests,
 cookies, stream decryption or proxying through the previous website are needed.
 The local catalog and watch history remain in PostgreSQL; local anime IDs are

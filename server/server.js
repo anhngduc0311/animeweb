@@ -19,6 +19,7 @@ import {
 } from './db/db.js';
 import { getLiveSources, getLiveEpisodes } from './streamService.js';
 
+import { getVietsub } from './vietsubService.js';
 import { getArtwork } from './artworkService.js';
 
 dotenv.config();
@@ -242,6 +243,16 @@ app.get('/api/watch/:id/episodes', async (req, res) => {
 app.post('/api/watch/sources', async (req, res) => {
   try {
     const { anime_id, episode_number = 1, language = 'sub', provider = 'Megaplay' } = req.body;
+    if (provider === 'Vietsub') {
+      if (!Number.isSafeInteger(Number(anime_id)) || Number(anime_id) <= 0 ||
+          !Number.isSafeInteger(Number(episode_number)) || Number(episode_number) <= 0) {
+        return res.status(400).json({ success: false, message: 'Mã phim hoặc số tập không hợp lệ' });
+      }
+      const anime = await getAnimeById(Number(anime_id));
+      const source = anime ? await getVietsub(anime, episode_number) : null;
+      return source ? res.json(source) : res.status(404).json({ success: false,
+        message: 'Chưa có Vietsub khớp phim, mùa và tập này. Bạn có thể chọn MegaPlay để xem bản SUB/DUB.' });
+    }
     const sources = await getLiveSources(anime_id, episode_number, language, provider);
 
     if (sources) {

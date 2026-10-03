@@ -609,6 +609,8 @@ let streamRequest = 0;
 let lastProgressSave = 0;
 let activeProvider = 'Megaplay';
 let activeLanguage = 'sub';
+let originalEpisodes = [];
+let originalAnimeId = null;
 
 async function openPlayer(anime, episodeIndex = 0, resumeTime = 0) {
   state.currentVideoAnime = anime;
@@ -639,6 +641,10 @@ async function openPlayer(anime, episodeIndex = 0, resumeTime = 0) {
     ];
   }
 
+  if (originalAnimeId !== anime.id || activeProvider !== 'Vietsub') {
+    originalEpisodes = [...state.currentEpisodes];
+    originalAnimeId = anime.id;
+  }
   const episode = state.currentEpisodes[episodeIndex] || state.currentEpisodes[0];
   const epNum = episode.number || (episodeIndex + 1);
   title.textContent = `${anime.title.english || anime.title.vietnamese} — ${episode.title || `Tập ${epNum}`}`;
@@ -665,17 +671,22 @@ async function loadLiveAnimeStream(animeId, episodeNumber, provider, language, r
   iframe.style.display = 'none';
   if (controls) controls.style.display = 'none';
   document.getElementById('player-notice-banner')?.remove();
-  showToast('Đang kết nối Anikoto / MegaPlay...');
+  showToast(provider === 'Vietsub' ? 'Đang tìm bản phụ đề tiếng Việt...' : 'Đang kết nối Anikoto / MegaPlay...');
   try {
     const res = await fetch('/api/watch/sources', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ anime_id: animeId, episode_number: episodeNumber, language })
+      body: JSON.stringify({ anime_id: animeId, episode_number: episodeNumber, language, provider })
     });
     const data = await res.json();
     if (requestId !== streamRequest) return;
     if (!res.ok || !data.success || data.type !== 'embed') throw new Error(data.message || 'Tập hoặc ngôn ngữ này chưa có nguồn phát.');
     const url = new URL(data.embed_url);
-    if (url.origin !== 'https://megaplay.buzz') throw new Error('Địa chỉ trình phát không hợp lệ.');
+    if (url.origin !== (provider === 'Vietsub' ? 'https://player.phimapi.com' : 'https://megaplay.buzz')) throw new Error('Địa chỉ trình phát không hợp lệ.');
+    if (provider === 'Vietsub' && Array.isArray(data.episodes)) {
+      state.currentEpisodes = data.episodes;
+      state.currentEpisodeIndex = data.episodes.findIndex(ep => ep.number === Number(episodeNumber));
+    }
+    document.getElementById('player-source-label').textContent = provider === 'Vietsub' ? 'KKPhim • Phụ đề Việt' : 'Anikoto / MegaPlay';
     iframe.src = url.href;
     iframe.style.display = 'block';
     // MegaPlay owns playback controls; its public API does not document seeking.
@@ -724,7 +735,7 @@ function showPlayerNotice(message) {
 
   document.getElementById('notice-retry-btn')?.addEventListener('click', () => {
     notice.style.display = 'none';
-    const altProv = 'Megaplay';
+    const altProv = activeProvider;
     document.querySelectorAll('.prov-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.provider === altProv);
     });
@@ -773,7 +784,16 @@ function initPlayerControls() {
     btn.addEventListener('click', async () => {
       document.querySelectorAll('.prov-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      const currentNumber = state.currentEpisodes[state.currentEpisodeIndex]?.number || 1;
       activeProvider = btn.dataset.provider || 'Megaplay';
+      if (activeProvider !== 'Vietsub' && originalAnimeId === state.currentVideoAnime?.id) {
+        state.currentEpisodes = [...originalEpisodes];
+        state.currentEpisodeIndex = Math.max(0, state.currentEpisodes.findIndex(ep => ep.number === currentNumber));
+      }
+      document.querySelectorAll('.lang-btn').forEach(button => { button.disabled = activeProvider === 'Vietsub'; });
+      const autoNext = document.getElementById('chk-autonext');
+      autoNext.disabled = activeProvider === 'Vietsub';
+      autoNext.closest('label').title = activeProvider === 'Vietsub' ? 'Nguồn Vietsub chưa hỗ trợ tự chuyển tập' : '';
       if (state.currentVideoAnime) {
         const episode = state.currentEpisodes[state.currentEpisodeIndex] || { number: 1 };
         await loadLiveAnimeStream(state.currentVideoAnime.id, episode.number, activeProvider, activeLanguage, video.currentTime || 0);

@@ -103,6 +103,7 @@ body { background: var(--bg-primary); }
 .nav-right:empty { display: none; }
 .nav-btn.primary, .lang-btn.active, .prov-btn.active { background: var(--accent-mint); border-color: var(--accent-mint); color: #10221c; }
 .quick-toggle input { accent-color: var(--accent-mint); }
+.lang-btn:disabled, .quick-toggle:has(input:disabled) { opacity: .4; cursor: not-allowed; }
 .search-dialog, .login-card, .watchlist-drawer { background: #111923; border-color: #ffffff18; }
 .search-dialog { border-radius: 14px; }
 .site-footer { margin-top: 40px; background: #080c12; border-top-color: #ffffff0d; }
