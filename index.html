@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  
+
   <link rel="stylesheet" href="/src/style.css">
   <link rel="stylesheet" href="/src/refinement.css">
 </head>
@@ -158,8 +158,8 @@
     <section class="home-section" id="section-continue-watching" style="display: none;">
       <div class="section-header">
         <div class="section-title-group">
-          <h2 class="section-title">Tiếp tục xem</h2>
-          <span class="section-subtitle">Tập phim bạn đang theo dõi dở dang</span>
+          <h2 class="section-title">Đã xem gần đây</h2>
+          <span class="section-subtitle">Những tập bạn đã mở gần đây</span>
         </div>
       </div>
       <div class="cw-grid" id="continue-watching-grid"></div>
@@ -169,8 +169,8 @@
     <section class="home-section" id="section-trending">
       <div class="section-header">
         <div class="section-title-group">
-          <h2 class="section-title">Anime thịnh hành</h2>
-          <span class="section-subtitle">Được cộng đồng theo dõi nhiều nhất</span>
+          <h2 class="section-title">Khám phá anime</h2>
+          <span class="section-subtitle">Tuyển chọn từ danh sách cập nhật KKPhim</span>
         </div>
         <a href="#section-trending" class="section-link">Xem tất cả →</a>
       </div>
@@ -202,6 +202,7 @@
         <a href="#section-recent" class="section-link">Xem tất cả →</a>
       </div>
       <div class="anime-grid" id="recent-grid"></div>
+      <button class="btn-secondary" id="load-more-anime" style="margin-top:24px">Xem thêm anime</button>
     </section>
 
     <!-- Romance & Drama Genre Rail -->
@@ -223,8 +224,8 @@
     <section class="home-section" id="section-seasonal">
       <div class="section-header">
         <div class="section-title-group">
-          <h2 class="section-title">Anime mùa này (Thu 2026)</h2>
-          <span class="section-subtitle">Phát sóng song song với đài truyền hình Nhật Bản</span>
+          <h2 class="section-title">Anime năm nay</h2>
+          <span class="section-subtitle">Anime Nhật Bản cập nhật từ KKPhim</span>
         </div>
         <a href="#section-seasonal" class="section-link">Xem tất cả →</a>
       </div>
@@ -456,7 +457,7 @@
     <div class="player-header">
       <div class="player-title">
         <span id="player-anime-name">One Piece</span>
-        <span class="server-tab active" id="player-source-label">Anikoto / MegaPlay</span>
+        <span class="server-tab active" id="player-source-label">KKPhim • Vietsub</span>
       </div>
       <button class="icon-btn" id="close-player-btn" aria-label="Đóng trình phát">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -521,7 +522,7 @@
       <div class="watch-bottom-panel" id="watch-bottom-panel">
         <!-- Quick toggles row -->
         <div class="watch-quick-bar">
-          <label class="quick-toggle"><input type="checkbox" id="chk-autonext" checked> <span>Tự chuyển tập</span></label>
+          <label class="quick-toggle" title="Player KKPhim chưa hỗ trợ tự chuyển tập"><input type="checkbox" id="chk-autonext" disabled> <span>Tự chuyển tập</span></label>
           <button class="quick-btn" id="btn-light">💡 Tắt đèn</button>
         </div>
 
@@ -533,8 +534,8 @@
           </div>
           <div class="nav-center">
             <div class="lang-selector">
-              <button class="lang-btn active" data-lang="sub">SUB</button>
-              <button class="lang-btn" data-lang="dub">DUB</button>
+              <button class="lang-btn active" data-lang="sub" disabled>VIETSUB</button>
+
             </div>
           </div>
           <div class="nav-right">
@@ -548,8 +549,8 @@
 <div class="server-group">
               <span class="group-label">NGUỒN PHÁT</span>
               <div class="server-buttons">
-                <button class="prov-btn" data-provider="Vietsub">Vietsub</button>
-                <button class="prov-btn active" data-provider="Megaplay">Megaplay</button>
+                <span class="prov-btn active">KKPhim</span>
+
               </div>
             </div>
           </div>

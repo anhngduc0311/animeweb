@@ -1,5 +1,5 @@
 import { LinimeAPI } from './api.js';
-import { INITIAL_ANIME_DATA } from './data/animeData.js';
+const INITIAL_ANIME_DATA = []; // No sample catalog fallback for live KKPhim data.
 
 // Application State
 const state = {
@@ -113,6 +113,11 @@ async function loadSpotlight() {
     navContainer.appendChild(dot);
   });
 
+  if (!state.spotlights.length) {
+    document.getElementById('spotlight-title').textContent = 'Chưa tải được phim từ KKPhim';
+    document.getElementById('spotlight-desc').textContent = 'Vui lòng tải lại trang để thử kết nối lại.';
+    document.querySelectorAll('.spotlight-actions button').forEach(button => { button.disabled = true; });
+  }
   setSpotlightSlide(0);
   startSpotlightTimer();
 
@@ -284,6 +289,26 @@ async function loadCatalogs() {
   moviesGrid.innerHTML = '';
   state.movies.forEach(anime => moviesGrid.appendChild(renderCard(anime)));
 
+  for (const id of ['trending-grid','recent-grid','seasonal-grid','movies-grid']) {
+    const grid = document.getElementById(id);
+    if (!grid.children.length) grid.textContent = 'Chưa có dữ liệu phù hợp từ KKPhim.';
+  }
+  const more = document.getElementById('load-more-anime');
+  let page = 1;
+  more?.addEventListener('click', async () => {
+    more.disabled = true;
+    more.textContent = 'Đang tải...';
+    try {
+      const response = await fetch('/api/catalog?page=' + (page + 1));
+      const data = await response.json();
+      if (!response.ok || !data.success) throw new Error();
+      page++;
+      data.data.forEach(anime => recentGrid.appendChild(renderCard(anime)));
+      more.hidden = page >= data.pagination.totalPages || !data.data.length;
+    } catch { showToast('Không tải được thêm phim. Hãy thử lại.'); }
+    more.disabled = false;
+    more.textContent = 'Xem thêm anime';
+  });
   renderGenreRails();
   await loadContinueWatching();
 }
@@ -603,14 +628,13 @@ function initDetailEvents() {
 }
 
 // ==========================================
-// CINEMA VIDEO PLAYER (ANIKOTO / MEGAPLAY EMBED)
+// CINEMA VIDEO PLAYER (KKPHIM EMBED)
 // ==========================================
 let streamRequest = 0;
 let lastProgressSave = 0;
-let activeProvider = 'Megaplay';
+let activeProvider = 'KKPhim';
 let activeLanguage = 'sub';
-let originalEpisodes = [];
-let originalAnimeId = null;
+
 
 async function openPlayer(anime, episodeIndex = 0, resumeTime = 0) {
   state.currentVideoAnime = anime;
@@ -630,30 +654,20 @@ async function openPlayer(anime, episodeIndex = 0, resumeTime = 0) {
     }
   }
 
-  // Fallback an toàn nếu vẫn chưa có tập
   if (!state.currentEpisodes.length) {
-    state.currentEpisodes = [
-      {
-        number: 1,
-        title: `Tập 1: Khởi Đầu Hành Trình`,
-        duration: '24:00'
-      }
-    ];
+    showToast('KKPhim chưa có tập Vietsub cho phim này.');
+    return;
   }
 
-  if (originalAnimeId !== anime.id || activeProvider !== 'Vietsub') {
-    originalEpisodes = [...state.currentEpisodes];
-    originalAnimeId = anime.id;
-  }
   const episode = state.currentEpisodes[episodeIndex] || state.currentEpisodes[0];
   const epNum = episode.number || (episodeIndex + 1);
   title.textContent = `${anime.title.english || anime.title.vietnamese} — ${episode.title || `Tập ${epNum}`}`;
-  if (epHeading) epHeading.textContent = `${epNum}. Episode ${epNum}`;
+  if (epHeading) epHeading.textContent = episode.title || `Tập ${epNum}`;
 
   modal.classList.add('active');
   document.body.style.overflow = 'hidden';
 
-  // Nạp iframe MegaPlay từ máy chủ
+  // Nạp iframe KKPhim từ máy chủ
   await loadLiveAnimeStream(anime.id, epNum, activeProvider, activeLanguage, resumeTime);
 }
 
@@ -671,7 +685,7 @@ async function loadLiveAnimeStream(animeId, episodeNumber, provider, language, r
   iframe.style.display = 'none';
   if (controls) controls.style.display = 'none';
   document.getElementById('player-notice-banner')?.remove();
-  showToast(provider === 'Vietsub' ? 'Đang tìm bản phụ đề tiếng Việt...' : 'Đang kết nối Anikoto / MegaPlay...');
+  showToast('Đang tải nguồn KKPhim • Vietsub...');
   try {
     const res = await fetch('/api/watch/sources', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -681,16 +695,13 @@ async function loadLiveAnimeStream(animeId, episodeNumber, provider, language, r
     if (requestId !== streamRequest) return;
     if (!res.ok || !data.success || data.type !== 'embed') throw new Error(data.message || 'Tập hoặc ngôn ngữ này chưa có nguồn phát.');
     const url = new URL(data.embed_url);
-    if (url.origin !== (provider === 'Vietsub' ? 'https://player.phimapi.com' : 'https://megaplay.buzz')) throw new Error('Địa chỉ trình phát không hợp lệ.');
-    if (provider === 'Vietsub' && Array.isArray(data.episodes)) {
-      state.currentEpisodes = data.episodes;
-      state.currentEpisodeIndex = data.episodes.findIndex(ep => ep.number === Number(episodeNumber));
-    }
-    document.getElementById('player-source-label').textContent = provider === 'Vietsub' ? 'KKPhim • Phụ đề Việt' : 'Anikoto / MegaPlay';
+    if (url.origin !== ('https://player.phimapi.com')) throw new Error('Địa chỉ trình phát không hợp lệ.');
+    document.getElementById('player-source-label').textContent = 'KKPhim • Phụ đề Việt';
     iframe.src = url.href;
     iframe.style.display = 'block';
-    // MegaPlay owns playback controls; its public API does not document seeking.
-    if (resumeTime > 0) showToast('Chọn vị trí xem tiếp trong trình phát MegaPlay.');
+    LinimeAPI.saveProgress(animeId, episodeNumber, 0, 0);
+    // KKPhim owns playback controls; its public API does not document seeking.
+    if (resumeTime > 0) showToast('Chọn vị trí xem tiếp trong trình phát.');
   } catch (err) {
     if (requestId === streamRequest) showPlayerNotice(err.message);
   }
@@ -756,63 +767,6 @@ function initPlayerControls() {
   const timeDisplay = document.getElementById('video-time');
   const speedBtn = document.getElementById('speed-btn');
   const fullscreenBtn = document.getElementById('fullscreen-btn');
-
-  window.addEventListener('message', event => {
-    if (event.origin !== 'https://megaplay.buzz' || event.source !== iframe.contentWindow ||
-        !iframe.getAttribute('src') || !modal.classList.contains('active')) return;
-    let data = event.data;
-    if (typeof data === 'string') { try { data = JSON.parse(data); } catch { return; } }
-    if (!data || typeof data !== 'object') return;
-    if (data.event === 'error') { showPlayerNotice('MegaPlay không phát được tập này. Hãy thử lại hoặc đổi SUB / DUB.'); return; }
-    const currentTime = Number(data.type === 'watching-log' ? data.currentTime : data.time);
-    const duration = Number(data.duration);
-    if ((data.event === 'time' || data.type === 'watching-log') && Number.isFinite(currentTime) &&
-        Number.isFinite(duration) && currentTime >= 0 && duration > 0 && currentTime <= duration &&
-        Date.now() - lastProgressSave > 5000 && state.currentVideoAnime) {
-      lastProgressSave = Date.now();
-      LinimeAPI.saveProgress(state.currentVideoAnime.id,
-        state.currentEpisodes[state.currentEpisodeIndex]?.number || 1, currentTime, duration);
-    }
-    if (data.event === 'complete' && document.getElementById('chk-autonext')?.checked &&
-        state.currentVideoAnime && state.currentEpisodeIndex < state.currentEpisodes.length - 1) {
-      openPlayer(state.currentVideoAnime, state.currentEpisodeIndex + 1);
-    }
-  });
-
-  // Chọn nguồn phát MegaPlay
-  document.querySelectorAll('.prov-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      document.querySelectorAll('.prov-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const currentNumber = state.currentEpisodes[state.currentEpisodeIndex]?.number || 1;
-      activeProvider = btn.dataset.provider || 'Megaplay';
-      if (activeProvider !== 'Vietsub' && originalAnimeId === state.currentVideoAnime?.id) {
-        state.currentEpisodes = [...originalEpisodes];
-        state.currentEpisodeIndex = Math.max(0, state.currentEpisodes.findIndex(ep => ep.number === currentNumber));
-      }
-      document.querySelectorAll('.lang-btn').forEach(button => { button.disabled = activeProvider === 'Vietsub'; });
-      const autoNext = document.getElementById('chk-autonext');
-      autoNext.disabled = activeProvider === 'Vietsub';
-      autoNext.closest('label').title = activeProvider === 'Vietsub' ? 'Nguồn Vietsub chưa hỗ trợ tự chuyển tập' : '';
-      if (state.currentVideoAnime) {
-        const episode = state.currentEpisodes[state.currentEpisodeIndex] || { number: 1 };
-        await loadLiveAnimeStream(state.currentVideoAnime.id, episode.number, activeProvider, activeLanguage, video.currentTime || 0);
-      }
-    });
-  });
-
-  // SUB / DUB toggle
-  document.querySelectorAll('.lang-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      activeLanguage = btn.dataset.lang || 'sub';
-      if (state.currentVideoAnime) {
-        const episode = state.currentEpisodes[state.currentEpisodeIndex] || { number: 1 };
-        await loadLiveAnimeStream(state.currentVideoAnime.id, episode.number, activeProvider, activeLanguage, video.currentTime || 0);
-      }
-    });
-  });
 
   // Nút Tập trước / Tập tiếp theo (Dưới player)
   document.getElementById('nav-next-ep')?.addEventListener('click', () => {

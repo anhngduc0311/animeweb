@@ -1,49 +1,25 @@
-# Animeweb
+# Animeweb — KKPhim
 
-## Automatic artwork
+Run PostgreSQL with the existing .env configuration, then npm run server and npm run dev.
+Build: npm run build. Adapter tests: node --test server/kkphim.test.js.
 
-`GET /api/anime/:id/artwork` redirects to the current AniList poster. Add
-`?kind=banner` for a banner (or the poster if AniList has no banner).
-Catalog, detail, search, watchlist and history responses use these local URLs.
-The backend batches up to 50 stale titles into one AniList GraphQL request and
-stores resolved URLs in PostgreSQL for 24 hours. Concurrent image requests
-share the refresh; unsuccessful requests back off for five minutes. Refresh
-is triggered by image requests, with no separate scheduler required.
-During outages, previously resolved artwork remains available; titles without
-a successful lookup use the local placeholder. AniList IDs must match the
-actual title/season: this does not repair incorrect IDs in seed data.
+All active catalog, search, details, artwork and episode playback use KKPhim
+(https://phimapi.com). Anime listings retain the Japanese animation scope.
+The app uses KKPhim slugs as IDs, with no AniList/sample catalog fallback or
+cross-provider title matching. Responses are cached for five minutes and
+concurrent requests share the same upstream request.
 
-Run `npm run server` and `npm run dev` with PostgreSQL configured in `.env`.
-Build with `npm run build`. Check the streaming adapter with
-`node --test server/streamService.test.js`.
+The recent section supports pagination through GET /api/catalog?page=2.
+Home sections are selections, not a download of the entire upstream library.
+Only episodes from a Vietsub server with an approved KKPhim embed URL appear.
+Titles without such episodes show an unavailable message.
 
-## Video provider
+Favorites and recently opened episodes persist in separate PostgreSQL tables
+kk_watchlist and kk_history. Old AniList-based data remains untouched in the
+legacy tables; it is not automatically associated with KKPhim titles.
+The iframe does not provide a documented progress API: history records the
+opened episode, not exact playback position; auto-next is disabled.
 
-The player also offers **Vietsub** via KKPhim (`https://phimapi.com`). The
-backend caches searches and details for five minutes and requires a unique
-matching title, year and animation type. Season numbers are preserved during
-matching. Only the provider's `Vietsub` server and exact requested episode are
-used; unavailable titles produce an explicit error instead of switching seasons.
-This source uses its own iframe; MegaPlay progress tracking and auto-next are
-not available on it. Use the previous/next episode buttons manually.
-
-Playback uses [Anikoto / MegaPlay](https://megaplay.buzz/api). No requests,
-cookies, stream decryption or proxying through the previous website are needed.
-The local catalog and watch history remain in PostgreSQL; local anime IDs are
-AniList IDs, not Anikoto series IDs.
-
-The backend reads the latest 100 entries from `https://anikotoapi.site/recent-anime`
-and matches `ani_id` before requesting `/series/{id}`. It caches responses for
-five minutes and combines concurrent requests. Matched series use the actual
-episode list, available SUB/DUB languages and `episode_embed_id`.
-
-Titles outside this recent feed, or an unavailable Anikoto API, use the documented
-MegaPlay `/stream/ani/{anilist-id}/{episode}/{sub|dub}` endpoint and local episode
-metadata. MegaPlay does not guarantee mapping coverage for every AniList title;
-an iframe URL alone does not confirm video availability. This is not a full
-Anikoto catalog synchronization.
-
-The browser embeds MegaPlay directly, with its own playback controls. Trusted
-player messages update history and advance episodes when auto-next is enabled.
-Programmatic seek/resume is not documented by this API; users can seek inside
-the embedded player. SUB does not guarantee Vietnamese subtitles.
+Poster and banner URLs come from KKPhim. Title logos use the IMDb ID supplied
+by KKPhim with MetaHub, falling back to a text title if unavailable.
+Legacy adapter files are retained but are no longer imported by the server.
