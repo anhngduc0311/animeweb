@@ -305,6 +305,13 @@ function renderGenreRails() {
       ${anime.logo ? `<img class="genre-card-logo" src="${anime.logo}" alt="Logo">` : ''}
       <h4 class="genre-card-title">${anime.title.english}</h4>
     `;
+    const cardLogo = card.querySelector('.genre-card-logo');
+    if (cardLogo) {
+      cardLogo.style.visibility = 'hidden';
+      cardLogo.onload = () => { cardLogo.style.visibility = 'visible'; };
+      cardLogo.onerror = () => { cardLogo.style.display = 'none'; };
+      if (cardLogo.complete && cardLogo.naturalWidth) cardLogo.style.visibility = 'visible';
+    }
     card.addEventListener('click', () => openAnimeDetail(anime.id));
     actionRail.appendChild(card);
   });
@@ -407,16 +414,26 @@ async function openAnimeDetail(animeId) {
     genreContainer.appendChild(pill);
   });
 
-  // Logo Artwork or Title
+  // Show a readable title until a valid logo has loaded.
   const logoImg = document.getElementById('detail-logo-img');
-  if (anime.logo) {
-    logoImg.src = anime.logo;
+  const titleLabel = document.getElementById('detail-sub-title');
+  titleLabel.textContent = anime.title.english || anime.title.vietnamese;
+  titleLabel.classList.add('title-fallback');
+  logoImg.style.display = 'none';
+  logoImg.onload = () => {
     logoImg.style.display = 'block';
-  } else {
+    titleLabel.classList.remove('title-fallback');
+  };
+  logoImg.onerror = () => {
     logoImg.style.display = 'none';
+    titleLabel.classList.add('title-fallback');
+  };
+  if (anime.logo) {
+    logoImg.alt = titleLabel.textContent;
+    logoImg.src = anime.logo;
+  } else {
+    logoImg.removeAttribute('src');
   }
-
-  document.getElementById('detail-sub-title').textContent = anime.title.english || anime.title.vietnamese;
 
   // Stats bar
   document.getElementById('stat-format').textContent = anime.format;

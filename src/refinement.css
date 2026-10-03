@@ -82,6 +82,7 @@ body { background: var(--bg-primary); }
 .cw-progress-fill { background: var(--accent-mint); }
 .anime-detail-view { background: var(--bg-primary); }
 .detail-info-col { min-width: 0; }
+.detail-display-title.title-fallback { font-family: var(--font-display); font-size: clamp(28px, 4vw, 48px); font-weight: 700; line-height: 1.15; color: #f2f7fa; letter-spacing: -.035em; text-wrap: balance; margin-top: 12px; }
 .detail-banner::after { background: linear-gradient(0deg, #090e15 0%, #090e15cf 35%, #090e1530 100%); }
 .countdown-card { background: #111923; border: 1px solid #ffffff12; border-radius: 12px; }
 .detail-tab-btn.active { color: var(--accent-mint); background: #9aefce12; border-bottom-color: var(--accent-mint); }

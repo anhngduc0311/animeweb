@@ -47,7 +47,7 @@ export const INITIAL_ANIME_DATA = [
       romaji: "Kusuriya no Hitorigoto 3rd Season",
       native: "薬屋のひとりごと 第3期"
     },
-    logo: "https://image.tmdb.org/t/p/original/m9mFjU5y96v9vJj9eP3f6h1b2wA.png",
+    logo: "https://images.metahub.space/logo/medium/tt26743760/img",
     coverImage: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx195516-MJpUZlOberqH.jpg",
     bannerImage: "https://s4.anilist.co/file/anilistcdn/media/anime/banner/195516-MJpUZlOberqH.jpg",
     score: 8.8,
