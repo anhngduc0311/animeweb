@@ -34,8 +34,8 @@ function mapAnimeRow(row) {
       native: row.title_native
     },
     logo: row.logo,
-    coverImage: row.cover_image,
-    bannerImage: row.banner_image,
+    coverImage: `/api/anime/${row.id}/artwork`,
+    bannerImage: `/api/anime/${row.id}/artwork?kind=banner`,
     score: parseFloat(row.score),
     studio: row.studio,
     genres: typeof row.genres === 'string' ? JSON.parse(row.genres) : (row.genres || []),
@@ -305,7 +305,7 @@ export async function getWatchHistory(userId = 'usr_001') {
         english: r.title_english,
         vietnamese: r.title_vietnamese
       },
-      coverImage: r.cover_image,
+      coverImage: `/api/anime/${r.anime_id}/artwork`,
       score: parseFloat(r.score)
     }
   }));

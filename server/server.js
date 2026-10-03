@@ -19,6 +19,8 @@ import {
 } from './db/db.js';
 import { getLiveSources, getLiveEpisodes } from './streamService.js';
 
+import { getArtwork } from './artworkService.js';
+
 dotenv.config();
 
 const app = express();
@@ -44,6 +46,23 @@ app.get('/api/health', (req, res) => {
     database: `PostgreSQL on port ${process.env.PGPORT || 5438}`,
     timestamp: new Date().toISOString()
   });
+});
+
+// Same-origin artwork URLs automatically resolve current AniList artwork.
+app.get('/api/anime/:id/artwork', async (req, res) => {
+  if (!/^[1-9]\d*$/.test(req.params.id) || !Number.isSafeInteger(Number(req.params.id)) ||
+      (req.query.kind && !['poster', 'banner'].includes(req.query.kind))) {
+    return res.status(400).json({ success: false, message: 'Tham số ảnh không hợp lệ' });
+  }
+  try {
+    const url = await getArtwork(Number(req.params.id), req.query.kind || 'poster');
+    if (!url) return res.status(404).json({ success: false, message: 'Anime không tồn tại' });
+    res.set('Cache-Control', url.startsWith('/') ? 'no-store' : 'public, max-age=3600');
+    res.redirect(302, url);
+  } catch (error) {
+    console.warn('Artwork endpoint:', error.message);
+    res.set('Cache-Control', 'no-store').redirect(302, '/poster-placeholder.svg');
+  }
 });
 
 // Spotlight Hero Carousel

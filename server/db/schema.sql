@@ -75,3 +75,7 @@ CREATE INDEX IF NOT EXISTS idx_animes_spotlight ON animes(is_spotlight);
 CREATE INDEX IF NOT EXISTS idx_animes_status ON animes(status);
 CREATE INDEX IF NOT EXISTS idx_animes_format ON animes(format);
 CREATE INDEX IF NOT EXISTS idx_episodes_anime_id ON episodes(anime_id);
+
+-- Persistent artwork metadata cache for existing and new databases.
+ALTER TABLE animes ADD COLUMN IF NOT EXISTS artwork_checked_at TIMESTAMPTZ;
+ALTER TABLE animes ADD COLUMN IF NOT EXISTS artwork_attempted_at TIMESTAMPTZ;

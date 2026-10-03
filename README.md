@@ -1,5 +1,18 @@
 # Animeweb
 
+## Automatic artwork
+
+`GET /api/anime/:id/artwork` redirects to the current AniList poster. Add
+`?kind=banner` for a banner (or the poster if AniList has no banner).
+Catalog, detail, search, watchlist and history responses use these local URLs.
+The backend batches up to 50 stale titles into one AniList GraphQL request and
+stores resolved URLs in PostgreSQL for 24 hours. Concurrent image requests
+share the refresh; unsuccessful requests back off for five minutes. Refresh
+is triggered by image requests, with no separate scheduler required.
+During outages, previously resolved artwork remains available; titles without
+a successful lookup use the local placeholder. AniList IDs must match the
+actual title/season: this does not repair incorrect IDs in seed data.
+
 Run `npm run server` and `npm run dev` with PostgreSQL configured in `.env`.
 Build with `npm run build`. Check the streaming adapter with
 `node --test server/streamService.test.js`.
