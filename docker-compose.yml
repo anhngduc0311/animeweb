@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: linime_postgres_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: linime_db
+      POSTGRES_USER: linime_user
+      POSTGRES_PASSWORD: linime_secure_pass_2026
+    ports:
+      # Ánh xạ ra cổng 5438 ở máy chủ để tránh xung đột với cổng 5432 / 5433 của dự án khác
+      - "5438:5432"
+    volumes:
+      - linime_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U linime_user -d linime_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  linime_pgdata:
+    driver: local
