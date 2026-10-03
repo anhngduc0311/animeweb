@@ -18,6 +18,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="/src/style.css">
+  <!-- HLS.js for Live Master Streaming -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
 </head>
 <body>
   <!-- ==========================================
@@ -506,6 +508,60 @@
                   <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
                 </svg>
               </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LINIME WATCH CONTROL PANEL (MATCHING SCREENSHOT 1:1) -->
+      <div class="watch-bottom-panel" id="watch-bottom-panel">
+        <!-- Quick toggles row -->
+        <div class="watch-quick-bar">
+          <label class="quick-toggle"><input type="checkbox" id="chk-autoplay" checked> <span>Tự phát</span></label>
+          <label class="quick-toggle"><input type="checkbox" id="chk-autoskip" checked> <span>Tự bỏ qua</span></label>
+          <label class="quick-toggle"><input type="checkbox" id="chk-autonext" checked> <span>Tự chuyển tập</span></label>
+          <label class="quick-toggle"><input type="checkbox" id="chk-skipfiller"> <span>Bỏ qua tập phụ</span></label>
+          <button class="quick-btn" id="btn-shortcuts">⌨ Phím tắt</button>
+          <button class="quick-btn" id="btn-light">💡 Tắt đèn</button>
+          <button class="quick-btn" id="btn-orig-player">🖥 Trình phát gốc</button>
+        </div>
+
+        <!-- Navigation row -->
+        <div class="watch-nav-bar">
+          <div class="nav-left">
+            <button class="nav-btn" id="nav-prev-ep">‹ Tập trước</button>
+            <button class="nav-btn primary" id="nav-next-ep">Tập tiếp ›</button>
+          </div>
+          <div class="nav-center">
+            <div class="lang-selector">
+              <button class="lang-btn active" data-lang="sub">SUB</button>
+              <button class="lang-btn" data-lang="dub">DUB</button>
+            </div>
+          </div>
+          <div class="nav-right">
+            <button class="action-pill-btn" id="btn-watch-together">👥 Xem cùng nhau</button>
+            <button class="action-pill-btn" id="btn-report">🚩 Báo lỗi</button>
+          </div>
+        </div>
+
+        <!-- Current episode title & Server Selector -->
+        <div class="watch-servers-box">
+          <h3 class="current-ep-heading" id="current-ep-heading">1. Episode 1</h3>
+          <div class="servers-groups">
+            <div class="server-group">
+              <span class="group-label">⚡ NỘI BỘ</span>
+              <div class="server-buttons">
+                <button class="prov-btn" data-provider="Yuki">Yuki</button>
+                <button class="prov-btn" data-provider="Zuna">Zuna</button>
+                <button class="prov-btn" data-provider="Sora">Sora</button>
+                <button class="prov-btn" data-provider="Zenith">Zenith</button>
+              </div>
+            </div>
+            <div class="server-group">
+              <span class="group-label">🖥 BÊN NGOÀI</span>
+              <div class="server-buttons">
+                <button class="prov-btn active" data-provider="Megaplay">Megaplay</button>
+              </div>
             </div>
           </div>
         </div>

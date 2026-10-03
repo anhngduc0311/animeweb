@@ -17,6 +17,7 @@ import {
   getWatchHistory,
   saveWatchProgress
 } from './db/db.js';
+import { getLiveSources, getLiveEpisodes, proxyStream } from './streamService.js';
 
 dotenv.config();
 
@@ -159,6 +160,29 @@ app.get('/api/anime/:id', async (req, res) => {
 app.get('/api/anime/:id/episodes', async (req, res) => {
   try {
     const id = parseInt(req.params.id);
+
+    // 1. Ưu tiên lấy trực tiếp danh sách tập thực tế từ Linime API
+    const liveEpData = await getLiveEpisodes(id);
+    if (liveEpData && liveEpData.episodes && liveEpData.episodes.length > 0) {
+      const formatted = liveEpData.episodes.map(ep => ({
+        number: ep.number,
+        title: ep.title ? `Tập ${ep.number}: ${ep.title}` : `Tập ${ep.number}`,
+        isFiller: ep.isFiller || false,
+        duration: ep.duration || '24:00',
+        image: ep.image || '',
+        description: ep.description || ''
+      }));
+
+      return res.json({
+        success: true,
+        animeId: id,
+        totalEpisodes: formatted.length,
+        providers: liveEpData.sorted_providers || [],
+        data: formatted
+      });
+    }
+
+    // 2. Dự phòng lấy từ PostgreSQL
     const episodes = await getAnimeEpisodes(id);
     res.json({
       success: true,
@@ -172,8 +196,58 @@ app.get('/api/anime/:id/episodes', async (req, res) => {
   }
 });
 
+// Endpoint tương thích Linime /api/watch/:id/episodes
+app.get('/api/watch/:id/episodes', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const liveEpData = await getLiveEpisodes(id);
+    if (liveEpData) {
+      return res.json(liveEpData);
+    }
+    const dbEpisodes = await getAnimeEpisodes(id);
+    res.json({
+      success: true,
+      animeId: id,
+      episodes: dbEpisodes
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Lỗi server' });
+  }
+});
+
 // ==========================================
-// 2. SEARCH & FILTER API (POSTGRESQL)
+// 2. REAL ANIME STREAMING & PROXY APIS
+// ==========================================
+
+// Lấy nguồn phát thực tế từ Linime / Yuki / Megaplay
+app.post('/api/watch/sources', async (req, res) => {
+  try {
+    const { anime_id, episode_number = 1, language = 'sub', provider = 'Megaplay' } = req.body;
+    const sources = await getLiveSources(anime_id, episode_number, language, provider);
+
+    if (sources) {
+      res.json(sources);
+    } else {
+      res.status(404).json({ success: false, message: 'Không tìm thấy nguồn phát cho tập này' });
+    }
+  } catch (err) {
+    console.error('Lỗi /api/watch/sources:', err);
+    res.status(500).json({ success: false, message: 'Lỗi server khi lấy nguồn phát' });
+  }
+});
+
+// Proxy stream m3u8 và TS chunk không bị chặn CORS
+app.get('/api/stream-proxy', async (req, res) => {
+  const { url, referer } = req.query;
+  if (!url) {
+    return res.status(400).send('Missing url parameter');
+  }
+
+  await proxyStream(url, referer, res);
+});
+
+// ==========================================
+// 3. SEARCH & FILTER API (POSTGRESQL)
 // ==========================================
 app.get('/api/search', async (req, res) => {
   try {

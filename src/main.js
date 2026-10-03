@@ -547,9 +547,11 @@ function initDetailEvents() {
 }
 
 // ==========================================
-// CINEMA VIDEO PLAYER (MULTI-SERVER & FALLBACK)
+// CINEMA VIDEO PLAYER (REAL HLS.JS STREAMING & LINIME CONTROLS)
 // ==========================================
-let activeServerIndex = 0;
+let hlsInstance = null;
+let activeProvider = 'Megaplay';
+let activeLanguage = 'sub';
 
 async function openPlayer(anime, episodeIndex = 0, resumeTime = 0) {
   state.currentVideoAnime = anime;
@@ -557,6 +559,7 @@ async function openPlayer(anime, episodeIndex = 0, resumeTime = 0) {
 
   const modal = document.getElementById('player-modal');
   const title = document.getElementById('player-anime-name');
+  const epHeading = document.getElementById('current-ep-heading');
 
   // Đảm bảo nạp đầy đủ danh sách tập từ API nếu chưa có
   if (!state.currentEpisodes.length || state.currentDetailAnime?.id !== anime.id) {
@@ -574,72 +577,180 @@ async function openPlayer(anime, episodeIndex = 0, resumeTime = 0) {
       {
         number: 1,
         title: `Tập 1: Khởi Đầu Hành Trình`,
-        duration: '24:00',
-        servers: [
-          { name: 'Server VIP 1 (Trực tiếp)', quality: '1080p', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', type: 'mp4' },
-          { name: 'Server 2 (YouTube Anime HD)', quality: '1080p', url: 'https://www.youtube.com/embed/l_98KBvycqg?autoplay=1', type: 'embed' },
-          { name: 'Server 3 (Dự phòng Fast)', quality: '720p', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4' }
-        ]
+        duration: '24:00'
       }
     ];
   }
 
   const episode = state.currentEpisodes[episodeIndex] || state.currentEpisodes[0];
-  title.textContent = `${anime.title.english || anime.title.vietnamese} — ${episode.title || `Tập ${episode.number}`}`;
+  const epNum = episode.number || (episodeIndex + 1);
+  title.textContent = `${anime.title.english || anime.title.vietnamese} — ${episode.title || `Tập ${epNum}`}`;
+  if (epHeading) epHeading.textContent = `${epNum}. Episode ${epNum}`;
 
   modal.classList.add('active');
   document.body.style.overflow = 'hidden';
 
-  // Chuyển sang server mặc định
-  switchServer(activeServerIndex, resumeTime);
+  // Nạp luồng phát thực tế HLS từ máy chủ
+  await loadLiveAnimeStream(anime.id, epNum, activeProvider, activeLanguage, resumeTime);
 }
 
-function switchServer(serverIdx, resumeTime = 0) {
-  activeServerIndex = serverIdx;
+async function loadLiveAnimeStream(animeId, episodeNumber, provider, language, resumeTime = 0) {
   const video = document.getElementById('main-video');
   const iframe = document.getElementById('youtube-iframe');
   const controls = document.getElementById('player-controls');
 
-  // Cập nhật tab active
-  document.querySelectorAll('.server-tab').forEach((tab, idx) => {
-    tab.classList.toggle('active', idx === serverIdx);
-  });
+  showToast(`Đang kết nối Server ${provider} (${language.toUpperCase()})...`);
 
-  const episode = state.currentEpisodes[state.currentEpisodeIndex] || state.currentEpisodes[0];
-  const servers = episode.servers || [
-    { name: 'Server VIP 1', url: episode.videoUrl || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', type: 'mp4' },
-    { name: 'Server 2 (YouTube HD)', url: 'https://www.youtube.com/embed/l_98KBvycqg?autoplay=1', type: 'embed' },
-    { name: 'Server 3 (Dự phòng)', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4' }
-  ];
+  // Xóa HLS cũ nếu đang chạy
+  if (hlsInstance) {
+    hlsInstance.destroy();
+    hlsInstance = null;
+  }
 
-  const currentServer = servers[serverIdx] || servers[0];
+  try {
+    const res = await fetch('/api/watch/sources', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        anime_id: animeId,
+        episode_number: episodeNumber,
+        language: language,
+        provider: provider
+      })
+    });
 
-  if (currentServer.type === 'embed') {
-    // Chế độ phát nhúng YouTube HD
+    const data = await res.json();
+    const streamUrl = data.proxy_stream_url || data.video_link;
+
+    if (streamUrl) {
+      iframe.style.display = 'none';
+      iframe.src = '';
+      video.style.display = 'block';
+      if (controls) controls.style.display = 'flex';
+
+      // Nạp phụ đề WebVTT trực tiếp vào thẻ video (giống Linime)
+      while (video.querySelector('track')) {
+        video.querySelector('track').remove();
+      }
+
+      if (data.subtitles && Array.isArray(data.subtitles)) {
+        data.subtitles.forEach((sub, idx) => {
+          const track = document.createElement('track');
+          track.kind = sub.kind || 'subtitles';
+          track.label = sub.label || (sub.lang === 'eng' ? 'English' : 'Tiếng Việt');
+          track.srclang = sub.lang || sub.srclang || 'vi';
+          track.src = sub.file || sub.url;
+          if (sub.default || idx === 0) {
+            track.default = true;
+          }
+          video.appendChild(track);
+        });
+      }
+
+      // Sử dụng HLS.js để phát stream m3u8 chuẩn Full HD
+      if (window.Hls && window.Hls.isSupported()) {
+        hlsInstance = new window.Hls({
+          maxBufferLength: 30,
+          maxMaxBufferLength: 60,
+          enableWorker: true
+        });
+
+        hlsInstance.loadSource(streamUrl);
+        hlsInstance.attachMedia(video);
+
+        hlsInstance.on(window.Hls.Events.MANIFEST_PARSED, () => {
+          if (resumeTime > 0) video.currentTime = resumeTime;
+          video.play().catch(() => {
+            video.muted = true;
+            video.play().catch(() => {});
+          });
+          updatePlayPauseIcon(true);
+          showToast(`Đang phát: ${animeId === 21 ? 'One Piece' : 'Anime'} [${provider}] 1080p`);
+        });
+
+        hlsInstance.on(window.Hls.Events.ERROR, (event, data) => {
+          if (data.fatal) {
+            console.warn('HLS fatal error:', data.type);
+            fallbackToAlternativeStream(animeId);
+          }
+        });
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        // Hỗ trợ Safari iOS native HLS
+        video.src = streamUrl;
+        if (resumeTime > 0) video.currentTime = resumeTime;
+        video.play().catch(() => {});
+        updatePlayPauseIcon(true);
+      }
+      return;
+    }
+
+    // Nếu tập yêu cầu không có sẵn (ví dụ bấm tập 12 của anime mới chỉ có tập 1)
+    if (episodeNumber !== 1) {
+      showToast(`Tập ${episodeNumber} chưa có sẵn. Tự động chuyển về Tập 1...`);
+      state.currentEpisodeIndex = 0;
+      const title = document.getElementById('player-anime-name');
+      const epHeading = document.getElementById('current-ep-heading');
+      if (title && state.currentVideoAnime) {
+        title.textContent = `${state.currentVideoAnime.title.english || state.currentVideoAnime.title.vietnamese} — Tập 1`;
+      }
+      if (epHeading) epHeading.textContent = `1. Episode 1`;
+      return loadLiveAnimeStream(animeId, 1, provider, language, 0);
+    }
+  } catch (err) {
+    console.warn('Lỗi khi nạp HLS stream từ provider:', err);
+  }
+
+  // Thông báo lỗi nhẹ nhàng trên giao diện Cinema thay vì YouTube lỗi
+  showPlayerNotice(`Server ${provider} đang bận hoặc tập này đang được xử lý. Bạn hãy thử chuyển sang server khác (Yuki / Megaplay / Zuna).`);
+}
+
+function showPlayerNotice(message) {
+  const video = document.getElementById('main-video');
+  const iframe = document.getElementById('youtube-iframe');
+  const controls = document.getElementById('player-controls');
+  const container = document.getElementById('video-container');
+
+  if (video) {
     video.pause();
     video.style.display = 'none';
-    if (controls) controls.style.display = 'none';
-
-    iframe.style.display = 'block';
-    iframe.src = currentServer.url;
-    showToast(`Đã chuyển sang ${currentServer.name}`);
-  } else {
-    // Chế độ phát HTML5 Video Player trực tiếp
+  }
+  if (iframe) {
     iframe.style.display = 'none';
     iframe.src = '';
-    if (controls) controls.style.display = 'flex';
-
-    video.style.display = 'block';
-    video.src = currentServer.url;
-    video.currentTime = resumeTime;
-    video.play().catch(() => {
-      // Nếu trình duyệt chặn autoplay có tiếng
-      video.muted = true;
-      video.play().catch(() => {});
-    });
-    updatePlayPauseIcon(true);
-    showToast(`Đã chuyển sang ${currentServer.name}`);
   }
+  if (controls) controls.style.display = 'none';
+
+  let notice = document.getElementById('player-notice-banner');
+  if (!notice) {
+    notice = document.createElement('div');
+    notice.id = 'player-notice-banner';
+    notice.className = 'player-notice-banner';
+    container.appendChild(notice);
+  }
+
+  notice.innerHTML = `
+    <div class="notice-card">
+      <div class="notice-icon">⚠️</div>
+      <h3 class="notice-title">Thông Báo Nguồn Phát</h3>
+      <p class="notice-desc">${message}</p>
+      <div class="notice-actions">
+        <button class="notice-retry-btn" id="notice-retry-btn">Thử lại với Server khác</button>
+      </div>
+    </div>
+  `;
+  notice.style.display = 'flex';
+
+  document.getElementById('notice-retry-btn')?.addEventListener('click', () => {
+    notice.style.display = 'none';
+    const altProv = activeProvider === 'Megaplay' ? 'Yuki' : 'Megaplay';
+    document.querySelectorAll('.prov-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.provider === altProv);
+    });
+    activeProvider = altProv;
+    if (state.currentVideoAnime) {
+      loadLiveAnimeStream(state.currentVideoAnime.id, 1, altProv, activeLanguage, 0);
+    }
+  });
 }
 
 function initPlayerControls() {
@@ -652,27 +763,67 @@ function initPlayerControls() {
   const timeDisplay = document.getElementById('video-time');
   const speedBtn = document.getElementById('speed-btn');
   const fullscreenBtn = document.getElementById('fullscreen-btn');
-  const prevBtn = document.getElementById('prev-ep-btn');
-  const nextBtn = document.getElementById('next-ep-btn');
 
-  // Bắt sự kiện chọn Server
-  document.querySelectorAll('.server-tab').forEach((tab, idx) => {
-    tab.addEventListener('click', () => {
-      switchServer(idx, video.currentTime || 0);
+  // Nút Provider: Yuki, Zuna, Sora, Zenith, Megaplay (1:1 trong ảnh)
+  document.querySelectorAll('.prov-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      document.querySelectorAll('.prov-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeProvider = btn.dataset.provider || 'Yuki';
+      if (state.currentVideoAnime) {
+        const episode = state.currentEpisodes[state.currentEpisodeIndex] || { number: 1 };
+        await loadLiveAnimeStream(state.currentVideoAnime.id, episode.number, activeProvider, activeLanguage, video.currentTime || 0);
+      }
     });
   });
 
-  // Tự động chuyển server khi video MP4 trực tiếp gặp lỗi mạng hoặc CORS
-  video.addEventListener('error', () => {
-    console.warn('HTML5 Video direct stream encountered an error, switching to YouTube HD server...');
-    showToast('Đang tự động chuyển sang Server 2 (YouTube Anime HD)...');
-    switchServer(1);
+  // SUB / DUB toggle
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeLanguage = btn.dataset.lang || 'sub';
+      if (state.currentVideoAnime) {
+        const episode = state.currentEpisodes[state.currentEpisodeIndex] || { number: 1 };
+        await loadLiveAnimeStream(state.currentVideoAnime.id, episode.number, activeProvider, activeLanguage, video.currentTime || 0);
+      }
+    });
   });
 
+  // Nút Tập trước / Tập tiếp theo (Dưới player)
+  document.getElementById('nav-next-ep')?.addEventListener('click', () => {
+    const epList = state.currentEpisodes.length ? state.currentEpisodes : (state.currentVideoAnime?.episodes || []);
+    if (state.currentVideoAnime && state.currentEpisodeIndex < epList.length - 1) {
+      openPlayer(state.currentVideoAnime, state.currentEpisodeIndex + 1);
+    } else {
+      showToast('Đang ở tập mới nhất');
+    }
+  });
+
+  document.getElementById('nav-prev-ep')?.addEventListener('click', () => {
+    const epList = state.currentEpisodes.length ? state.currentEpisodes : (state.currentVideoAnime?.episodes || []);
+    if (state.currentVideoAnime && state.currentEpisodeIndex > 0) {
+      openPlayer(state.currentVideoAnime, state.currentEpisodeIndex - 1);
+    } else {
+      showToast('Đang ở tập đầu tiên');
+    }
+  });
+
+  // Tắt đèn / Theater Mode
+  document.getElementById('btn-light')?.addEventListener('click', () => {
+    modal.classList.toggle('light-off');
+    showToast(modal.classList.contains('light-off') ? 'Đã tắt đèn làm dịu mắt' : 'Đã bật đèn');
+  });
+
+  // Đóng player
   document.getElementById('close-player-btn')?.addEventListener('click', async () => {
+    if (hlsInstance) {
+      hlsInstance.destroy();
+      hlsInstance = null;
+    }
     video.pause();
     video.src = '';
-    iframe.src = ''; // Dừng âm thanh của YouTube embed
+    iframe.src = '';
     modal.classList.remove('active');
     document.body.style.overflow = '';
     await loadContinueWatching();
@@ -724,24 +875,6 @@ function initPlayerControls() {
       container.requestFullscreen().catch(() => {});
     } else {
       document.exitFullscreen().catch(() => {});
-    }
-  });
-
-  nextBtn?.addEventListener('click', () => {
-    const epList = state.currentEpisodes.length ? state.currentEpisodes : (state.currentVideoAnime?.episodes || []);
-    if (state.currentVideoAnime && state.currentEpisodeIndex > 0) {
-      openPlayer(state.currentVideoAnime, state.currentEpisodeIndex - 1);
-    } else {
-      showToast('Đang ở tập mới nhất');
-    }
-  });
-
-  prevBtn?.addEventListener('click', () => {
-    const epList = state.currentEpisodes.length ? state.currentEpisodes : (state.currentVideoAnime?.episodes || []);
-    if (state.currentVideoAnime && state.currentEpisodeIndex < epList.length - 1) {
-      openPlayer(state.currentVideoAnime, state.currentEpisodeIndex + 1);
-    } else {
-      showToast('Đang ở tập đầu tiên');
     }
   });
 }
