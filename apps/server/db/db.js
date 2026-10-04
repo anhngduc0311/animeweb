@@ -12,17 +12,26 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 const { Pool } = pg;
 
-// Cấu hình kết nối PostgreSQL (Docker port 5438)
-export const pool = new Pool({
-  host: process.env.PGHOST || 'localhost',
-  port: parseInt(process.env.PGPORT || '5438'),
-  user: process.env.PGUSER || 'anidoki_user',
-  password: process.env.PGPASSWORD || 'anidoki_secure_pass_2026',
-  database: process.env.PGDATABASE || 'anidoki_db',
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000
-});
+// Cấu hình kết nối PostgreSQL
+export const pool = new Pool(
+  process.env.DATABASE_URL
+    ? {
+        connectionString: process.env.DATABASE_URL,
+        max: 20,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 5000
+      }
+    : {
+        host: process.env.PGHOST || 'localhost',
+        port: parseInt(process.env.PGPORT || '5438'),
+        user: process.env.PGUSER || 'anidoki_user',
+        password: process.env.PGPASSWORD || 'anidoki_secure_pass_2026',
+        database: process.env.PGDATABASE || 'anidoki_db',
+        max: 20,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 5000
+      }
+);
 
 // Helper chuyển đổi row PostgreSQL sang format anime chuẩn
 function mapAnimeRow(row) {
