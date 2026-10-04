@@ -1,25 +1,70 @@
-# Animeweb — KKPhim
+# Animeweb — Turborepo Monorepo
 
-Run PostgreSQL with the existing .env configuration, then npm run server and npm run dev.
-Build: npm run build. Adapter tests: node --test server/kkphim.test.js.
+Dự án anime web được tổ chức dưới dạng Monorepo sử dụng **Turborepo** và **npm workspaces**.
 
-All active catalog, search, details, artwork and episode playback use KKPhim
-(https://phimapi.com). Anime listings retain the Japanese animation scope.
-The app uses KKPhim slugs as IDs, with no AniList/sample catalog fallback or
-cross-provider title matching. Responses are cached for five minutes and
-concurrent requests share the same upstream request.
+## Cấu trúc thư mục (Monorepo Layout)
 
-The recent section supports pagination through GET /api/catalog?page=2.
-Home sections are selections, not a download of the entire upstream library.
-Only episodes from a Vietsub server with an approved KKPhim embed URL appear.
-Titles without such episodes show an unavailable message.
+```
+animeweb/
+├── apps/
+│   ├── web/               # Frontend (Vite + Vanilla JS + CSS)
+│   │   ├── src/
+│   │   ├── public/
+│   │   ├── index.html
+│   │   ├── vite.config.js
+│   │   └── package.json
+│   │
+│   └── server/            # Backend (Node.js Express API + KKPhim + PostgreSQL)
+│       ├── db/
+│       ├── server.js
+│       ├── kkphim.js
+│       ├── *.test.js
+│       └── package.json
+│
+├── .env                   # Biến môi trường chung (PostgreSQL, Port, ...)
+├── turbo.json             # Cấu hình Turborepo pipeline
+└── package.json           # Root package.json & workspaces config
+```
 
-Favorites and recently opened episodes persist in separate PostgreSQL tables
-kk_watchlist and kk_history. Old AniList-based data remains untouched in the
-legacy tables; it is not automatically associated with KKPhim titles.
-The iframe does not provide a documented progress API: history records the
-opened episode, not exact playback position; auto-next is disabled.
+---
 
-Poster and banner URLs come from KKPhim. Title logos use the IMDb ID supplied
-by KKPhim with MetaHub, falling back to a text title if unavailable.
-Legacy adapter files are retained but are no longer imported by the server.
+## Hướng dẫn cài đặt & Chạy dự án
+
+### 1. Cài đặt dependencies
+```bash
+npm install
+```
+
+### 2. Chạy môi trường phát triển (Dev)
+- Chạy toàn bộ hệ thống (cả Web frontend và Server API song song qua Turborepo):
+  ```bash
+  npm run dev
+  # hoặc
+  npx turbo dev
+  ```
+- Chỉ chạy Web Frontend:
+  ```bash
+  npm run dev:web
+  ```
+- Chỉ chạy Backend Server:
+  ```bash
+  npm run dev:server
+  ```
+
+### 3. Build & Test
+- Build toàn bộ dự án (có caching siêu tốc với Turborepo):
+  ```bash
+  npm run build
+  ```
+- Chạy bộ kiểm thử (Tests):
+  ```bash
+  npm run test
+  ```
+
+---
+
+## Chi tiết kỹ thuật & Tính năng
+
+- **Frontend (`apps/web`)**: Chạy tại `http://localhost:5173`, tích hợp proxy tự động `/api` sang backend `http://localhost:3000`.
+- **Backend API (`apps/server`)**: Cung cấp dữ liệu anime qua KKPhim API (`https://phimapi.com`), quản lý watchlist và watch history bằng PostgreSQL.
+- **Turborepo Pipelines (`turbo.json`)**: Tối ưu hóa build cache, song song hóa dev/build/test pipelines.

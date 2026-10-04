@@ -4,11 +4,13 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 
-dotenv.config();
-
-const { Pool } = pg;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+
+const { Pool } = pg;
 
 // Cấu hình kết nối PostgreSQL (Docker port 5438)
 export const pool = new Pool({
