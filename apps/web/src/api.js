@@ -74,6 +74,25 @@ export const LinimeAPI = {
     }
   },
 
+  async getBrowse(filters = {}) {
+    try {
+      const cleanParams = new URLSearchParams();
+      Object.entries(filters).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && String(v).trim() !== '') {
+          cleanParams.set(k, String(v).trim());
+        }
+      });
+      const res = await fetch(`${API_BASE}/browse?${cleanParams.toString()}`);
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.message || 'Lỗi tải danh sách phim');
+      return data;
+    } catch (err) {
+      console.error('getBrowse error:', err);
+      throw err;
+    }
+  },
+
+
   // 2. Anime Detail & Episodes
   async getAnimeDetail(id) {
     try {
@@ -110,10 +129,44 @@ export const LinimeAPI = {
     }
   },
 
-  // 4. Watchlist API
+  // Token Storage Helpers
+  getToken() {
+    return localStorage.getItem('anidoki_token') || localStorage.getItem('linime_token');
+  },
+
+  setToken(token) {
+    if (token) {
+      localStorage.setItem('anidoki_token', token);
+      localStorage.setItem('linime_token', token);
+    }
+  },
+
+  clearToken() {
+    localStorage.removeItem('anidoki_token');
+    localStorage.removeItem('linime_token');
+  },
+
+  getAuthHeaders(extra = {}) {
+    const token = this.getToken();
+    const headers = { 'Content-Type': 'application/json', ...extra };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  },
+
+  // 4. Watchlist API (Yêu cầu đăng nhập & gửi token)
   async getWatchlist() {
+    const token = this.getToken();
+    if (!token) return [];
     try {
-      const res = await fetch(`${API_BASE}/watchlist`);
+      const res = await fetch(`${API_BASE}/watchlist`, {
+        headers: this.getAuthHeaders()
+      });
+      if (res.status === 401) {
+        this.clearToken();
+        return [];
+      }
       const data = await res.json();
       return data.success ? data.data : [];
     } catch (err) {
@@ -123,46 +176,168 @@ export const LinimeAPI = {
   },
 
   async toggleWatchlist(animeId) {
+    const token = this.getToken();
+    if (!token) {
+      return { success: false, code: 'UNAUTHORIZED', message: 'Vui lòng đăng nhập để lưu phim yêu thích' };
+    }
     try {
       const res = await fetch(`${API_BASE}/watchlist/toggle`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.getAuthHeaders(),
         body: JSON.stringify({ animeId })
       });
-      return await res.json();
+      const data = await res.json();
+      if (res.status === 401) {
+        this.clearToken();
+        return { success: false, code: 'UNAUTHORIZED', message: data.message || 'Phiên làm việc đã hết hạn' };
+      }
+      return data;
     } catch (err) {
       console.error('toggleWatchlist error:', err);
-      return { success: false };
+      return { success: false, message: 'Lỗi kết nối máy chủ' };
     }
   },
 
-  // 5. History / Continue Watching API
-  async getHistory() {
+  // 5. History / Continue Watching API (Yêu cầu đăng nhập & gửi token)
+  async getHistory(page = 1, limit = 20) {
+    const token = this.getToken();
+    if (!token) return { success: false, data: [], pagination: { page, limit, total: 0, hasMore: false } };
     try {
-      const res = await fetch(`${API_BASE}/history`);
+      const res = await fetch(`${API_BASE}/history?page=${page}&limit=${limit}`, {
+        headers: this.getAuthHeaders()
+      });
+      if (res.status === 401) {
+        this.clearToken();
+        return { success: false, data: [], pagination: { page, limit, total: 0, hasMore: false } };
+      }
       const data = await res.json();
-      return data.success ? data.data : [];
+      return data.success ? data : { success: false, data: [], pagination: {} };
     } catch (err) {
       console.error('getHistory error:', err);
-      return [];
+      return { success: false, data: [], pagination: {} };
     }
   },
 
   async saveProgress(animeId, episodeNumber, currentTime, duration) {
+    const token = this.getToken();
+    if (!token) return { success: false, code: 'UNAUTHORIZED' };
     try {
       const res = await fetch(`${API_BASE}/history`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.getAuthHeaders(),
         body: JSON.stringify({ animeId, episodeNumber, currentTime, duration })
       });
-      return await res.json();
+      const data = await res.json();
+      if (res.status === 401) {
+        this.clearToken();
+        return { success: false, code: 'UNAUTHORIZED' };
+      }
+      return data;
     } catch (err) {
       console.error('saveProgress error:', err);
       return { success: false };
     }
   },
 
-  // 6. User Auth API
+  async deleteHistory(animeId) {
+    try {
+      const url = animeId ? `${API_BASE}/history/${encodeURIComponent(animeId)}` : `${API_BASE}/history`;
+      const res = await fetch(url, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders()
+      });
+      return await res.json();
+    } catch (err) {
+      console.error('deleteHistory error:', err);
+      return { success: false };
+    }
+  },
+
+  async clearAllHistory() {
+    try {
+      const res = await fetch(`${API_BASE}/history`, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders()
+      });
+      return await res.json();
+    } catch (err) {
+      console.error('clearAllHistory error:', err);
+      return { success: false, message: 'Lỗi xóa toàn bộ lịch sử xem' };
+    }
+  },
+
+  // 6. Library API (Thư viện cá nhân)
+  async getLibrary(params = {}) {
+    const token = this.getToken();
+    if (!token) return { success: false, code: 'UNAUTHORIZED', data: [], counts: { all: 0, plan_to_watch: 0, watching: 0, completed: 0 } };
+    try {
+      const cleanParams = new URLSearchParams();
+      Object.entries(params).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && String(v).trim() !== '') {
+          cleanParams.set(k, String(v).trim());
+        }
+      });
+      const res = await fetch(`${API_BASE}/library?${cleanParams.toString()}`, {
+        headers: this.getAuthHeaders()
+      });
+      if (res.status === 401) {
+        this.clearToken();
+        return { success: false, code: 'UNAUTHORIZED', data: [], counts: { all: 0, plan_to_watch: 0, watching: 0, completed: 0 } };
+      }
+      return await res.json();
+    } catch (err) {
+      console.error('getLibrary error:', err);
+      return { success: false, data: [], counts: { all: 0, plan_to_watch: 0, watching: 0, completed: 0 } };
+    }
+  },
+
+  async updateLibraryStatus(animeId, status) {
+    const token = this.getToken();
+    if (!token) return { success: false, code: 'UNAUTHORIZED', message: 'Vui lòng đăng nhập' };
+    try {
+      const res = await fetch(`${API_BASE}/library/status`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ animeId, status })
+      });
+      return await res.json();
+    } catch (err) {
+      console.error('updateLibraryStatus error:', err);
+      return { success: false, message: 'Lỗi cập nhật trạng thái thư viện' };
+    }
+  },
+
+  async deleteLibraryItem(animeId) {
+    const token = this.getToken();
+    if (!token) return { success: false, code: 'UNAUTHORIZED' };
+    try {
+      const res = await fetch(`${API_BASE}/library/${encodeURIComponent(animeId)}`, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders()
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false };
+    }
+  },
+
+  // 7. Báo lỗi phát video (Reports)
+  async submitReport(reportData) {
+    try {
+      const res = await fetch(`${API_BASE}/reports`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(reportData)
+      });
+      return await res.json();
+    } catch (err) {
+      console.error('submitReport error:', err);
+      return { success: false, message: 'Lỗi kết nối khi gửi báo lỗi' };
+    }
+  },
+
+
+  // 6. User Auth & Session API
   async getAuthConfig() {
     try {
       const res = await fetch(`${API_BASE}/auth/config`);
@@ -179,24 +354,491 @@ export const LinimeAPI = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(authPayload)
       });
-      return await res.json();
+      const data = await res.json();
+      if (data.success && data.token) {
+        this.setToken(data.token);
+      }
+      return data;
     } catch (err) {
       console.error('googleLogin error:', err);
       return { success: false, message: 'Lỗi kết nối máy chủ xác thực' };
     }
   },
 
-  async login(userPayload) {
+  async getMe() {
+    const token = this.getToken();
+    if (!token) return { success: false, code: 'UNAUTHORIZED', message: 'Chưa đăng nhập' };
     try {
-      const res = await fetch(`${API_BASE}/auth/login`, {
+      const res = await fetch(`${API_BASE}/auth/me`, {
+        headers: this.getAuthHeaders()
+      });
+      const data = await res.json();
+      if (res.status === 401) {
+        this.clearToken();
+        return { success: false, code: 'SESSION_EXPIRED', message: data.message || 'Phiên làm việc đã hết hạn' };
+      }
+      return data;
+    } catch (err) {
+      console.error('getMe error:', err);
+      return { success: false, message: 'Lỗi kiểm tra phiên làm việc' };
+    }
+  },
+
+  async logout() {
+    try {
+      await fetch(`${API_BASE}/auth/logout`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userPayload)
+        headers: this.getAuthHeaders()
+      });
+    } catch (err) {
+      console.warn('Logout network notice:', err);
+    } finally {
+      this.clearToken();
+    }
+    return { success: true };
+  },
+
+  // 7. Admin APIs
+  async getAdminMe() {
+    try {
+      const res = await fetch(`${API_BASE}/admin/me`, {
+        headers: this.getAuthHeaders()
       });
       return await res.json();
     } catch (err) {
-      console.error('login error:', err);
-      return { success: false };
+      return { success: false, message: err.message };
+    }
+  },
+
+  async getAdminDashboard() {
+    try {
+      const res = await fetch(`${API_BASE}/admin/dashboard`, {
+        headers: this.getAuthHeaders()
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  async getAdminStats() {
+    try {
+      const res = await fetch(`${API_BASE}/admin/stats`, {
+        headers: this.getAuthHeaders()
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  async getAdminAnime(params = {}) {
+    try {
+      const cleanParams = new URLSearchParams();
+      Object.entries(params).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && String(v).trim() !== '') {
+          cleanParams.set(k, String(v).trim());
+        }
+      });
+      const res = await fetch(`${API_BASE}/admin/anime?${cleanParams.toString()}`, {
+        headers: this.getAuthHeaders()
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  async getAdminAnimeDetail(id) {
+    try {
+      const res = await fetch(`${API_BASE}/admin/anime/${encodeURIComponent(id)}`, {
+        headers: this.getAuthHeaders()
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  async updateAdminAnime(id, data) {
+    try {
+      const res = await fetch(`${API_BASE}/admin/anime/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(data)
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  async toggleAdminAnimeVisibility(id, isHidden) {
+    try {
+      const res = await fetch(`${API_BASE}/admin/anime/${encodeURIComponent(id)}/toggle-visibility`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ isHidden })
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  async getAdminEpisodes(animeId) {
+    try {
+      const res = await fetch(`${API_BASE}/admin/anime/${encodeURIComponent(animeId)}/episodes`, {
+        headers: this.getAuthHeaders()
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  async updateAdminEpisode(animeId, episodeNumber, data) {
+    try {
+      const res = await fetch(`${API_BASE}/admin/anime/${encodeURIComponent(animeId)}/episodes/${episodeNumber}`, {
+        method: 'PUT',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(data)
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  async checkAdminEpisode(animeId, episodeNumber, embedUrl) {
+    try {
+      const res = await fetch(`${API_BASE}/admin/anime/${encodeURIComponent(animeId)}/episodes/${episodeNumber}/check`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ embedUrl })
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  async getAdminSyncLogs(limit = 20) {
+    try {
+      const res = await fetch(`${API_BASE}/admin/sync/logs?limit=${limit}`, {
+        headers: this.getAuthHeaders()
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  async syncAdminAnime(slug) {
+    try {
+      const res = await fetch(`${API_BASE}/admin/sync/anime`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ slug })
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  async syncAdminRecent(page = 1) {
+    try {
+      const res = await fetch(`${API_BASE}/admin/sync/recent`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ page })
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  async getAdminReports(params = {}) {
+    try {
+      const cleanParams = new URLSearchParams();
+      Object.entries(params).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && String(v).trim() !== '') {
+          cleanParams.set(k, String(v).trim());
+        }
+      });
+      const res = await fetch(`${API_BASE}/admin/reports?${cleanParams.toString()}`, {
+        headers: this.getAuthHeaders()
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  async updateAdminReport(id, data) {
+    try {
+      const res = await fetch(`${API_BASE}/admin/reports/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(data)
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  async getAdminUsers(params = {}) {
+    try {
+      const cleanParams = new URLSearchParams();
+      Object.entries(params).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && String(v).trim() !== '') {
+          cleanParams.set(k, String(v).trim());
+        }
+      });
+      const res = await fetch(`${API_BASE}/admin/users?${cleanParams.toString()}`, {
+        headers: this.getAuthHeaders()
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  async updateAdminUserRole(id, role) {
+    try {
+      const res = await fetch(`${API_BASE}/admin/users/${encodeURIComponent(id)}/role`, {
+        method: 'PATCH',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ role })
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  // ==========================================
+  // PHASE 4: USER ACCOUNT & PLAYER SETTINGS
+  // ==========================================
+  async getAccountProfile() {
+    try {
+      const res = await fetch(`${API_BASE}/account/me`, {
+        headers: this.getAuthHeaders()
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  async updateAccountProfile(data) {
+    try {
+      const res = await fetch(`${API_BASE}/account/profile`, {
+        method: 'PUT',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(data)
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  async getAccountSessions() {
+    try {
+      const res = await fetch(`${API_BASE}/account/sessions`, {
+        headers: this.getAuthHeaders()
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  async revokeOtherSessions() {
+    try {
+      const res = await fetch(`${API_BASE}/account/sessions/revoke-others`, {
+        method: 'POST',
+        headers: this.getAuthHeaders()
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  // ==========================================
+  // PHASE 4: HELP & FEEDBACK
+  // ==========================================
+  async sendFeedback(data) {
+    try {
+      const headers = this.getAuthHeaders();
+      const res = await fetch(`${API_BASE}/feedback`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(data)
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  // ==========================================
+  // PHASE 4: PUBLIC HOMEPAGE CONFIG & SETTINGS
+  // ==========================================
+  async getHomepageConfig() {
+    try {
+      const res = await fetch(`${API_BASE}/homepage/config`);
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  async getPublicSettings() {
+    try {
+      const res = await fetch(`${API_BASE}/settings`);
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  // ==========================================
+  // PHASE 4: ADMIN ADVANCED USER MANAGEMENT
+  // ==========================================
+  async getAdminUserDetail(id) {
+    try {
+      const res = await fetch(`${API_BASE}/admin/users/${encodeURIComponent(id)}`, {
+        headers: this.getAuthHeaders()
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  async banAdminUser(id, { is_banned, ban_reason }) {
+    try {
+      const res = await fetch(`${API_BASE}/admin/users/${encodeURIComponent(id)}/ban`, {
+        method: 'PATCH',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ is_banned, ban_reason })
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  // ==========================================
+  // PHASE 4: ADMIN HOMEPAGE CONFIG
+  // ==========================================
+  async getAdminHomepageConfig() {
+    try {
+      const res = await fetch(`${API_BASE}/admin/homepage`, {
+        headers: this.getAuthHeaders()
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  async updateAdminHomepageConfig(data) {
+    try {
+      const res = await fetch(`${API_BASE}/admin/homepage`, {
+        method: 'PUT',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(data)
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  // ==========================================
+  // PHASE 4: ADMIN FEEDBACK MANAGEMENT
+  // ==========================================
+  async getAdminFeedback(params = {}) {
+    try {
+      const cleanParams = new URLSearchParams();
+      Object.entries(params).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && String(v).trim() !== '') {
+          cleanParams.set(k, String(v).trim());
+        }
+      });
+      const res = await fetch(`${API_BASE}/admin/feedback?${cleanParams.toString()}`, {
+        headers: this.getAuthHeaders()
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  async updateAdminFeedback(id, data) {
+    try {
+      const res = await fetch(`${API_BASE}/admin/feedback/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(data)
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  // ==========================================
+  // PHASE 4: ADMIN SYSTEM SETTINGS
+  // ==========================================
+  async getAdminSettings() {
+    try {
+      const res = await fetch(`${API_BASE}/admin/settings`, {
+        headers: this.getAuthHeaders()
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  async updateAdminSettings(settings) {
+    try {
+      const res = await fetch(`${API_BASE}/admin/settings`, {
+        method: 'PUT',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(settings)
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+
+  // ==========================================
+  // PHASE 4: ADMIN AUDIT LOGS
+  // ==========================================
+  async getAdminAuditLogs(params = {}) {
+    try {
+      const cleanParams = new URLSearchParams();
+      Object.entries(params).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && String(v).trim() !== '') {
+          cleanParams.set(k, String(v).trim());
+        }
+      });
+      const res = await fetch(`${API_BASE}/admin/audit-logs?${cleanParams.toString()}`, {
+        headers: this.getAuthHeaders()
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
     }
   }
 };
