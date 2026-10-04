@@ -365,6 +365,42 @@ export const LinimeAPI = {
     }
   },
 
+  async loginWithCredentials(username, password) {
+    try {
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (data.success && data.token) {
+        this.setToken(data.token);
+      }
+      return data;
+    } catch (err) {
+      console.error('loginWithCredentials error:', err);
+      return { success: false, message: 'Lỗi kết nối máy chủ xác thực' };
+    }
+  },
+
+  async registerWithCredentials({ name, email, username, password }) {
+    try {
+      const res = await fetch(`${API_BASE}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, username, password })
+      });
+      const data = await res.json();
+      if (data.success && data.token) {
+        this.setToken(data.token);
+      }
+      return data;
+    } catch (err) {
+      console.error('registerWithCredentials error:', err);
+      return { success: false, message: 'Lỗi kết nối máy chủ xác thực' };
+    }
+  },
+
   async getMe() {
     const token = this.getToken();
     if (!token) return { success: false, code: 'UNAUTHORIZED', message: 'Chưa đăng nhập' };

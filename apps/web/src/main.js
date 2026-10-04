@@ -4174,6 +4174,151 @@ function initLoginModal() {
       }
     }
   });
+
+  // Chuyển đổi tab Đăng nhập / Đăng ký
+  const tabBtnLogin = document.getElementById('tab-btn-login');
+  const tabBtnRegister = document.getElementById('tab-btn-register');
+  const tabContentLogin = document.getElementById('auth-tab-login');
+  const tabContentRegister = document.getElementById('auth-tab-register');
+  const switchToRegister = document.getElementById('switch-to-register');
+  const switchToLogin = document.getElementById('switch-to-login');
+
+  const switchAuthTab = (tab) => {
+    if (tab === 'register') {
+      tabBtnLogin?.classList.remove('active');
+      tabBtnRegister?.classList.add('active');
+      if (tabContentLogin) tabContentLogin.style.display = 'none';
+      if (tabContentRegister) tabContentRegister.style.display = 'block';
+    } else {
+      tabBtnRegister?.classList.remove('active');
+      tabBtnLogin?.classList.add('active');
+      if (tabContentRegister) tabContentRegister.style.display = 'none';
+      if (tabContentLogin) tabContentLogin.style.display = 'block';
+    }
+    // Ẩn các thông báo lỗi cũ khi đổi tab
+    const loginErr = document.getElementById('admin-login-error');
+    const regErr = document.getElementById('auth-register-error');
+    if (loginErr) loginErr.style.display = 'none';
+    if (regErr) regErr.style.display = 'none';
+  };
+
+  tabBtnLogin?.addEventListener('click', () => switchAuthTab('login'));
+  tabBtnRegister?.addEventListener('click', () => switchAuthTab('register'));
+  switchToRegister?.addEventListener('click', (e) => {
+    e.preventDefault();
+    switchAuthTab('register');
+  });
+  switchToLogin?.addEventListener('click', (e) => {
+    e.preventDefault();
+    switchAuthTab('login');
+  });
+
+  // Nút ẩn / hiện mật khẩu
+  modal.querySelectorAll('.auth-toggle-pwd').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetId = btn.getAttribute('data-target');
+      const input = document.getElementById(targetId);
+      if (input) {
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        btn.textContent = isPassword ? '🙈' : '👁';
+      }
+    });
+  });
+
+  // Xử lý đăng nhập tài khoản Thành viên / Quản trị
+  const adminForm = document.getElementById('admin-login-form');
+  const adminError = document.getElementById('admin-login-error');
+  const adminSubmitBtn = document.getElementById('admin-login-submit');
+
+  adminForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const usernameInput = document.getElementById('admin-login-username');
+    const passwordInput = document.getElementById('admin-login-password');
+    const username = usernameInput?.value.trim();
+    const password = passwordInput?.value;
+
+    if (!username || !password) return;
+
+    if (adminError) adminError.style.display = 'none';
+    if (adminSubmitBtn) {
+      adminSubmitBtn.disabled = true;
+      adminSubmitBtn.textContent = 'Đang đăng nhập...';
+    }
+
+    try {
+      const res = await LinimeAPI.loginWithCredentials(username, password);
+      if (res.success && res.user) {
+        await handleLoginSuccess(res.user);
+        if (adminForm) adminForm.reset();
+      } else {
+        if (adminError) {
+          adminError.textContent = res.message || 'Tài khoản hoặc mật khẩu không chính xác.';
+          adminError.style.display = 'block';
+        } else {
+          showToast(res.message || 'Đăng nhập thất bại');
+        }
+      }
+    } catch {
+      if (adminError) {
+        adminError.textContent = 'Lỗi kết nối máy chủ. Vui lòng thử lại sau.';
+        adminError.style.display = 'block';
+      }
+    } finally {
+      if (adminSubmitBtn) {
+        adminSubmitBtn.disabled = false;
+        adminSubmitBtn.textContent = 'Đăng nhập';
+      }
+    }
+  });
+
+  // Xử lý tạo tài khoản mới (Đăng ký)
+  const registerForm = document.getElementById('auth-register-form');
+  const registerError = document.getElementById('auth-register-error');
+  const registerSubmitBtn = document.getElementById('auth-register-submit');
+
+  registerForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('reg-fullname')?.value.trim();
+    const email = document.getElementById('reg-email')?.value.trim();
+    const username = document.getElementById('reg-username')?.value.trim();
+    const password = document.getElementById('reg-password')?.value;
+
+    if (!name || !email || !username || !password) return;
+
+    if (registerError) registerError.style.display = 'none';
+    if (registerSubmitBtn) {
+      registerSubmitBtn.disabled = true;
+      registerSubmitBtn.textContent = 'Đang tạo tài khoản...';
+    }
+
+    try {
+      const res = await LinimeAPI.registerWithCredentials({ name, email, username, password });
+      if (res.success && res.user) {
+        if (registerForm) registerForm.reset();
+        await handleLoginSuccess(res.user);
+        showToast(`Đăng ký thành công! Chào mừng ${res.user.name}`);
+      } else {
+        if (registerError) {
+          registerError.textContent = res.message || 'Đăng ký không thành công. Vui lòng thử lại.';
+          registerError.style.display = 'block';
+        } else {
+          showToast(res.message || 'Đăng ký thất bại');
+        }
+      }
+    } catch {
+      if (registerError) {
+        registerError.textContent = 'Lỗi kết nối máy chủ. Vui lòng thử lại sau.';
+        registerError.style.display = 'block';
+      }
+    } finally {
+      if (registerSubmitBtn) {
+        registerSubmitBtn.disabled = false;
+        registerSubmitBtn.textContent = 'Tạo tài khoản';
+      }
+    }
+  });
 }
 
 // ==========================================

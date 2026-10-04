@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import { pool } from './db.js';
 
 export async function runMigrations() {
@@ -274,6 +275,34 @@ export async function runMigrations() {
       CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs(action);
       CREATE INDEX IF NOT EXISTS idx_audit_logs_target ON audit_logs(target_type, target_id);
     `);
+
+    // 15. Tài khoản quản trị viên cục bộ (admin / admin123)
+    await client.query(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT;
+    `);
+
+    const salt = 'e4a28f80459c9d72213e00cf77821381';
+    const hash = crypto.scryptSync('admin123', salt, 64).toString('hex');
+    const pwdHash = `${salt}:${hash}`;
+
+    await client.query(`
+      INSERT INTO users (id, name, email, avatar, provider, role, password_hash, created_at, updated_at)
+      VALUES (
+        'admin',
+        'Quản trị viên AniDoki',
+        'admin@system.anidoki',
+        'https://ui-avatars.com/api/?name=Admin&background=e50914&color=fff&bold=true',
+        'local',
+        'admin',
+        $1,
+        NOW(),
+        NOW()
+      )
+      ON CONFLICT (id) DO UPDATE SET
+        password_hash = EXCLUDED.password_hash,
+        role = 'admin',
+        email = 'admin@system.anidoki';
+    `, [pwdHash]);
 
     // Xóa các phiên đã hết hạn
     await client.query('DELETE FROM user_sessions WHERE expires_at <= NOW()');

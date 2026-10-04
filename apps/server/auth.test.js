@@ -167,6 +167,125 @@ describe('Giai đoạn 1: Xác thực, Phân quyền và Dữ liệu cá nhân',
     assert.ok(Array.isArray(usersBody.users));
   });
 
+  test('POST /api/auth/login: Đăng nhập tài khoản quản trị nội bộ (admin | admin123)', async () => {
+    // 1. Sai mật khẩu -> 401
+    const resFail = await fetch(`${serverUrl}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: 'admin', password: 'wrong_password' })
+    });
+    assert.equal(resFail.status, 401);
+    const failBody = await resFail.json();
+    assert.equal(failBody.success, false);
+
+    // 2. Đúng tài khoản & mật khẩu admin -> 200 OK
+    const resOk = await fetch(`${serverUrl}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: 'admin', password: 'admin123' })
+    });
+    assert.equal(resOk.status, 200);
+    const okBody = await resOk.json();
+    assert.equal(okBody.success, true);
+    assert.ok(okBody.token.startsWith('anidoki_sess_'));
+    assert.equal(okBody.user.role, 'admin');
+
+    // 3. Dùng token vừa đăng nhập gọi API admin thành công
+    const resAdminMe = await fetch(`${serverUrl}/api/admin/me`, {
+      headers: { Authorization: `Bearer ${okBody.token}` }
+    });
+    assert.equal(resAdminMe.status, 200);
+  });
+
+  test('POST /api/auth/register: Người dùng thường đăng ký và đăng nhập tài khoản', async () => {
+    const regUsername = 'user_reg_test_' + Date.now();
+    const regEmail = `${regUsername}@test.anidoki`;
+    const regPassword = 'password123';
+    const regName = 'Người Dùng Đăng Ký Mới';
+
+    // 1. Kiểm tra từ chối mật khẩu quá ngắn (< 6 ký tự)
+    const resShortPwd = await fetch(`${serverUrl}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: regName,
+        email: regEmail,
+        username: regUsername,
+        password: '123'
+      })
+    });
+    assert.equal(resShortPwd.status, 400);
+
+    // 2. Đăng ký thành công tài khoản mới
+    const resReg = await fetch(`${serverUrl}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: regName,
+        email: regEmail,
+        username: regUsername,
+        password: regPassword
+      })
+    });
+    assert.equal(resReg.status, 201);
+    const regBody = await resReg.json();
+    assert.equal(regBody.success, true);
+    assert.ok(regBody.token.startsWith('anidoki_sess_'));
+    assert.equal(regBody.user.role, 'user');
+    assert.equal(regBody.user.email, regEmail);
+    assert.equal(regBody.user.name, regName);
+
+    // 3. Kiểm tra không cho phép đăng ký trùng lặp username
+    const resDuplicate = await fetch(`${serverUrl}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: regName,
+        email: `other_${regEmail}`,
+        username: regUsername,
+        password: regPassword
+      })
+    });
+    assert.equal(resDuplicate.status, 409);
+
+    // 4. Đăng nhập lại bằng tài khoản vừa đăng ký qua POST /api/auth/login (bằng username)
+    const resLoginByUsername = await fetch(`${serverUrl}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: regUsername,
+        password: regPassword
+      })
+    });
+    assert.equal(resLoginByUsername.status, 200);
+    const loginUserBody = await resLoginByUsername.json();
+    assert.equal(loginUserBody.success, true);
+    assert.equal(loginUserBody.user.role, 'user');
+    assert.equal(loginUserBody.user.id, regBody.user.id);
+
+    // 5. Đăng nhập lại bằng email
+    const resLoginByEmail = await fetch(`${serverUrl}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: regEmail,
+        password: regPassword
+      })
+    });
+    assert.equal(resLoginByEmail.status, 200);
+    const loginEmailBody = await resLoginByEmail.json();
+    assert.equal(loginEmailBody.success, true);
+    assert.equal(loginEmailBody.user.id, regBody.user.id);
+
+    // 6. Gọi /api/auth/me với token mới
+    const resMe = await fetch(`${serverUrl}/api/auth/me`, {
+      headers: { Authorization: `Bearer ${loginEmailBody.token}` }
+    });
+    assert.equal(resMe.status, 200);
+    const meBody = await resMe.json();
+    assert.equal(meBody.user.role, 'user');
+  });
+
   test('Watchlist: Hai tài khoản có danh sách yêu thích độc lập', async () => {
     // Chưa đăng nhập -> 401
     const resGuestWatchlist = await fetch(`${serverUrl}/api/watchlist`);
