@@ -169,7 +169,7 @@ export async function renderAccountSessions() {
         <span class="session-device-icon">${sess.userAgent?.includes('Mobile') ? '📱' : '💻'}</span>
         <div>
           <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
-            <strong style="color: #fff; font-size: 13px;">${sess.userAgent ? sess.userAgent.split(' ')[0] : 'Trình duyệt Web'}</strong>
+            <strong style="color: var(--text-primary); font-size: 13px;">${sess.userAgent ? sess.userAgent.split(' ')[0] : 'Trình duyệt Web'}</strong>
             ${sess.isCurrent ? '<span class="badge-user-active" style="font-size: 10.5px;">Thiết bị hiện tại</span>' : ''}
           </div>
           <div class="session-meta-sub">IP: ${sess.ipAddress || '—'} · Đăng nhập: ${createdStr}</div>

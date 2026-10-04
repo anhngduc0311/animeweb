@@ -195,7 +195,7 @@ async function loadAdminAnimeList(page = 1) {
           <img class="admin-table-thumb" src="${anime.coverImage || '/poster-placeholder.svg'}" alt="${titleEn}" onerror="this.src='/poster-placeholder.svg'">
         </td>
         <td>
-          <div style="font-weight: 600; font-size: 13.5px; color: #fff;">${titleEn}</div>
+          <div style="font-weight: 600; font-size: 13.5px; color: var(--text-primary);">${titleEn}</div>
           <div style="font-size: 11px; color: var(--text-muted); font-family: monospace;">${anime.id}</div>
         </td>
         <td>${titleVi}</td>
@@ -335,7 +335,7 @@ async function loadAdminEpisodes(animeSlug) {
       }
 
       tr.innerHTML = `
-        <td><strong style="color: #fff; font-size: 13.5px;">Tập ${ep.episodeNumber}</strong></td>
+        <td><strong style="color: var(--text-primary); font-size: 13.5px;">Tập ${ep.episodeNumber}</strong></td>
         <td>${ep.title || 'Tập ' + ep.episodeNumber}</td>
         <td>
           <div style="font-size: 11.5px; font-family: monospace; color: ${isOverridden ? '#f4d07a' : 'var(--text-muted)'}; max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
@@ -477,7 +477,7 @@ async function loadAdminSync() {
         : (log.details ? `<span style="font-size: 11px; font-family: monospace;">${typeof log.details === 'object' ? JSON.stringify(log.details) : log.details}</span>` : '—');
 
       tr.innerHTML = `
-        <td><strong style="color: #fff;">${log.sync_type === 'single' ? 'Anime đơn lẻ' : 'Catalog mới'}</strong></td>
+        <td><strong style="color: var(--text-primary);">${log.sync_type === 'single' ? 'Anime đơn lẻ' : 'Catalog mới'}</strong></td>
         <td><code>${log.target_slug || 'catalog'}</code></td>
         <td>${statusHtml}</td>
         <td>${log.items_synced || 0}</td>
@@ -525,13 +525,13 @@ async function loadAdminReports() {
 
       tr.innerHTML = `
         <td>
-          <strong style="color: #fff;">${rep.anime_title || rep.anime_id}</strong>
+          <strong style="color: var(--text-primary);">${rep.anime_title || rep.anime_id}</strong>
           <div style="font-size: 11px; color: var(--text-muted); font-family: monospace;">${rep.anime_id}</div>
         </td>
         <td>Tập ${rep.episode_number}</td>
         <td><span style="font-size: 12px; font-weight: 500;">${typeLabels[rep.issue_type] || rep.issue_type}</span></td>
         <td>
-          <div style="max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #eee; font-size: 12.5px;">
+          <div style="max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-primary); font-size: 12.5px;">
             ${rep.description ? `"${rep.description}"` : '<span style="color: var(--text-muted);">Không có mô tả</span>'}
           </div>
         </td>
@@ -626,7 +626,7 @@ async function loadAdminUsers() {
         <td>
           <img src="${avatarSrc}" alt="${u.name || 'Avatar'}" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; display: block;" onerror="this.src='${fallbackAvatar}'">
         </td>
-        <td><strong style="color: #fff;">${u.name || '—'}</strong></td>
+        <td><strong style="color: var(--text-primary);">${u.name || '—'}</strong></td>
         <td><span style="font-size: 12.5px; color: var(--text-muted);">${u.email || '—'}</span></td>
         <td>
           ${isAdmin
@@ -748,8 +748,8 @@ async function loadAdminHomepage() {
       item.innerHTML = `
         <div style="display: flex; align-items: center; gap: 12px;">
           <span style="font-weight: 700; color: var(--text-muted); font-size: 13px; width: 24px;">#${idx + 1}</span>
-          <input type="number" class="sec-order-input" value="${sec.order || idx + 1}" min="1" max="20" style="width: 50px; padding: 4px 6px; background: #16161b; border: 1px solid var(--border-line); border-radius: 6px; color: #fff; font-size: 12px; text-align: center;">
-          <strong style="color: #fff; font-size: 13.5px;">${sec.title || sec.id}</strong>
+          <input type="number" class="sec-order-input" value="${sec.order || idx + 1}" min="1" max="20" style="width: 50px; padding: 4px 6px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 6px; color: var(--text-primary); font-size: 12px; text-align: center;">
+          <strong style="color: var(--text-primary); font-size: 13.5px;">${sec.title || sec.id}</strong>
           <span style="font-size: 11px; color: var(--text-muted); font-family: monospace;">(${sec.id})</span>
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
@@ -839,9 +839,9 @@ async function loadAdminFeedback(status = currentFeedbackStatus) {
       if (fb.status === 'resolved') statusBadge = '<span class="badge-report-resolved">Đã xử lý</span>';
 
       tr.innerHTML = `
-        <td><strong style="color: #fff;">${fb.name || 'Khách'}</strong></td>
+        <td><strong style="color: var(--text-primary);">${fb.name || 'Khách'}</strong></td>
         <td><span style="font-size: 12px; color: var(--text-muted);">${fb.email || '—'}</span></td>
-        <td><span style="font-size: 12.5px; color: #fff;">${fb.subject || 'Góp ý'}</span></td>
+        <td><span style="font-size: 12.5px; color: var(--text-primary);">${fb.subject || 'Góp ý'}</span></td>
         <td style="max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${fb.message || ''}">
           <span style="font-size: 12.5px; color: var(--text-muted);">${fb.message || ''}</span>
         </td>
@@ -940,12 +940,12 @@ async function loadAdminAuditLogs(page = 1) {
       tr.innerHTML = `
         <td><span style="font-size: 11.5px; color: var(--text-muted);">${dateStr}</span></td>
         <td>
-          <strong style="color: #fff; font-size: 13px;">${log.admin_name || 'Admin'}</strong>
+          <strong style="color: var(--text-primary); font-size: 13px;">${log.admin_name || 'Admin'}</strong>
           ${log.admin_email ? `<div style="font-size: 11px; color: var(--text-muted);">${log.admin_email}</div>` : ''}
         </td>
         <td><span class="audit-badge ${actionClass}">${log.action}</span></td>
         <td>
-          <span style="font-size: 12px; color: #fff;">${log.target_type || '—'}</span>
+          <span style="font-size: 12px; color: var(--text-primary);">${log.target_type || '—'}</span>
           ${log.target_id ? `<span style="font-size: 11px; color: var(--text-muted); margin-left: 4px;">#${log.target_id}</span>` : ''}
         </td>
         <td style="max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${detailsStr}">

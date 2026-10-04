@@ -11,7 +11,7 @@
   <meta property="og:description"
     content="Xem anime mới, anime thịnh hành và phim lẻ chất lượng cao miễn phí trên anidoki.">
   <meta property="og:type" content="website">
-  <meta name="theme-color" content="#0b1118">
+  <meta name="theme-color" content="#101114">
 
   <title>anidoki — Xem anime online</title>
 
@@ -19,7 +19,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
     rel="stylesheet">
 
   <link rel="stylesheet" href="/src/style.css">
@@ -883,7 +883,7 @@
       <!-- Unauthenticated Guard -->
       <div id="account-unauth" class="view-empty-state" style="display: none;">
         <div class="view-empty-icon">🔒</div>
-        <h2 style="font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 8px;">Vui Lòng Đăng Nhập</h2>
+        <h2 style="font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">Vui Lòng Đăng Nhập</h2>
         <p style="color: var(--text-muted); font-size: 14px; max-width: 480px; line-height: 1.6; margin-bottom: 24px;">
           Bạn cần đăng nhập tài khoản để xem thông tin cá nhân và thiết lập tùy chọn trải nghiệm xem phim.
         </p>
@@ -927,11 +927,11 @@
               <form id="account-profile-form" style="margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06);">
                 <div style="margin-bottom: 14px;">
                   <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Tên hiển thị</label>
-                  <input type="text" id="account-input-name" required maxlength="100" style="width: 100%; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px;">
+                  <input type="text" id="account-input-name" required maxlength="100" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
                 </div>
                 <div style="margin-bottom: 16px;">
                   <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">URL Ảnh đại diện (tùy chọn)</label>
-                  <input type="url" id="account-input-avatar" placeholder="https://..." style="width: 100%; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px;">
+                  <input type="url" id="account-input-avatar" placeholder="https://..." style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
                 </div>
                 <button type="submit" class="btn-primary" id="account-profile-submit-btn" style="width: 100%; padding: 10px; font-size: 13px;">Lưu Hồ Sơ</button>
               </form>
@@ -943,7 +943,7 @@
             <!-- 1. Player Preferences -->
             <div class="account-card">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-                <h3 style="margin: 0; font-size: 16px; color: #fff;">🎬 Tùy Chọn Trình Phát Video</h3>
+                <h3 style="margin: 0; font-size: 16px; color: var(--text-primary);">🎬 Tùy Chọn Trình Phát Video</h3>
                 <span style="font-size: 11.5px; color: var(--text-muted);">Tự động lưu vào tài khoản</span>
               </div>
               
@@ -975,7 +975,7 @@
                     <strong>Tốc độ phát mặc định</strong>
                     <p>Tốc độ chuẩn khi bắt đầu mỗi tập phim mới</p>
                   </div>
-                  <select id="pref-default-speed" style="padding: 6px 12px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px;">
+                  <select id="pref-default-speed" style="padding: 6px 12px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
                     <option value="0.75">0.75x</option>
                     <option value="1" selected>1.0x (Chuẩn)</option>
                     <option value="1.25">1.25x</option>
@@ -989,7 +989,7 @@
                     <strong>Chất lượng video ưu tiên</strong>
                     <p>Độ phân giải ưu tiên chọn trước khi tải video</p>
                   </div>
-                  <select id="pref-preferred-quality" style="padding: 6px 12px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px;">
+                  <select id="pref-preferred-quality" style="padding: 6px 12px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
                     <option value="auto" selected>Tự động (Khuyên dùng)</option>
                     <option value="1080p">1080p Full HD</option>
                     <option value="720p">720p HD</option>
@@ -1007,7 +1007,7 @@
             <div class="account-card">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
                 <div>
-                  <h3 style="margin: 0; font-size: 16px; color: #fff;">🔐 Quản Lý Phiên Đăng Nhập</h3>
+                  <h3 style="margin: 0; font-size: 16px; color: var(--text-primary);">🔐 Quản Lý Phiên Đăng Nhập</h3>
                   <p style="margin: 3px 0 0; font-size: 12px; color: var(--text-muted);">Danh sách thiết bị đang có quyền truy cập vào tài khoản của bạn.</p>
                 </div>
                 <button type="button" class="btn-secondary" id="revoke-others-btn" style="padding: 6px 14px; font-size: 12px; border-color: rgba(255, 51, 75, 0.4); color: #ff5252;">
@@ -1039,7 +1039,7 @@
       <div class="feedback-grid">
         <!-- FAQ Accordion -->
         <div>
-          <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+          <h2 style="font-size: 17px; font-weight: 700; color: var(--text-primary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
             <span>❓</span> Câu Hỏi Thường Gặp (FAQ)
           </h2>
           <div class="faq-list" id="faq-list">
@@ -1088,7 +1088,7 @@
         <!-- Feedback & Contact Form -->
         <div>
           <div class="account-card" style="padding: 24px;">
-            <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+            <h2 style="font-size: 17px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
               <span>💬</span> Gửi Phản Hồi & Đóng Góp
             </h2>
             <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 20px;">
@@ -1098,17 +1098,17 @@
             <form id="help-feedback-form" style="display: flex; flex-direction: column; gap: 14px;">
               <div>
                 <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Họ tên của bạn</label>
-                <input type="text" id="feedback-name" placeholder="Nguyễn Văn A" style="width: 100%; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px;">
+                <input type="text" id="feedback-name" placeholder="Nguyễn Văn A" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
               </div>
 
               <div>
                 <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Email liên hệ (nếu cần nhận phản hồi)</label>
-                <input type="email" id="feedback-email" placeholder="email@example.com" style="width: 100%; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px;">
+                <input type="email" id="feedback-email" placeholder="email@example.com" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
               </div>
 
               <div>
                 <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Chủ đề</label>
-                <select id="feedback-subject" style="width: 100%; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px;">
+                <select id="feedback-subject" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
                   <option value="Góp ý giao diện & trải nghiệm">Góp ý giao diện & trải nghiệm</option>
                   <option value="Yêu cầu bổ sung Anime">Yêu cầu bổ sung Anime</option>
                   <option value="Báo lỗi tính năng">Báo lỗi tính năng</option>
@@ -1118,7 +1118,7 @@
 
               <div>
                 <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Nội dung phản hồi (*)</label>
-                <textarea id="feedback-message" required rows="4" placeholder="Nhập chi tiết ý kiến hoặc thắc mắc của bạn..." style="width: 100%; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px; resize: vertical;"></textarea>
+                <textarea id="feedback-message" required rows="4" placeholder="Nhập chi tiết ý kiến hoặc thắc mắc của bạn..." style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px; resize: vertical;"></textarea>
               </div>
 
               <button type="submit" class="btn-primary" id="feedback-submit-btn" style="padding: 10px; font-size: 13px; margin-top: 4px;">
@@ -1137,7 +1137,7 @@
   <div id="view-404" class="app-view" style="display: none;">
     <div class="container view-404-container">
       <div class="code-404">404</div>
-      <h2 style="font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 12px;">Trang Không Tồn Tại</h2>
+      <h2 style="font-size: 24px; font-weight: 700; color: var(--text-primary); margin-bottom: 12px;">Trang Không Tồn Tại</h2>
       <p style="color: var(--text-muted); font-size: 14px; max-width: 480px; line-height: 1.6; margin-bottom: 28px;">
         Đường dẫn bạn yêu cầu không tìm thấy hoặc đã được chuyển sang địa chỉ khác. Hãy quay về trang chủ hoặc khám phá kho phim phong phú của anidoki!
       </p>
@@ -1156,7 +1156,7 @@
     <div id="admin-unauth-view" class="container view-page" style="display: none;">
       <div class="view-empty-state">
         <div class="view-empty-icon">🛡️</div>
-        <h2 style="font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 8px;">Khu Vực Quản Trị Hệ Thống</h2>
+        <h2 style="font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">Khu Vực Quản Trị Hệ Thống</h2>
         <p style="color: var(--text-muted); font-size: 14px; max-width: 480px; line-height: 1.6; margin-bottom: 24px;">
           Trang quản trị yêu cầu quyền truy cập của Quản trị viên (Admin Role). Vui lòng đăng nhập với tài khoản có quyền quản trị để tiếp tục.
         </p>
@@ -1448,7 +1448,7 @@
                   Nhập mã định danh (slug) của anime để đồng bộ thông tin và toàn bộ danh sách tập phim.
                 </p>
                 <div style="display: flex; gap: 10px;">
-                  <input type="text" id="admin-sync-single-slug" placeholder="Ví dụ: one-piece, naruto..." style="flex: 1; padding: 10px; background: #121215; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px;">
+                  <input type="text" id="admin-sync-single-slug" placeholder="Ví dụ: one-piece, naruto..." style="flex: 1; padding: 10px; background: #121215; border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
                   <button type="button" class="btn-primary" id="admin-sync-single-btn" style="white-space: nowrap;">
                     🚀 Bắt đầu đồng bộ
                   </button>
@@ -1573,7 +1573,7 @@
                 <button type="button" class="pill-tab-btn" data-user-status="banned">Bị khóa (Banned)</button>
               </div>
               <div style="display: flex; gap: 8px; flex: 1; max-width: 360px;">
-                <input type="text" id="admin-users-search-input" placeholder="Tìm theo tên hoặc email..." style="width: 100%; padding: 8px 12px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px;">
+                <input type="text" id="admin-users-search-input" placeholder="Tìm theo tên hoặc email..." style="width: 100%; padding: 8px 12px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
               </div>
             </div>
 
@@ -1611,15 +1611,15 @@
             </div>
 
             <div class="account-card" style="margin-bottom: 24px;">
-              <h3 style="font-size: 15px; color: #fff; margin-bottom: 6px;">🌟 Danh Sách Anime Spotlight (Hero Slider)</h3>
+              <h3 style="font-size: 15px; color: var(--text-primary); margin-bottom: 6px;">🌟 Danh Sách Anime Spotlight (Hero Slider)</h3>
               <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 14px;">
                 Nhập danh sách mã phim (slug), phân cách bằng dấu phẩy. Các phim này sẽ được hiển thị trên banner trượt đầu trang chủ.
               </p>
-              <textarea id="admin-homepage-spotlight-input" rows="3" placeholder="dao-hai-tac-one-piece, chu-thuat-hoi-chien, thanh-guom-diet-quy" style="width: 100%; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px; font-family: monospace;"></textarea>
+              <textarea id="admin-homepage-spotlight-input" rows="3" placeholder="dao-hai-tac-one-piece, chu-thuat-hoi-chien, thanh-guom-diet-quy" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px; font-family: monospace;"></textarea>
             </div>
 
             <div class="account-card">
-              <h3 style="font-size: 15px; color: #fff; margin-bottom: 6px;">📑 Thứ Tự & Ẩn/Hiện Các Mục Trang Chủ</h3>
+              <h3 style="font-size: 15px; color: var(--text-primary); margin-bottom: 6px;">📑 Thứ Tự & Ẩn/Hiện Các Mục Trang Chủ</h3>
               <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 16px;">
                 Bật/tắt hoặc điều chỉnh thứ tự hiển thị của các khối anime trên trang chủ.
               </p>
@@ -1683,7 +1683,7 @@
             </div>
 
             <div class="admin-filter-bar">
-              <input type="text" id="admin-audit-search" placeholder="Tìm theo quản trị viên hoặc đối tượng..." style="padding: 8px 12px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px; max-width: 320px;">
+              <input type="text" id="admin-audit-search" placeholder="Tìm theo quản trị viên hoặc đối tượng..." style="padding: 8px 12px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px; max-width: 320px;">
               <select class="filter-select" id="admin-audit-action-filter" style="width: auto;">
                 <option value="">Tất cả hành động</option>
                 <option value="UPDATE_ANIME_OVERRIDE">Sửa anime</option>
@@ -1739,22 +1739,22 @@
             <form id="admin-settings-form" class="account-card" style="max-width: 680px;">
               <div style="margin-bottom: 16px;">
                 <label style="display: block; font-size: 12.5px; color: var(--text-muted); margin-bottom: 5px;">Tên Website (Site Name)</label>
-                <input type="text" id="admin-setting-sitename" placeholder="Linime" style="width: 100%; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13.5px;">
+                <input type="text" id="admin-setting-sitename" placeholder="Linime" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13.5px;">
               </div>
 
               <div style="margin-bottom: 16px;">
                 <label style="display: block; font-size: 12.5px; color: var(--text-muted); margin-bottom: 5px;">URL Logo Website</label>
-                <input type="text" id="admin-setting-logo" placeholder="https://... hoặc đường dẫn svg/png" style="width: 100%; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13.5px;">
+                <input type="text" id="admin-setting-logo" placeholder="https://... hoặc đường dẫn svg/png" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13.5px;">
               </div>
 
               <div style="margin-bottom: 16px;">
                 <label style="display: block; font-size: 12.5px; color: var(--text-muted); margin-bottom: 5px;">Email Liên Hệ Ban Quản Trị</label>
-                <input type="email" id="admin-setting-email" placeholder="contact@linime.org" style="width: 100%; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13.5px;">
+                <input type="email" id="admin-setting-email" placeholder="contact@linime.org" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13.5px;">
               </div>
 
               <div style="margin-bottom: 18px;">
                 <label style="display: block; font-size: 12.5px; color: var(--text-muted); margin-bottom: 5px;">Thông Báo Nổi Bật Toàn Trang (Announcement Banner)</label>
-                <textarea id="admin-setting-announcement" rows="3" placeholder="Để trống nếu không có thông báo..." style="width: 100%; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13.5px; resize: vertical;"></textarea>
+                <textarea id="admin-setting-announcement" rows="3" placeholder="Để trống nếu không có thông báo..." style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13.5px; resize: vertical;"></textarea>
               </div>
 
               <div class="setting-row" style="background: rgba(255, 51, 75, 0.06); padding: 14px 16px; border-radius: 10px; border: 1px solid rgba(255, 51, 75, 0.15);">
@@ -1778,7 +1778,7 @@
   <div class="login-modal" id="admin-user-ban-modal" role="dialog" aria-modal="true">
     <div class="login-card" style="max-width: 480px; text-align: left; padding: 26px;">
       <button class="detail-close-btn" id="close-admin-ban-modal-btn" style="position: absolute; top: 16px; right: 16px; width: 36px; height: 36px;">✕</button>
-      <h3 id="admin-ban-modal-title" style="margin: 0 0 8px 0; font-size: 17px; color: #fff;">Khóa Tài Khoản Người Dùng</h3>
+      <h3 id="admin-ban-modal-title" style="margin: 0 0 8px 0; font-size: 17px; color: var(--text-primary);">Khóa Tài Khoản Người Dùng</h3>
       <p id="admin-ban-modal-sub" style="margin: 0 0 16px 0; font-size: 12.5px; color: var(--text-muted);">
         Khi bị khóa, người dùng sẽ bị thu hồi toàn bộ phiên làm việc và không thể đăng nhập hoặc thực hiện bất kỳ hành động nào.
       </p>
@@ -1789,12 +1789,12 @@
 
         <div>
           <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Tài khoản</label>
-          <input type="text" id="admin-ban-user-name" readonly style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px;">
+          <input type="text" id="admin-ban-user-name" readonly style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
         </div>
 
         <div id="admin-ban-reason-wrap">
           <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Lý do khóa tài khoản (*)</label>
-          <textarea id="admin-ban-reason-input" rows="3" placeholder="Nhập lý do khóa (vi phạm chính sách, spam, v.v.)..." style="width: 100%; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px; resize: vertical;"></textarea>
+          <textarea id="admin-ban-reason-input" rows="3" placeholder="Nhập lý do khóa (vi phạm chính sách, spam, v.v.)..." style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px; resize: vertical;"></textarea>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px;">
@@ -1814,28 +1814,28 @@
       <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
         <span style="font-size: 24px;">⚠️</span>
         <div>
-          <h2 style="margin: 0; font-size: 18px; color: #fff;">Báo Cáo Sự Cố Trình Phát</h2>
+          <h2 style="margin: 0; font-size: 18px; color: var(--text-primary);">Báo Cáo Sự Cố Trình Phát</h2>
           <p style="margin: 0; font-size: 12.5px; color: var(--text-muted);">Chúng tôi sẽ kiểm tra và khắc phục nguồn phát sớm nhất có thể.</p>
         </div>
       </div>
       <form id="report-form" style="display: flex; flex-direction: column; gap: 14px; margin-top: 16px;">
         <div>
           <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Anime</label>
-          <input type="text" id="report-anime-title" readonly style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px;" />
+          <input type="text" id="report-anime-title" readonly style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;" />
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           <div>
             <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Tập phim</label>
-            <input type="text" id="report-episode-num" readonly style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px;" />
+            <input type="text" id="report-episode-num" readonly style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;" />
           </div>
           <div>
             <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Nguồn phát</label>
-            <input type="text" id="report-provider" readonly value="AniDoki" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px;" />
+            <input type="text" id="report-provider" readonly value="AniDoki" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;" />
           </div>
         </div>
         <div>
           <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Loại sự cố (*)</label>
-          <select id="report-issue-type" required style="width: 100%; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px;">
+          <select id="report-issue-type" required style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
             <option value="video_error">Video không tải được / Link hỏng</option>
             <option value="audio_error">Lỗi âm thanh / Mất tiếng</option>
             <option value="subtitle_error">Lỗi phụ đề / Lệch sub</option>
@@ -1845,7 +1845,7 @@
         </div>
         <div>
           <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Mô tả thêm (nếu có)</label>
-          <textarea id="report-desc" rows="3" placeholder="Ví dụ: Lỗi bắt đầu từ phút 12:30..." style="width: 100%; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px; resize: vertical;"></textarea>
+          <textarea id="report-desc" rows="3" placeholder="Ví dụ: Lỗi bắt đầu từ phút 12:30..." style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px; resize: vertical;"></textarea>
         </div>
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px;">
           <button type="button" class="btn-secondary" id="cancel-report-btn" style="padding: 10px 18px; font-size: 13px;">Hủy bỏ</button>
@@ -1860,7 +1860,7 @@
        ========================================== -->
   <div class="login-modal" id="confirm-modal" role="dialog" aria-modal="true">
     <div class="login-card" style="max-width: 440px; text-align: left; padding: 26px;">
-      <h3 id="confirm-modal-title" style="margin: 0 0 10px 0; font-size: 17px; color: #fff;">Xác nhận</h3>
+      <h3 id="confirm-modal-title" style="margin: 0 0 10px 0; font-size: 17px; color: var(--text-primary);">Xác nhận</h3>
       <p id="confirm-modal-message" style="margin: 0 0 20px 0; font-size: 13.5px; color: var(--text-muted); line-height: 1.5;"></p>
       <div style="display: flex; justify-content: flex-end; gap: 10px;">
         <button type="button" class="btn-secondary" id="confirm-cancel-btn" style="padding: 8px 18px; font-size: 13px;">Hủy</button>
@@ -1892,7 +1892,7 @@
   <div class="watchlist-modal" id="watchlist-modal">
     <div class="watchlist-drawer">
       <div class="watchlist-header">
-        <h3 style="font-size: 17px; font-weight: 700; color: #fff;">Danh sách xem sau</h3>
+        <h3 style="font-size: 17px; font-weight: 700; color: var(--text-primary);">Danh sách xem sau</h3>
         <button class="icon-btn" id="close-watchlist-btn">✕</button>
       </div>
       <div class="watchlist-list" id="watchlist-items-list"></div>
@@ -2037,7 +2037,7 @@
       <button class="detail-close-btn" id="close-admin-anime-modal-btn" style="position: absolute; top: 16px; right: 16px; width: 36px; height: 36px;">✕</button>
       <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
         <span style="font-size: 22px;">🎬</span>
-        <h2 style="margin: 0; font-size: 18px; color: #fff;">Chỉnh Sửa Thông Tin Anime</h2>
+        <h2 style="margin: 0; font-size: 18px; color: var(--text-primary);">Chỉnh Sửa Thông Tin Anime</h2>
       </div>
       <p style="color: var(--text-muted); font-size: 12.5px; margin-bottom: 18px;">
         Các thông tin nhập tại đây sẽ được lưu vào bảng ghi đè (overrides) và được ưu tiên hiển thị trước dữ liệu gốc.
@@ -2049,38 +2049,38 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           <div>
             <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Tên Tiếng Việt</label>
-            <input type="text" id="admin-edit-title-vi" placeholder="Ví dụ: Đảo Hải Tặc" style="width: 100%; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px;">
+            <input type="text" id="admin-edit-title-vi" placeholder="Ví dụ: Đảo Hải Tặc" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
           </div>
           <div>
             <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Tên Tiếng Anh / Tên Quốc Tế</label>
-            <input type="text" id="admin-edit-title-en" placeholder="Ví dụ: One Piece" style="width: 100%; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px;">
+            <input type="text" id="admin-edit-title-en" placeholder="Ví dụ: One Piece" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
           </div>
         </div>
 
         <div>
           <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Mô tả / Tóm tắt nội dung</label>
-          <textarea id="admin-edit-desc" rows="3" placeholder="Nhập mô tả phim..." style="width: 100%; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px; resize: vertical;"></textarea>
+          <textarea id="admin-edit-desc" rows="3" placeholder="Nhập mô tả phim..." style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px; resize: vertical;"></textarea>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           <div>
             <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Poster URL (Ảnh đại diện dọc)</label>
-            <input type="text" id="admin-edit-poster" placeholder="https://..." style="width: 100%; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px;">
+            <input type="text" id="admin-edit-poster" placeholder="https://..." style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
           </div>
           <div>
             <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Banner URL (Ảnh nền ngang)</label>
-            <input type="text" id="admin-edit-banner" placeholder="https://..." style="width: 100%; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px;">
+            <input type="text" id="admin-edit-banner" placeholder="https://..." style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
           </div>
         </div>
 
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
           <div>
             <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Thể loại (phân cách bằng dấu phẩy)</label>
-            <input type="text" id="admin-edit-genres" placeholder="Hành Động, Phiêu Lưu, Hài Hước" style="width: 100%; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px;">
+            <input type="text" id="admin-edit-genres" placeholder="Hành Động, Phiêu Lưu, Hài Hước" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
           </div>
           <div>
             <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Trạng thái phát sóng</label>
-            <select id="admin-edit-status" style="width: 100%; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px;">
+            <select id="admin-edit-status" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
               <option value="">Giữ nguyên từ nguồn</option>
               <option value="ongoing">Đang phát sóng (Ongoing)</option>
               <option value="completed">Đã hoàn thành (Completed)</option>
@@ -2090,13 +2090,13 @@
 
         <div>
           <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Ghi chú nội bộ quản trị</label>
-          <input type="text" id="admin-edit-notes" placeholder="Ghi chú về bản quyền, nguồn sub hoặc lý do can thiệp..." style="width: 100%; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px;">
+          <input type="text" id="admin-edit-notes" placeholder="Ghi chú về bản quyền, nguồn sub hoặc lý do can thiệp..." style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
         </div>
 
         <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: rgba(255, 51, 75, 0.08); border: 1px solid rgba(255, 51, 75, 0.2); border-radius: 8px;">
           <input type="checkbox" id="admin-edit-hidden" style="width: 18px; height: 18px; accent-color: #ff334b; cursor: pointer;">
           <div>
-            <label for="admin-edit-hidden" style="font-weight: 600; font-size: 13px; color: #fff; cursor: pointer;">Ẩn anime này khỏi giao diện người dùng</label>
+            <label for="admin-edit-hidden" style="font-weight: 600; font-size: 13px; color: var(--text-primary); cursor: pointer;">Ẩn anime này khỏi giao diện người dùng</label>
             <div style="font-size: 12px; color: var(--text-muted);">Khi bật, phim sẽ bị ẩn trên trang chủ, trang khám phá và trả về 404 khi người dùng truy cập trực tiếp.</div>
           </div>
         </div>
@@ -2116,7 +2116,7 @@
       <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
         <span style="font-size: 22px;">🎞️</span>
         <div>
-          <h2 style="margin: 0; font-size: 18px; color: #fff;">Chỉnh Sửa Tập Phim</h2>
+          <h2 style="margin: 0; font-size: 18px; color: var(--text-primary);">Chỉnh Sửa Tập Phim</h2>
           <span id="admin-ep-modal-subtitle" style="font-size: 12px; color: var(--text-muted);">Tập 1</span>
         </div>
       </div>
@@ -2128,7 +2128,7 @@
         <div>
           <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Link Nhúng / Phát Thay Thế (Embed URL)</label>
           <div style="display: flex; gap: 8px;">
-            <input type="text" id="admin-ep-edit-embed" placeholder="https://..." style="flex: 1; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px;">
+            <input type="text" id="admin-ep-edit-embed" placeholder="https://..." style="flex: 1; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
             <button type="button" class="btn-secondary" id="admin-ep-test-link-btn" style="padding: 0 14px; font-size: 12px; white-space: nowrap;">
               🔍 Kiểm tra link
             </button>
@@ -2138,13 +2138,13 @@
 
         <div>
           <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Ghi chú quản trị</label>
-          <input type="text" id="admin-ep-edit-notes" placeholder="Ví dụ: Link dự phòng do server chính mất kết nối..." style="width: 100%; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px;">
+          <input type="text" id="admin-ep-edit-notes" placeholder="Ví dụ: Link dự phòng do server chính mất kết nối..." style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
         </div>
 
         <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: rgba(255, 51, 75, 0.08); border: 1px solid rgba(255, 51, 75, 0.2); border-radius: 8px;">
           <input type="checkbox" id="admin-ep-edit-hidden" style="width: 18px; height: 18px; accent-color: #ff334b; cursor: pointer;">
           <div>
-            <label for="admin-ep-edit-hidden" style="font-weight: 600; font-size: 13px; color: #fff; cursor: pointer;">Ẩn tập phim này</label>
+            <label for="admin-ep-edit-hidden" style="font-weight: 600; font-size: 13px; color: var(--text-primary); cursor: pointer;">Ẩn tập phim này</label>
             <div style="font-size: 12px; color: var(--text-muted);">Người dùng sẽ không thể chọn hoặc phát tập này (trả về 404).</div>
           </div>
         </div>
@@ -2164,7 +2164,7 @@
       <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
         <span style="font-size: 22px;">🛠️</span>
         <div>
-          <h2 style="margin: 0; font-size: 18px; color: #fff;">Xử Lý Báo Cáo Sự Cố</h2>
+          <h2 style="margin: 0; font-size: 18px; color: var(--text-primary);">Xử Lý Báo Cáo Sự Cố</h2>
           <span id="admin-report-modal-sub" style="font-size: 12px; color: var(--text-muted);">Báo lỗi #123</span>
         </div>
       </div>
@@ -2175,7 +2175,7 @@
           <span class="badge-role" id="admin-report-detail-type" style="font-size: 11px;">Lỗi video</span>
         </div>
         <div style="color: var(--text-muted); font-size: 12px;" id="admin-report-detail-ep">Tập 1 · Gửi từ 127.0.0.1</div>
-        <div style="margin-top: 8px; color: #fff; background: rgba(0,0,0,0.25); padding: 8px; border-radius: 6px;" id="admin-report-detail-desc">
+        <div style="margin-top: 8px; color: var(--text-primary); background: rgba(0,0,0,0.25); padding: 8px; border-radius: 6px;" id="admin-report-detail-desc">
           "Không tải được video"
         </div>
       </div>
@@ -2185,7 +2185,7 @@
 
         <div>
           <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Cập nhật trạng thái</label>
-          <select id="admin-report-process-status" style="width: 100%; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px;">
+          <select id="admin-report-process-status" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
             <option value="pending">Chờ xử lý (Pending)</option>
             <option value="in_progress">Đang kiểm tra / Sửa chữa (In Progress)</option>
             <option value="resolved">Đã giải quyết xong (Resolved)</option>
@@ -2195,7 +2195,7 @@
 
         <div>
           <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Ghi chú phản hồi / Hành động khắc phục</label>
-          <textarea id="admin-report-process-notes" rows="3" placeholder="Ví dụ: Đã đổi link embed của server dự phòng..." style="width: 100%; padding: 10px; background: #16161b; border: 1px solid var(--border-line); border-radius: 8px; color: #fff; font-size: 13px; resize: vertical;"></textarea>
+          <textarea id="admin-report-process-notes" rows="3" placeholder="Ví dụ: Đã đổi link embed của server dự phòng..." style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px; resize: vertical;"></textarea>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px;">
