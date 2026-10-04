@@ -20,7 +20,7 @@ export function registerRoutes() {
     .addRoute('/browse', (route) => {
       switchView('view-browse');
       document.title = 'Khám Phá Anime | anidoki';
-      loadBrowseView(route);
+      return loadBrowseView(route);
     })
     .addRoute('/anime/:slug', (route) => {
       openAnimeDetail(route.params.slug, false);
@@ -31,12 +31,12 @@ export function registerRoutes() {
     .addRoute('/library', () => {
       switchView('view-library');
       document.title = 'Thư Viện Của Tôi | anidoki';
-      loadLibraryView();
+      return loadLibraryView();
     })
     .addRoute('/history', () => {
       switchView('view-history');
       document.title = 'Lịch Sử Xem Phim | anidoki';
-      loadHistoryView();
+      return loadHistoryView();
     })
     .addRoute('/account', () => {
       switchView('view-account');
@@ -86,6 +86,5 @@ export function registerRoutes() {
       document.title = '404 - Không Tìm Thấy Trang | anidoki';
     });
 }
-
 
 

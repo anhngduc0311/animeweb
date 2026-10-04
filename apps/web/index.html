@@ -50,12 +50,17 @@
         <li class="nav-genres">
           <button type="button" class="nav-link" id="genre-toggle" aria-expanded="false" aria-controls="genre-dropdown">Thể loại <span class="genre-chevron" aria-hidden="true">⌄</span><span id="genre-count" hidden></span></button>
           <form class="genre-dropdown" id="genre-dropdown" hidden aria-label="Chọn thể loại anime">
-            <div class="genre-dropdown-heading"><strong>Chọn thể loại</strong><button type="button" id="genre-reset">Bỏ chọn</button></div>
-            <p>Chọn nhiều thể loại để tìm phim có đủ các thể loại đó.</p>
+            <div class="genre-dropdown-heading"><strong>Khám phá theo thể loại</strong><button type="button" id="genre-close" aria-label="Đóng bảng thể loại">✕</button></div>
+            <p>Chọn một hoặc nhiều thể loại bạn muốn xem.</p>
+            <input type="search" class="genre-search" id="genre-search" placeholder="Tìm thể loại…" aria-label="Tìm thể loại" autocomplete="off">
             <p id="genre-options-status" role="status">Đang tải thể loại…</p>
             <div class="genre-options" id="genre-options"></div>
+            <p id="genre-search-empty" role="status" hidden>Không tìm thấy thể loại phù hợp.</p>
             <button type="button" id="genre-options-retry" class="btn-secondary" hidden>Thử lại</button>
-            <button type="submit" id="genre-apply" class="btn-primary" disabled>Xem anime</button>
+            <div class="genre-dropdown-footer">
+              <div class="genre-selection-summary"><span id="genre-selection-label" aria-live="polite">Chưa chọn thể loại</span><button type="button" id="genre-reset">Bỏ chọn tất cả</button></div>
+              <button type="submit" id="genre-apply" class="btn-primary" disabled>Xem anime →</button>
+            </div>
           </form>
         </li>
       </ul>

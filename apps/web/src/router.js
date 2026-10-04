@@ -47,16 +47,28 @@ export class Router {
     return this;
   }
 
-  navigate(url, replace = false) {
+  navigate(url, replace = false, scrollY = 0) {
+    const currentUrl = window.location.pathname + window.location.search;
+    const isDetail = path => /^\/(anime|watch)\//.test(path);
+    const returnTo = isDetail(url)
+      ? (isDetail(currentUrl) ? window.history.state?.detailReturnTo : { url: currentUrl, scrollY: window.scrollY })
+      : undefined;
+    const historyState = returnTo ? { detailReturnTo: returnTo } : {};
     if (replace) {
-      window.history.replaceState({}, '', url);
+      window.history.replaceState(historyState, '', url);
     } else {
-      window.history.pushState({}, '', url);
+      window.history.pushState(historyState, '', url);
     }
-    this.handleRoute(url);
+    this.handleRoute(url, scrollY);
   }
 
-  handleRoute(fullUrl = window.location.pathname + window.location.search) {
+  returnFromDetail() {
+    const target = window.history.state?.detailReturnTo;
+    const safe = target && /^\/(?!\/|anime\/|watch\/)/.test(target.url);
+    this.navigate(safe ? target.url : '/', true, safe ? target.scrollY || 0 : 0);
+  }
+
+  handleRoute(fullUrl = window.location.pathname + window.location.search, scrollY = 0) {
     const [pathname, searchStr] = fullUrl.split('?');
     const searchParams = new URLSearchParams(searchStr || '');
 
@@ -77,8 +89,12 @@ export class Router {
         };
 
         this.updateActiveNav(pathname);
-        route.handler(this.currentRoute);
-        window.scrollTo({ top: 0, behavior: 'instant' });
+        const current = this.currentRoute;
+        const result = route.handler(current);
+        window.scrollTo({ top: scrollY, behavior: 'instant' });
+        if (scrollY) Promise.resolve(result).then(() => {
+          if (this.currentRoute === current) window.scrollTo({ top: scrollY, behavior: 'instant' });
+        });
         return;
       }
     }

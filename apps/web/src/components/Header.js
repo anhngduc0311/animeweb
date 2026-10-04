@@ -49,6 +49,20 @@ export function initGenreDropdown() {
   const retryOptions = document.getElementById('genre-options-retry');
   const apply = document.getElementById('genre-apply');
   const count = document.getElementById('genre-count');
+  const search = document.getElementById('genre-search');
+  const summary = document.getElementById('genre-selection-label');
+  const reset = document.getElementById('genre-reset');
+  const normalize = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'd').toLowerCase().trim();
+  const filterOptions = () => {
+    const query = normalize(search.value);
+    let visible = 0;
+    options.querySelectorAll('label').forEach(label => {
+      label.hidden = !normalize(label.textContent).includes(query);
+      if (!label.hidden) visible++;
+    });
+    document.getElementById('genre-search-empty').hidden = !options.children.length || visible > 0;
+  };
+  search.addEventListener('input', filterOptions);
   const section = document.getElementById('section-genre-results');
   const grid = document.getElementById('genre-results-grid');
   const status = document.getElementById('genre-results-status');
@@ -65,6 +79,8 @@ export function initGenreDropdown() {
     count.hidden = size === 0;
     count.textContent = String(size);
     apply.disabled = size === 0;
+    summary.textContent = size ? `Đã chọn ${size} thể loại` : 'Chưa chọn thể loại';
+    reset.disabled = size === 0;
   };
   async function loadOptions() {
     if (loaded || loadingOptions) return;
@@ -87,6 +103,7 @@ export function initGenreDropdown() {
       });
       loaded = true;
       optionsStatus.textContent = '';
+      filterOptions();
     } catch {
       optionsStatus.textContent = 'Không tải được thể loại.';
       retryOptions.hidden = false;
@@ -96,11 +113,14 @@ export function initGenreDropdown() {
     if (!form.hidden) return close();
     form.hidden = false;
     toggle.setAttribute('aria-expanded', 'true');
+    search.focus();
     void loadOptions();
   });
+  document.getElementById('genre-close').addEventListener('click', () => close(true));
+  sync();
   options.addEventListener('change', sync);
   retryOptions.addEventListener('click', loadOptions);
-  document.getElementById('genre-reset').addEventListener('click', () => {
+  reset.addEventListener('click', () => {
     chosen().forEach(input => { input.checked = false; });
     sync();
   });
@@ -336,6 +356,5 @@ export function initWatchlistDrawer() {
 
 
 // ==========================================
-
 
 

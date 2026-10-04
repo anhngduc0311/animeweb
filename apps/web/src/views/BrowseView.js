@@ -1,6 +1,7 @@
 import { LinimeAPI } from '../api.js';
 import { router } from '../router.js';
 import { renderCard } from '../components/MovieCard.js';
+import { initBrowseFilters, syncBrowseFilters } from '../components/BrowseFilters.js';
 
 let browseGenreOptions = [];
 
@@ -67,6 +68,7 @@ export async function initBrowseView() {
 
   resetBtn?.addEventListener('click', resetFilters);
   emptyResetBtn?.addEventListener('click', resetFilters);
+  initBrowseFilters();
 }
 
 export async function loadBrowseView(route) {
@@ -89,6 +91,7 @@ export async function loadBrowseView(route) {
   if (yearSelect) yearSelect.value = year;
   if (statusSelect) statusSelect.value = status;
   if (sortSelect) sortSelect.value = sort;
+  syncBrowseFilters();
 
   renderBrowseChips(query);
 

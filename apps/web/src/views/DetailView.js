@@ -19,7 +19,7 @@ export async function openAnimeDetail(animeId, pushRoute = true) {
   }
   const request = ++detailRequest;
   let anime = await LinimeAPI.getAnimeDetail(animeId);
-  if (request !== detailRequest) return;
+  if (request !== detailRequest || router.currentRoute?.pathname !== `/anime/${animeId}`) return;
   if (!anime) {
     anime = INITIAL_ANIME_DATA.find(a => a.id === animeId);
   }
@@ -97,11 +97,12 @@ export async function openAnimeDetail(animeId, pushRoute = true) {
   // Episodes List from API
   try {
     const epData = await LinimeAPI.getEpisodes(anime.id);
-    if (request !== detailRequest) return;
+    if (request !== detailRequest || router.currentRoute?.pathname !== `/anime/${animeId}`) return;
     state.currentEpisodes = epData.length ? epData : (anime.episodes || []);
   } catch {
     state.currentEpisodes = anime.episodes || [];
   }
+  if (request !== detailRequest || router.currentRoute?.pathname !== `/anime/${animeId}`) return;
   renderDetailEpisodes(state.currentEpisodes);
 
   // Show View
@@ -249,11 +250,7 @@ export function initDetailEvents() {
     document.getElementById('detail-view')?.classList.remove('active');
     document.body.style.overflow = '';
     if (state.countdownInterval) clearInterval(state.countdownInterval);
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      router.navigate('/');
-    }
+    router.returnFromDetail();
   });
 
   document.getElementById('copy-title-btn')?.addEventListener('click', () => {
@@ -363,4 +360,3 @@ export function initDetailEvents() {
 }
 
 // ==========================================
-
