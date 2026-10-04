@@ -55,12 +55,8 @@
           <form class="genre-dropdown" id="genre-dropdown" hidden aria-label="Chọn thể loại anime">
             <div class="genre-dropdown-heading"><strong>Khám phá theo thể loại</strong><button type="button"
                 id="genre-close" aria-label="Đóng bảng thể loại">✕</button></div>
-            <p>Chọn một hoặc nhiều thể loại bạn muốn xem.</p>
-            <input type="search" class="genre-search" id="genre-search" placeholder="Tìm thể loại…"
-              aria-label="Tìm thể loại" autocomplete="off">
-            <p id="genre-options-status" role="status">Đang tải thể loại…</p>
+            <p id="genre-options-status" role="status"></p>
             <div class="genre-options" id="genre-options"></div>
-            <p id="genre-search-empty" role="status" hidden>Không tìm thấy thể loại phù hợp.</p>
             <button type="button" id="genre-options-retry" class="btn-secondary" hidden>Thử lại</button>
             <div class="genre-dropdown-footer">
               <div class="genre-selection-summary"><span id="genre-selection-label" aria-live="polite">Chưa chọn thể
@@ -427,9 +423,9 @@
         </select>
 
         <select class="filter-select" id="browse-sort-select" aria-label="Sắp xếp kết quả">
-          <option value="score">Điểm đánh giá cao nhất</option>
+          <option value="year" selected>Năm mới nhất</option>
           <option value="updated">Mới cập nhật</option>
-          <option value="year">Năm mới nhất</option>
+          <option value="score">Điểm đánh giá cao nhất</option>
           <option value="title">Tên A-Z</option>
         </select>
 

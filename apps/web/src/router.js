@@ -125,6 +125,7 @@ export class Router {
       if (isHome || isMatch) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
     });
+    document.querySelector('.mobile-bottom-nav')?.classList.remove('nav-hidden');
   }
 }
 

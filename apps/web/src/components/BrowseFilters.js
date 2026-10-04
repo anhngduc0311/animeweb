@@ -4,7 +4,7 @@ const controls = [];
 export function syncBrowseFilters() {
   controls.forEach(({ select, trigger, value, items }) => {
     value.textContent = select.selectedOptions[0]?.textContent || (select.id === 'browse-genre-select' ? 'Nhiều thể loại' : 'Tất cả');
-    trigger.classList.toggle('has-value', Boolean(select.value) && select.value !== 'score');
+    trigger.classList.toggle('has-value', Boolean(select.value) && select.value !== 'year');
     items.forEach(({ option, button }) => {
       button.setAttribute('aria-pressed', String(option.selected));
     });
@@ -44,14 +44,6 @@ export function initBrowseFilters() {
     list.setAttribute('role', 'group');
     list.setAttribute('aria-label', names[index]);
     const close = () => { popup.hidden = true; trigger.setAttribute('aria-expanded', 'false'); };
-    let search;
-    if (index === 0) {
-      search = document.createElement('input');
-      search.type = 'search';
-      search.placeholder = 'Tìm thể loại…';
-      search.setAttribute('aria-label', 'Tìm trong bộ lọc thể loại');
-      popup.append(search);
-    }
     const items = [...select.options].map(option => {
       const button = document.createElement('button');
       button.type = 'button';
@@ -67,30 +59,17 @@ export function initBrowseFilters() {
       return { option, button };
     });
     popup.append(list);
-    if (search) {
-      const empty = document.createElement('p');
-      empty.textContent = 'Không tìm thấy thể loại.';
-      empty.hidden = true;
-      empty.setAttribute('role', 'status');
-      popup.append(empty);
-      const normalize = text => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'd').toLowerCase();
-      search.addEventListener('input', () => {
-        items.forEach(({ button }) => { button.hidden = !normalize(button.textContent).includes(normalize(search.value.trim())); });
-        empty.hidden = items.some(({ button }) => !button.hidden);
-      });
-    }
     trigger.addEventListener('click', () => {
       const opening = popup.hidden;
       closeAll();
       if (!opening) return;
       popup.hidden = false;
       trigger.setAttribute('aria-expanded', 'true');
-      if (search) search.focus();
-      else (items.find(({ option }) => option.selected) || items[0]).button.focus();
+      (items.find(({ option }) => option.selected) || items[0])?.button.focus();
     });
     field.addEventListener('keydown', event => {
       if (event.key === 'Escape') { close(); trigger.focus(); event.stopPropagation(); }
-      if (!popup.hidden && ['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key) && event.target !== search) {
+      if (!popup.hidden && ['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
         event.preventDefault();
         const visible = items.map(item => item.button).filter(button => !button.hidden);
         const current = visible.indexOf(document.activeElement);

@@ -37,10 +37,70 @@ export function initHeader() {
     });
   });
   document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMenu(); });
-  document.addEventListener('click', event => { if (!header.contains(event.target)) closeMenu(); });
   updateUserUI();
   initHeaderSearch();
+  initMobileBottomNav();
 }
+
+export function initMobileBottomNav() {
+  const bottomNav = document.querySelector('.mobile-bottom-nav');
+  if (!bottomNav) return;
+
+  let lastScrollY = window.scrollY || 0;
+  let ticking = false;
+  const threshold = 8;
+
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        const currentScrollY = Math.max(0, window.scrollY || 0);
+        const diff = currentScrollY - lastScrollY;
+
+        // Luôn hiển thị khi ở gần đầu trang (< 60px)
+        if (currentScrollY < 60) {
+          bottomNav.classList.remove('nav-hidden');
+        } else if (diff > threshold) {
+          // Cuộn xuống: ẩn thanh điều hướng dưới
+          bottomNav.classList.add('nav-hidden');
+        } else if (diff < -threshold) {
+          // Cuộn lên: hiện thanh điều hướng dưới
+          bottomNav.classList.remove('nav-hidden');
+        }
+
+        lastScrollY = currentScrollY;
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+}
+
+export const DEFAULT_GENRES = [
+  { name: 'Hành Động', slug: 'hanh-dong' },
+  { name: 'Phiêu Lưu', slug: 'phieu-luu' },
+  { name: 'Hài Hước', slug: 'hai-huoc' },
+  { name: 'Tình Cảm', slug: 'tinh-cam' },
+  { name: 'Tâm Lý', slug: 'tam-ly' },
+  { name: 'Khoa Học', slug: 'khoa-hoc' },
+  { name: 'Viễn Tưởng', slug: 'vien-tuong' },
+  { name: 'Kinh Dị', slug: 'kinh-di' },
+  { name: 'Bí Ẩn', slug: 'bi-an' },
+  { name: 'Học Đường', slug: 'hoc-duong' },
+  { name: 'Thể Thao', slug: 'the-thao' },
+  { name: 'Thần Thoại', slug: 'than-thoai' },
+  { name: 'Võ Thuật', slug: 'vo-thuat' },
+  { name: 'Chính Kịch', slug: 'chinh-kich' },
+  { name: 'Cổ Trang', slug: 'co-trang' },
+  { name: 'Gia Đình', slug: 'gia-dinh' },
+  { name: 'Chiến Tranh', slug: 'chien-tranh' },
+  { name: 'Hình Sự', slug: 'hinh-su' },
+  { name: 'Âm Nhạc', slug: 'am-nhac' },
+  { name: 'Trẻ Em', slug: 'tre-em' },
+  { name: 'Tài Liệu', slug: 'tai-lieu' },
+  { name: 'Kinh Điển', slug: 'kinh-dien' },
+  { name: 'Phim Ngắn', slug: 'phim-ngan' },
+  { name: 'Phim 18+', slug: 'phim-18' }
+];
 
 export function initGenreDropdown() {
   const toggle = document.getElementById('genre-toggle');
@@ -50,20 +110,8 @@ export function initGenreDropdown() {
   const retryOptions = document.getElementById('genre-options-retry');
   const apply = document.getElementById('genre-apply');
   const count = document.getElementById('genre-count');
-  const search = document.getElementById('genre-search');
   const summary = document.getElementById('genre-selection-label');
   const reset = document.getElementById('genre-reset');
-  const normalize = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'd').toLowerCase().trim();
-  const filterOptions = () => {
-    const query = normalize(search.value);
-    let visible = 0;
-    options.querySelectorAll('label').forEach(label => {
-      label.hidden = !normalize(label.textContent).includes(query);
-      if (!label.hidden) visible++;
-    });
-    document.getElementById('genre-search-empty').hidden = !options.children.length || visible > 0;
-  };
-  search.addEventListener('input', filterOptions);
   const section = document.getElementById('section-genre-results');
   const grid = document.getElementById('genre-results-grid');
   const status = document.getElementById('genre-results-status');
@@ -83,41 +131,61 @@ export function initGenreDropdown() {
     summary.textContent = size ? `Đã chọn ${size} thể loại` : 'Chưa chọn thể loại';
     reset.disabled = size === 0;
   };
+
+  function renderGenreList(genreList) {
+    if (!options || !Array.isArray(genreList) || !genreList.length) return;
+    const currentChecked = new Set(chosen().map(i => i.value));
+    options.replaceChildren();
+    genreList.forEach(genre => {
+      const label = document.createElement('label');
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.value = genre.slug;
+      input.dataset.label = genre.name;
+      if (currentChecked.has(genre.slug)) input.checked = true;
+      label.append(input, document.createTextNode(genre.name));
+      options.appendChild(label);
+    });
+    if (optionsStatus) optionsStatus.textContent = '';
+    sync();
+  }
+
   async function loadOptions() {
     if (loaded || loadingOptions) return;
     loadingOptions = true;
-    retryOptions.hidden = true;
-    optionsStatus.textContent = 'Đang tải thể loại…';
+    if (retryOptions) retryOptions.hidden = true;
     try {
       const response = await fetch('/api/genre-options');
       const result = await response.json();
       if (!response.ok || !result.success || !Array.isArray(result.data)) throw new Error();
-      options.replaceChildren();
-      result.data.forEach(genre => {
-        const label = document.createElement('label');
-        const input = document.createElement('input');
-        input.type = 'checkbox';
-        input.value = genre.slug;
-        input.dataset.label = genre.name;
-        label.append(input, document.createTextNode(genre.name));
-        options.appendChild(label);
-      });
+      renderGenreList(result.data);
       loaded = true;
-      optionsStatus.textContent = '';
-      filterOptions();
+      if (optionsStatus) optionsStatus.textContent = '';
     } catch {
-      optionsStatus.textContent = 'Không tải được thể loại.';
-      retryOptions.hidden = false;
-    } finally { loadingOptions = false; }
+      // Nếu có sẵn danh sách mặc định thì không báo lỗi đứt quãng
+      if (!options.children.length) {
+        if (optionsStatus) optionsStatus.textContent = 'Không tải được thể loại.';
+        if (retryOptions) retryOptions.hidden = false;
+      }
+    } finally {
+      loadingOptions = false;
+    }
   }
-  toggle.addEventListener('click', () => {
+
+  // Khởi tạo ngay lập tức với danh sách mặc định để không bị trễ
+  renderGenreList(DEFAULT_GENRES);
+
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
     if (!form.hidden) return close();
     form.hidden = false;
     toggle.setAttribute('aria-expanded', 'true');
-    search.focus();
     void loadOptions();
   });
   document.getElementById('genre-close').addEventListener('click', () => close(true));
+
+  // Tải ngầm danh sách mới nhất từ server
+  void loadOptions();
   sync();
   options.addEventListener('change', sync);
   retryOptions.addEventListener('click', loadOptions);

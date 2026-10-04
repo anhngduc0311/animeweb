@@ -3,7 +3,9 @@ import { router } from '../router.js';
 import { renderCard } from '../components/MovieCard.js';
 import { initBrowseFilters, syncBrowseFilters } from '../components/BrowseFilters.js';
 
-let browseGenreOptions = [];
+import { DEFAULT_GENRES } from '../components/Header.js';
+
+let browseGenreOptions = [...DEFAULT_GENRES];
 
 export async function initBrowseView() {
   const genreSelect = document.getElementById('browse-genre-select');
@@ -11,19 +13,28 @@ export async function initBrowseView() {
   const resetBtn = document.getElementById('browse-reset-btn');
   const emptyResetBtn = document.getElementById('browse-empty-reset-btn');
 
+  const renderSelectOptions = (list) => {
+    if (!genreSelect) return;
+    const currentVal = genreSelect.value;
+    genreSelect.innerHTML = '<option value="">Tất cả thể loại</option>';
+    list.forEach(g => {
+      const opt = document.createElement('option');
+      opt.value = g.slug;
+      opt.textContent = g.name;
+      genreSelect.appendChild(opt);
+    });
+    if (currentVal) genreSelect.value = currentVal;
+  };
+
+  // Render ngay danh sách mặc định
+  renderSelectOptions(browseGenreOptions);
+
   try {
     const res = await fetch('/api/genre-options');
     const json = await res.json();
     if (json.success && Array.isArray(json.data)) {
       browseGenreOptions = json.data;
-      if (genreSelect) {
-        browseGenreOptions.forEach(g => {
-          const opt = document.createElement('option');
-          opt.value = g.slug;
-          opt.textContent = g.name;
-          genreSelect.appendChild(opt);
-        });
-      }
+      renderSelectOptions(browseGenreOptions);
     }
   } catch (err) {
     console.warn('Error loading browse genre options:', err);
@@ -34,14 +45,14 @@ export async function initBrowseView() {
     const category = document.getElementById('browse-genre-select')?.value || '';
     const year = document.getElementById('browse-year-select')?.value || '';
     const status = document.getElementById('browse-status-select')?.value || '';
-    const sort = document.getElementById('browse-sort-select')?.value || 'score';
+    const sort = document.getElementById('browse-sort-select')?.value || 'year';
 
     const params = new URLSearchParams();
     if (q) params.set('q', q);
     if (category) params.set('category', category);
     if (year) params.set('year', year);
     if (status) params.set('status', status);
-    if (sort && sort !== 'score') params.set('sort', sort);
+    if (sort && sort !== 'year') params.set('sort', sort);
 
     const queryStr = params.toString();
     router.navigate(`/browse${queryStr ? '?' + queryStr : ''}`);
@@ -77,7 +88,7 @@ export async function loadBrowseView(route) {
   const category = query.category || '';
   const year = query.year || '';
   const status = query.status || '';
-  const sort = query.sort || 'score';
+  const sort = query.sort || 'year';
   const page = parseInt(query.page, 10) || 1;
 
   const searchInput = document.getElementById('browse-search-input');
@@ -160,8 +171,8 @@ export function renderBrowseChips(query) {
     const statusLabels = { ongoing: 'Đang phát sóng', completed: 'Trọn bộ' };
     activeFilters.push({ key: 'status', label: `Trạng thái: ${statusLabels[query.status] || query.status}` });
   }
-  if (query.sort && query.sort !== 'score') {
-    const sortLabels = { updated: 'Mới cập nhật', year: 'Năm mới nhất', title: 'Tên A-Z' };
+  if (query.sort && query.sort !== 'year') {
+    const sortLabels = { updated: 'Mới cập nhật', year: 'Năm mới nhất', score: 'Điểm đánh giá cao nhất', title: 'Tên A-Z' };
     activeFilters.push({ key: 'sort', label: `Sắp xếp: ${sortLabels[query.sort] || query.sort}` });
   }
 
