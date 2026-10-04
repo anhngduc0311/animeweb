@@ -513,3 +513,40 @@ button:disabled { cursor: not-allowed; opacity: .5; }
 }
 /* Passive toasts must never intercept navigation, including while faded out. */
 .toast-msg { pointer-events: none; }
+
+/* Small-screen player: let long titles define the header height. */
+@media (max-width: 768px) {
+  #player-modal { height: 100dvh; overflow-x: hidden; overflow-y: auto; overscroll-behavior-y: contain; }
+  #player-modal .player-header { height: auto; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; padding: calc(12px + env(safe-area-inset-top)) 14px 14px; gap: 8px 12px; }
+  #player-modal .player-title { grid-column: 1 / -1; grid-row: 2; display: flex; align-items: flex-start; flex-direction: column; gap: 10px; min-width: 0; }
+  #player-anime-name { max-width: 100%; width: 100%; white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; font-size: 15px; line-height: 1.55; }
+  #player-modal .player-header-actions { grid-column: 1 / -1; grid-row: 1; justify-content: flex-end; gap: 8px !important; }
+  #player-modal #close-player-btn { width: 40px; height: 40px; min-height: 40px; border-radius: 10px; }
+  #player-modal #player-source-label { font-size: 10px; padding: 5px 8px; border: 1px solid #b76e9135; background: #b76e9115; color: #e5b2cc; }
+  #player-modal .player-body { width: 100%; min-width: 0; padding: 12px 12px calc(20px + env(safe-area-inset-bottom)); gap: 0; }
+  #player-modal .video-container { width: 100%; aspect-ratio: 16 / 9; border-radius: 10px; margin: 0; }
+  #player-modal .watch-bottom-panel { margin-top: 14px; padding: 0; gap: 0; overflow: hidden; border-radius: 12px; }
+  #player-modal .watch-quick-bar { padding: 8px 12px; gap: 8px; min-height: 48px; font-size: 12px; }
+  #player-modal .quick-toggle { min-height: 36px; font-size: 12px; gap: 7px; }
+  #player-modal .quick-toggle input { width: 16px; height: 16px; }
+  #player-modal .quick-btn { min-height: 36px; padding: 7px 0 7px 8px; font-size: 12px; }
+  #player-modal .watch-nav-bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; padding: 12px; gap: 8px; border-block: 1px solid #ffffff0c; }
+  #player-modal .nav-left { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); min-width: 0; gap: 8px; }
+  #player-modal .nav-btn { min-height: 42px; padding: 9px 7px; font-size: 11px; white-space: nowrap; }
+  #player-modal .lang-btn { min-height: 42px; padding: 8px; font-size: 10px; color: #dec5d3; background: #b76e9115; border: 1px solid #b76e9130; border-radius: 8px; }
+  #player-modal .watch-servers-box { margin: 0; padding: 14px 12px; gap: 12px; border: 0; border-radius: 0; background: transparent; }
+  #player-modal .current-ep-heading { font-size: 13px; }
+  #player-modal .servers-groups { width: 100%; }
+  #player-modal .server-group { justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  #player-modal .group-label { min-width: 0; font-size: 10px; }
+  #player-modal .prov-btn { min-height: 38px; padding: 8px 14px; font-size: 12px; }
+  #player-modal .watch-episodes-shelf { width: 100%; margin-top: 14px; padding: 14px 12px; }
+  #player-modal .watch-episodes-shelf-header { align-items: baseline; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  #player-modal .watch-episodes-shelf-header h3 { font-size: 14px; }
+  #player-modal .watch-episodes-shelf-grid { max-height: 230px; }
+  #player-modal .watch-ep-button { min-height: 42px; }
+  #player-modal .custom-controls { padding: 8px; }
+  #player-modal .controls-row { gap: 4px; }
+  #player-modal .controls-left, #player-modal .controls-right { gap: 4px; }
+  #player-modal .time-display { font-size: 10px; }
+}
