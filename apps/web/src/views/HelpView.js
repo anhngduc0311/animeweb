@@ -7,12 +7,17 @@ export function loadHelpView() {
   const faqList = document.getElementById('faq-list');
   if (faqList) {
     faqList.querySelectorAll('.faq-header').forEach(header => {
+      header.setAttribute('aria-expanded', String(header.closest('.faq-item').classList.contains('open')));
       header.onclick = () => {
         const item = header.closest('.faq-item');
         if (item) {
           const isOpen = item.classList.contains('open');
-          faqList.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+          faqList.querySelectorAll('.faq-item').forEach(i => {
+            i.classList.remove('open');
+            i.querySelector('.faq-header')?.setAttribute('aria-expanded', 'false');
+          });
           if (!isOpen) item.classList.add('open');
+          header.setAttribute('aria-expanded', String(!isOpen));
         }
       };
     });

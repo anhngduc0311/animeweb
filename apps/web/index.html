@@ -11,7 +11,7 @@
   <meta property="og:description"
     content="Xem anime mới, anime thịnh hành và phim lẻ chất lượng cao miễn phí trên anidoki.">
   <meta property="og:type" content="website">
-  <meta name="theme-color" content="#0c0c0e">
+  <meta name="theme-color" content="#0b1118">
 
   <title>anidoki — Xem anime online</title>
 
@@ -24,6 +24,7 @@
 
   <link rel="stylesheet" href="/src/style.css">
   <link rel="stylesheet" href="/src/refinement.css">
+  <link rel="stylesheet" href="/src/theme.css">
 
   <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -213,11 +214,23 @@
       </div>
 
       <!-- Carousel Progress Indicators -->
-      <div class="spotlight-nav" id="spotlight-nav"></div>
+      <div class="spotlight-controls">
+        <button class="spotlight-pause" id="spotlight-pause" type="button" aria-label="Tạm dừng chuyển phim" aria-pressed="false">Ⅱ</button>
+        <div class="spotlight-nav" id="spotlight-nav"></div>
+      </div>
     </section>
 
     <!-- MAIN CATALOG CONTENT -->
     <main class="container">
+      <nav class="discover-strip" aria-label="Khám phá nhanh">
+        <div class="discover-intro"><span>THẾ GIỚI ANIME CỦA BẠN</span><strong>Hôm nay bạn muốn xem gì?</strong></div>
+        <div class="discover-options">
+          <a href="/browse?sort=updated"><span aria-hidden="true">↗</span> Mới cập nhật</a>
+          <a href="/browse?sort=score"><span aria-hidden="true">☆</span> Đánh giá cao</a>
+          <a href="/browse?status=completed"><span aria-hidden="true">✓</span> Anime trọn bộ</a>
+          <a href="/browse" class="discover-all">Khám phá tất cả <span aria-hidden="true">→</span></a>
+        </div>
+      </nav>
       <section class="home-section" id="section-genre-results" hidden aria-labelledby="genre-results-title">
         <div class="section-header">
           <div class="section-title-group">
@@ -2208,6 +2221,9 @@
         anidoki không lưu trữ bất kỳ tệp video nào trên máy chủ của mình. Tất cả nội dung được cung cấp bởi các bên thứ
         ba không liên kết. Trang web hoạt động phi thương mại nhằm phục vụ cộng đồng người yêu thích hoạt hình anime.
       </p>
+      <nav class="footer-links" aria-label="Liên kết cuối trang">
+        <a href="/browse">Khám phá</a><a href="/library">Thư viện của tôi</a><a href="/help">Trợ giúp & Góp ý</a>
+      </nav>
       <div class="footer-copy">© 2026 anidoki. Toàn bộ hình ảnh và dữ liệu bản quyền thuộc về tác giả và nhà sản xuất
         gốc.</div>
     </div>

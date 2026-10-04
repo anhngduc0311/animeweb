@@ -214,6 +214,13 @@ export function initLoginModal(callbacks = {}) {
     if (e.target === modal) modal.classList.remove('active');
   });
 
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && modal?.classList.contains('active')) {
+      modal.classList.remove('active');
+      openLoginBtn?.focus();
+    }
+  });
+
   // Bấm Đăng nhập bằng Google
   googleBtn?.addEventListener('click', async () => {
     if (!googleTokenClient && window.google?.accounts?.oauth2) {

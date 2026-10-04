@@ -3,6 +3,7 @@ import { state } from '../store/state.js';
 import { router } from '../router.js';
 import { showToast, formatTime } from '../utils/ui.js';
 import { renderCard } from '../components/MovieCard.js';
+import { refreshWatchlistCount } from '../components/Header.js';
 import { groupSeries, seriesKey, seasonNumber } from '../../../../shared/series.js';
 import { openAnimeDetail } from './DetailView.js';
 import { openPlayerByRoute } from './PlayerView.js';
@@ -40,6 +41,16 @@ export async function loadSpotlight() {
   }
   setSpotlightSlide(0);
   startSpotlightTimer();
+
+  const pause = document.getElementById('spotlight-pause');
+  pause?.addEventListener('click', () => {
+    const paused = pause.getAttribute('aria-pressed') !== 'true';
+    pause.setAttribute('aria-pressed', String(paused));
+    pause.setAttribute('aria-label', paused ? 'Tiếp tục chuyển phim' : 'Tạm dừng chuyển phim');
+    pause.textContent = paused ? '▷' : 'Ⅱ';
+    clearInterval(state.spotlightTimer);
+    if (!paused) startSpotlightTimer();
+  });
 
   // Button actions
   document.getElementById('spotlight-watch-btn')?.addEventListener('click', () => {
@@ -114,8 +125,9 @@ function setSpotlightSlide(index) {
 }
 
 function startSpotlightTimer() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || document.getElementById('spotlight-pause')?.getAttribute('aria-pressed') === 'true') return;
   state.spotlightTimer = setInterval(() => {
-    if (state.spotlights.length) {
+    if (state.spotlights.length && !document.hidden && document.getElementById('view-home')?.classList.contains('active') && !document.querySelector('.spotlight-section:hover, .spotlight-section:focus-within')) {
       setSpotlightSlide((state.spotlightIndex + 1) % state.spotlights.length);
     }
   }, 6500);
@@ -449,4 +461,3 @@ export async function loadContinueWatching() {
 
 
 // ==========================================
-
