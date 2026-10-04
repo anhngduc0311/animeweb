@@ -52,6 +52,28 @@ async function listing(params = {}) {
   const json = await kkRequest('/v1/api/danh-sach/hoat-hinh?' + query);
   return { items: (json.data?.items || []).map(mapMovie), pagination: json.data?.params?.pagination || {} };
 }
+// Paginate matching movies, not the mixed TV/movie upstream pages.
+export async function movieCatalog(page = 1, limit = 12, request = kkRequest) {
+  page = Math.min(100, Math.max(1, parseInt(page) || 1));
+  limit = Math.min(24, Math.max(1, parseInt(limit) || 12));
+  const end = page * limit;
+  const movies = new Map();
+  let upstreamPage = 1, totalPages = 1;
+  do {
+    const query = new URLSearchParams({ country: 'nhat-ban', limit: '64', page: String(upstreamPage) });
+    const json = await request('/v1/api/danh-sach/hoat-hinh?' + query);
+    const items = json.data?.items;
+    if (!Array.isArray(items)) throw new Error('Danh sách phim không hợp lệ');
+    totalPages = Number(json.data?.params?.pagination?.totalPages) || upstreamPage;
+    for (const item of items) {
+      const movie = mapMovie(item);
+      if (movie.isMovie && slugOK(movie.id)) movies.set(movie.id, movie);
+    }
+    upstreamPage++;
+  } while (movies.size <= end && upstreamPage <= totalPages);
+  const all = [...movies.values()];
+  return { data: all.slice((page - 1) * limit, end), pagination: { page, limit, hasMore: all.length > end } };
+}
 export const router = express.Router();
 const route = (method, path, fn) => router[method](path, async (req,res) => {
   try { await fn(req,res); } catch (err) { console.warn('KKPhim:', err.message); res.status(502).json({ success:false, message:'Không tải được dữ liệu KKPhim. Hãy thử lại.' }); }
@@ -70,7 +92,10 @@ route('get','/catalog', async (req,res) => {
   res.json({success:true,data:result.items,pagination:result.pagination});
 });
 route('get','/anime/seasonal', async (req,res) => send(res,(await listing({year: new Intl.DateTimeFormat('en',{year:'numeric',timeZone:'Asia/Bangkok'}).format(new Date())})).items));
-route('get','/anime/movies', async (req,res) => send(res,(await listing({limit:'64'})).items.filter(m=>m.isMovie)));
+route('get','/anime/movies', async (req,res) => {
+  const result = await movieCatalog(req.query.page, req.query.limit);
+  res.json({ success: true, ...result, total: result.data.length });
+});
 route('get','/anime/genres', async (req,res) => {
   const [action,romance] = await Promise.all([listing({category:'hanh-dong',limit:'8'}),listing({category:'tinh-cam',limit:'8'})]);
   send(res,{Action:action.items,Romance:romance.items});

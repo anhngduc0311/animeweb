@@ -10,6 +10,8 @@
   --detail-sidebar: 240px;
 }
 body { background: var(--bg-primary); }
+.movies-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; margin-top: 24px; }
+.movies-controls button[hidden] { display: none; }
 ::selection { background: #f2f0e9; color: #171719; }
 :focus-visible { outline: 2px solid var(--accent-brand); outline-offset: 5px; }
 .container { max-width: 1440px; padding-inline: 48px; }

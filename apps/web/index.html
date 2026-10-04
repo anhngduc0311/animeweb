@@ -28,7 +28,7 @@
     <div class="container header-inner">
       <!-- Brand -->
       <a href="#" class="brand" id="brand-link" aria-label="anidoki — Trang chủ">
-        <img class="brand-logo" src="/brand/anidoki-white.svg?v=3" alt="anidoki" width="1680" height="358">
+        <img class="brand-logo" src="/brand/anidoki-white.svg?v=6" alt="anidoki" width="1616" height="358">
       </a>
 
       <!-- Navigation Links -->
@@ -228,11 +228,14 @@
       <div class="section-header">
         <div class="section-title-group">
           <h2 class="section-title">Phim lẻ điện ảnh</h2>
-          <span class="section-subtitle">Anime Movie chất lượng rạp chiếu phim</span>
+          <span class="section-subtitle">Khám phá anime điện ảnh mới cập nhật</span>
         </div>
-        <a href="#section-movies" class="section-link">Xem tất cả →</a>
       </div>
       <div class="anime-grid" id="movies-grid"></div>
+      <div class="movies-controls">
+        <p class="section-subtitle" id="movies-status" role="status" aria-live="polite"></p>
+        <button class="btn-secondary" id="load-more-movies" type="button" hidden>Xem thêm phim lẻ</button>
+      </div>
     </section>
   </main>
 
@@ -586,7 +589,7 @@
   <div class="login-modal" id="login-modal">
     <div class="login-card">
       <button class="detail-close-btn" id="close-login-btn" style="position: absolute; top: 16px; right: 16px; width: 36px; height: 36px;">✕</button>
-      <img class="brand-logo login-logo" src="/brand/anidoki-white.svg?v=3" alt="anidoki" width="1680" height="358">
+      <img class="brand-logo login-logo" src="/brand/anidoki-white.svg?v=6" alt="anidoki" width="1616" height="358">
       <h2>Chào mừng đến anidoki</h2>
       <p>Lưu tiến trình xem, đồng bộ danh sách yêu thích và nhận thông báo khi có tập mới.</p>
       <button class="oauth-btn" id="google-login-btn">
@@ -610,7 +613,7 @@
   <footer class="site-footer">
     <div class="container footer-content">
       <div class="brand">
-        <img class="brand-logo" src="/brand/anidoki-white.svg?v=3" alt="anidoki" width="1680" height="358">
+        <img class="brand-logo" src="/brand/anidoki-white.svg?v=6" alt="anidoki" width="1616" height="358">
       </div>
       <p class="footer-disclaimer">
         anidoki không lưu trữ bất kỳ tệp video nào trên máy chủ của mình. Tất cả nội dung được cung cấp bởi các bên thứ ba không liên kết. Trang web hoạt động phi thương mại nhằm phục vụ cộng đồng người yêu thích hoạt hình anime.
@@ -622,4 +625,5 @@
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>
+
 

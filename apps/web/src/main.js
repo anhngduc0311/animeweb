@@ -248,25 +248,22 @@ function renderCard(anime) {
 
 async function loadCatalogs() {
   try {
-    const [trending, recent, seasonal, movies, genres] = await Promise.all([
+    const [trending, recent, seasonal, genres] = await Promise.all([
       LinimeAPI.getTrending(12),
       LinimeAPI.getRecentlyUpdated(12),
       LinimeAPI.getSeasonal(),
-      LinimeAPI.getMovies(),
       LinimeAPI.getGenres()
     ]);
 
     state.trending = trending.length ? trending : INITIAL_ANIME_DATA.filter(a => a.isTrending);
     state.recent = recent.length ? recent : INITIAL_ANIME_DATA;
     state.seasonal = seasonal.length ? seasonal : INITIAL_ANIME_DATA.filter(a => a.status === 'Currently Airing');
-    state.movies = movies.length ? movies : INITIAL_ANIME_DATA.filter(a => a.format === 'MOVIE');
     state.genres = genres;
   } catch (err) {
     console.error('Error loading catalogs from API:', err);
     state.trending = INITIAL_ANIME_DATA.filter(a => a.isTrending);
     state.recent = INITIAL_ANIME_DATA;
     state.seasonal = INITIAL_ANIME_DATA.filter(a => a.status === 'Currently Airing');
-    state.movies = INITIAL_ANIME_DATA.filter(a => a.format === 'MOVIE');
   }
 
   // Trending Grid
@@ -284,12 +281,7 @@ async function loadCatalogs() {
   seasonalGrid.innerHTML = '';
   state.seasonal.forEach(anime => seasonalGrid.appendChild(renderCard(anime)));
 
-  // Movies Grid
-  const moviesGrid = document.getElementById('movies-grid');
-  moviesGrid.innerHTML = '';
-  state.movies.forEach(anime => moviesGrid.appendChild(renderCard(anime)));
-
-  for (const id of ['trending-grid','recent-grid','seasonal-grid','movies-grid']) {
+  for (const id of ['trending-grid','recent-grid','seasonal-grid']) {
     const grid = document.getElementById(id);
     if (!grid.children.length) grid.textContent = 'Chưa có dữ liệu phù hợp từ KKPhim.';
   }
@@ -311,6 +303,41 @@ async function loadCatalogs() {
   });
   renderGenreRails();
   await loadContinueWatching();
+}
+
+function initMovies() {
+  const grid = document.getElementById('movies-grid');
+  const button = document.getElementById('load-more-movies');
+  const status = document.getElementById('movies-status');
+  let page = 0, loading = false;
+  async function load() {
+    if (loading) return;
+    loading = true;
+    button.disabled = true;
+    grid.setAttribute('aria-busy', 'true');
+    status.textContent = 'Đang tải phim lẻ…';
+    try {
+      const result = await LinimeAPI.getMovies(page + 1);
+      const existing = new Set(state.movies.map(movie => movie.id));
+      const movies = result.data.filter(movie => !existing.has(movie.id));
+      movies.forEach(movie => grid.appendChild(renderCard(movie)));
+      state.movies.push(...movies);
+      page++;
+      status.textContent = state.movies.length ? `Đã hiển thị ${state.movies.length} phim lẻ.` : 'Chưa có phim lẻ. Hãy quay lại sau.';
+      button.hidden = !result.pagination?.hasMore;
+      button.textContent = 'Xem thêm phim lẻ';
+    } catch {
+      status.textContent = 'Không tải được phim lẻ. Vui lòng thử lại.';
+      button.hidden = false;
+      button.textContent = 'Thử lại';
+    } finally {
+      loading = false;
+      button.disabled = false;
+      grid.setAttribute('aria-busy', 'false');
+    }
+  }
+  button.addEventListener('click', load);
+  void load();
 }
 
 function renderGenreRails() {
@@ -1041,6 +1068,7 @@ function initLoginModal() {
 // STARTUP BOOTSTRAP
 // ==========================================
 document.addEventListener('DOMContentLoaded', async () => {
+  initMovies();
   initHeader();
   await refreshWatchlistCount();
   await loadSpotlight();

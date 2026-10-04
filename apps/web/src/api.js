@@ -47,15 +47,12 @@ export const LinimeAPI = {
     }
   },
 
-  async getMovies() {
-    try {
-      const res = await fetch(`${API_BASE}/anime/movies`);
-      const data = await res.json();
-      return data.success ? data.data : [];
-    } catch (err) {
-      console.error('getMovies error:', err);
-      return [];
-    }
+  async getMovies(page = 1, limit = 12) {
+    const params = new URLSearchParams({ page, limit });
+    const res = await fetch(`${API_BASE}/anime/movies?${params}`);
+    const data = await res.json();
+    if (!res.ok || !data.success || !Array.isArray(data.data)) throw new Error('Không tải được phim lẻ');
+    return data;
   },
 
   async getGenres() {
