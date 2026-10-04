@@ -10,6 +10,7 @@
   --detail-sidebar: 240px;
 }
 body { background: var(--bg-primary); }
+#load-more-trending[hidden], #view-all-trending[hidden] { display: none; }
 .detail-seasons { margin: 24px 0; padding: 18px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 14px; }
 .detail-seasons[hidden] { display: none; }
 .detail-seasons h3 { font-size: 14px; color: var(--text-primary); }

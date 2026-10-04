@@ -252,13 +252,14 @@ function renderCard(anime) {
 async function loadCatalogs() {
   try {
     const [trending, recent, seasonal, genres] = await Promise.all([
-      LinimeAPI.getTrending(24),
+      LinimeAPI.getTrendingCatalog().catch(() => null),
       LinimeAPI.getRecentlyUpdated(24),
       LinimeAPI.getSeasonal(),
       LinimeAPI.getGenres()
     ]);
 
-    state.trending = trending.length ? trending : INITIAL_ANIME_DATA.filter(a => a.isTrending);
+    state.trending = trending?.data || [];
+    state.trendingPagination = trending?.pagination || { page: 0, hasMore: true };
     state.recent = recent.length ? recent : INITIAL_ANIME_DATA;
     state.seasonal = seasonal.length ? seasonal : INITIAL_ANIME_DATA.filter(a => a.status === 'Currently Airing');
     state.genres = genres;
@@ -279,10 +280,14 @@ async function loadCatalogs() {
   recentGrid.innerHTML = '';
   groupSeries(state.recent).slice(0, 12).forEach(anime => recentGrid.appendChild(renderCard(anime)));
 
-  // Seasonal Grid (2 hàng x 6 ô = 12 ô)
+  // Seasonal Grid (Anime Tâm lý & Tình cảm: sắp xếp năm mới nhất trước, 2 hàng x 6 ô = 12 ô)
   const seasonalGrid = document.getElementById('seasonal-grid');
-  seasonalGrid.innerHTML = '';
-  groupSeries(state.seasonal).slice(0, 12).forEach(anime => seasonalGrid.appendChild(renderCard(anime)));
+  const renderSortedSeasonalGrid = (all = false) => {
+    seasonalGrid.innerHTML = '';
+    const sorted = groupSeries(state.seasonal).sort((a, b) => (Number(b.year) || 0) - (Number(a.year) || 0));
+    (all ? sorted : sorted.slice(0, 12)).forEach(anime => seasonalGrid.appendChild(renderCard(anime)));
+  };
+  renderSortedSeasonalGrid(false);
 
   for (const id of ['trending-grid','recent-grid','seasonal-grid']) {
     const grid = document.getElementById(id);
@@ -290,14 +295,41 @@ async function loadCatalogs() {
   }
   // 1. Trending controls
   const viewAllTrending = document.getElementById('view-all-trending');
-  viewAllTrending?.addEventListener('click', () => {
-    trendingGrid.innerHTML = '';
-    groupSeries(state.trending).forEach(anime => trendingGrid.appendChild(renderCard(anime)));
-    viewAllTrending.textContent = 'Đang hiển thị tất cả';
-    viewAllTrending.disabled = true;
-    viewAllTrending.style.opacity = '0.6';
-    showToast(`Đã mở rộng hiển thị ${trendingGrid.children.length} anime.`);
-  });
+  const moreTrending = document.getElementById('load-more-trending');
+  let trendingLoading = false;
+  const updateTrendingControls = () => {
+    const hasMore = state.trendingPagination?.hasMore ?? true;
+    moreTrending.hidden = !hasMore;
+    viewAllTrending.hidden = !hasMore;
+  };
+  updateTrendingControls();
+  const loadMoreTrending = async () => {
+    if (trendingLoading || state.trendingPagination?.hasMore === false) return;
+    trendingLoading = true;
+    moreTrending.disabled = viewAllTrending.disabled = true;
+    moreTrending.textContent = 'Đang tải…';
+    trendingGrid.setAttribute('aria-busy', 'true');
+    try {
+      const result = await LinimeAPI.getTrendingCatalog((state.trendingPagination?.page || 0) + 1);
+      const existing = new Set(state.trending.map(seriesKey));
+      const added = result.data.filter(item => !existing.has(seriesKey(item)));
+      if (!state.trending.length && added.length) trendingGrid.replaceChildren();
+      added.forEach(item => trendingGrid.appendChild(renderCard(item)));
+      state.trending.push(...added);
+      state.trendingPagination = result.pagination;
+      updateTrendingControls();
+      showToast(added.length ? `Đã tải thêm ${added.length} anime từ 7 sao trở lên.` : 'Đã hiển thị hết phim thịnh hành.');
+    } catch {
+      showToast('Không tải được thêm phim thịnh hành. Hãy thử lại.');
+    } finally {
+      trendingLoading = false;
+      moreTrending.disabled = viewAllTrending.disabled = false;
+      moreTrending.textContent = 'Xem thêm anime';
+      trendingGrid.setAttribute('aria-busy', 'false');
+    }
+  };
+  moreTrending.addEventListener('click', loadMoreTrending);
+  viewAllTrending.addEventListener('click', loadMoreTrending);
 
   // 2. Recent controls
   const viewAllRecent = document.getElementById('view-all-recent');
@@ -332,7 +364,7 @@ async function loadCatalogs() {
     void loadMoreRecent();
   });
 
-  // 3. Seasonal (Tâm lý & Tình cảm) controls
+  // 3. Seasonal (Tâm lý & Tình cảm) controls - Luôn ưu tiên năm mới nhất trước
   const viewAllSeasonal = document.getElementById('view-all-seasonal');
   const loadMoreSeasonal = document.getElementById('load-more-seasonal');
   let seasonalPage = 1;
@@ -349,13 +381,7 @@ async function loadCatalogs() {
       }
       seasonalPage++;
       state.seasonal.push(...moreItems);
-      const groups = groupSeries(state.seasonal);
-      const existing = new Map([...seasonalGrid.children].map(card => [card.dataset.seriesKey, card]));
-      for (const anime of groups) {
-        const card = existing.get(seriesKey(anime));
-        if (!card) seasonalGrid.appendChild(renderCard(anime));
-        else card.querySelector('.anime-card-sub').textContent = `${anime.studio} · ${anime.year}${anime.seasons.length > 1 ? ` · ${anime.seasons.length} mùa` : ''}`;
-      }
+      renderSortedSeasonalGrid(true);
       showToast(`Đã tải thêm phim. Tổng cộng: ${seasonalGrid.children.length} anime.`);
     } catch {
       showToast('Không tải được thêm phim tâm lý & tình cảm.');
@@ -366,8 +392,7 @@ async function loadCatalogs() {
   };
   loadMoreSeasonal?.addEventListener('click', loadMoreSeasonalFn);
   viewAllSeasonal?.addEventListener('click', () => {
-    seasonalGrid.innerHTML = '';
-    groupSeries(state.seasonal).forEach(anime => seasonalGrid.appendChild(renderCard(anime)));
+    renderSortedSeasonalGrid(true);
     void loadMoreSeasonalFn();
   });
   renderGenreRails();

@@ -25,6 +25,14 @@ export const LinimeAPI = {
     }
   },
 
+  async getTrendingCatalog(page = 1, limit = 12) {
+    const params = new URLSearchParams({ page, limit });
+    const res = await fetch(`${API_BASE}/anime/trending?${params}`);
+    const data = await res.json();
+    if (!res.ok || !data.success || !Array.isArray(data.data)) throw new Error('Không tải được phim thịnh hành');
+    return data;
+  },
+
   async getRecentlyUpdated(limit = 12) {
     try {
       const res = await fetch(`${API_BASE}/anime/recently-updated?limit=${limit}`);

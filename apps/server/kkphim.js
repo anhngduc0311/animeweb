@@ -1,6 +1,6 @@
 import express from 'express';
 import { pool } from './db/db.js';
-import { seriesKey, seriesTitle, seasonNumber } from '../../shared/series.js';
+import { seriesKey, seriesTitle, seasonNumber, groupSeries } from '../../shared/series.js';
 const cache = new Map(), pending = new Map();
 export async function kkRequest(path) {
   const hit = cache.get(path);
@@ -28,6 +28,7 @@ export function mapMovie(m) {
   return { id: m.slug, title: { english: m.origin_name || m.name, vietnamese: m.name, romaji: m.origin_name || m.name },
     seriesId: !movie && m.tmdb?.type === 'tv' ? m.tmdb.id || null : null,
     seasonNumber: !movie ? Number(m.tmdb?.season) || null : null,
+    updatedAt: m.modified?.time || null,
     logo: /^tt\d+$/.test(m.imdb?.id || '') ? 'https://images.metahub.space/logo/medium/' + m.imdb.id + '/img' : null,
     coverImage: image(m.poster_url), bannerImage: image(m.thumb_url),
     score: Number(m.imdb?.vote_average || m.tmdb?.vote_average || 0), studio: 'KKPhim',
@@ -74,6 +75,41 @@ async function listing(params = {}) {
   const json = await kkRequest('/v1/api/danh-sach/hoat-hinh?' + query);
   return { items: (json.data?.items || []).map(mapMovie), pagination: json.data?.params?.pagination || {} };
 }
+export function selectSpotlights(items) {
+  const updated = item => Date.parse(item.updatedAt) || 0;
+  // Use the newest entry of each series from the recent catalog, then rank it.
+  const latest = [...items].sort((a, b) => updated(b) - updated(a));
+  return groupSeries(latest)
+    .filter(item => Number.isFinite(item.score) && item.score > 0)
+    .sort((a, b) => b.score - a.score || updated(b) - updated(a))
+    .slice(0, 7);
+}
+export function selectTrending(items) {
+  return groupSeries(items).filter(item => Number.isFinite(item.score) && item.score >= 7);
+}
+export async function trendingCatalog(page = 1, limit = 12, request = kkRequest) {
+  page = Math.min(100, Math.max(1, parseInt(page) || 1));
+  limit = Math.min(24, Math.max(1, parseInt(limit) || 12));
+  const end = page * limit;
+  const series = new Map();
+  let upstreamPage = 1, totalPages = 1;
+  let eligible = [];
+  do {
+    const query = new URLSearchParams({ country: 'nhat-ban', limit: '64', page: String(upstreamPage) });
+    const json = await request('/v1/api/danh-sach/hoat-hinh?' + query);
+    if (!Array.isArray(json.data?.items)) throw new Error('Danh sách thịnh hành không hợp lệ');
+    totalPages = Number(json.data.params?.pagination?.totalPages) || upstreamPage;
+    for (const raw of json.data.items) {
+      const item = mapMovie(raw);
+      const key = seriesKey(item);
+      // The first entry is the latest update, even when it fails the rating filter.
+      if (slugOK(item.id) && !series.has(key)) series.set(key, item);
+    }
+    eligible = selectTrending([...series.values()]);
+    upstreamPage++;
+  } while (eligible.length <= end && upstreamPage <= totalPages);
+  return { data: eligible.slice((page - 1) * limit, end), pagination: { page, limit, hasMore: eligible.length > end } };
+}
 // Paginate matching movies, not the mixed TV/movie upstream pages.
 export async function movieCatalog(page = 1, limit = 12, request = kkRequest) {
   page = Math.min(100, Math.max(1, parseInt(page) || 1));
@@ -102,11 +138,17 @@ const route = (method, path, fn) => router[method](path, async (req,res) => {
 });
 const send = (res, data) => res.json({ success:true, data, total: Array.isArray(data) ? data.length : undefined });
 route('get','/anime/spotlight', async (req,res) => {
-  const {items} = await listing();
-  const details = await Promise.allSettled(items.slice(0,4).map(m => movieDetail(m.id)));
-  send(res, details.map((r,i) => r.status === 'fulfilled' ? r.value : items[i]));
+  const {items} = await listing({limit:'36'});
+  const selected = selectSpotlights(items);
+  const details = await Promise.allSettled(selected.map(m => movieDetail(m.id)));
+  send(res, details.map((r,i) => r.status === 'fulfilled'
+    ? { ...r.value, score: selected[i].score, updatedAt: selected[i].updatedAt }
+    : selected[i]));
 });
-route('get','/anime/trending', async (req,res) => send(res,(await listing({limit:'36'})).items));
+route('get','/anime/trending', async (req,res) => {
+  const result = await trendingCatalog(req.query.page, req.query.limit);
+  res.json({ success: true, ...result, total: result.data.length });
+});
 route('get','/anime/recently-updated', async (req,res) => send(res,(await listing({limit:'36'})).items));
 route('get','/catalog', async (req,res) => {
   const page = Math.min(1000,Math.max(1,parseInt(req.query.page) || 1));
@@ -127,6 +169,7 @@ route('get','/anime/seasonal', async (req,res) => {
       items.push(item);
     }
   }
+  items.sort((a, b) => (Number(b.year) || 0) - (Number(a.year) || 0));
   const totalPages = Math.max(
     Number(psychological.pagination?.totalPages) || 1,
     Number(romance.pagination?.totalPages) || 1
