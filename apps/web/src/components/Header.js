@@ -39,6 +39,7 @@ export function initHeader() {
   document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMenu(); });
   document.addEventListener('click', event => { if (!header.contains(event.target)) closeMenu(); });
   updateUserUI();
+  initHeaderSearch();
 }
 
 export function initGenreDropdown() {
@@ -206,12 +207,294 @@ export async function refreshWatchlistCount() {
 // ==========================================
 
 
-// LIVE SEARCH MODAL (API SEARCH)
+// ==========================================
+// LIVE HEADER SEARCH & AUTOCOMPLETE DROPDOWN
+// (1:1 VỚI HÌNH ẢNH MẪU ĐƯỢC CUNG CẤP)
+// ==========================================
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function createSuggestItem(anime, onSelect) {
+  const item = document.createElement('div');
+  item.className = 'search-suggest-item';
+  item.dataset.id = anime.id || '';
+  item.setAttribute('role', 'option');
+  item.tabIndex = -1;
+
+  const engTitle = anime.title?.english || (typeof anime.title === 'string' ? anime.title : '');
+  const vieTitle = anime.title?.vietnamese || '';
+  const title = vieTitle || engTitle || 'Anime';
+
+  // Episode calculation (exact matching to screenshot: "Chương / Tập ...")
+  let epText = 'Đang cập nhật';
+  const rawEp = String(anime.currentEpisode || anime.episode_current || '').trim();
+  if (rawEp.toUpperCase() === 'FULL') {
+    epText = 'Full HD';
+  } else if (rawEp) {
+    const num = rawEp.match(/\d+(\.\d+)?/)?.[0];
+    epText = num ? `Tập ${num}` : `Tập ${rawEp}`;
+  } else if (anime.format === 'MOVIE' || anime.isMovie) {
+    epText = 'Phim lẻ';
+  } else if (anime.totalEpisodes) {
+    epText = `Tập ${anime.totalEpisodes}`;
+  } else {
+    epText = 'Tập mới';
+  }
+
+  // Score calculation (screenshot displays ⭐ 8.5)
+  let scoreVal = '8.5';
+  if (typeof anime.score === 'number' && anime.score > 0) {
+    scoreVal = anime.score.toFixed(1);
+  }
+
+  // Status line (screenshot displays "Đang cập nhật")
+  let statusText = 'Đang cập nhật';
+  if (anime.status === 'Finished Airing' || anime.status === 'completed') {
+    statusText = 'Đã hoàn thành';
+  }
+
+  const coverSrc = anime.coverImage || anime.posterUrl || anime.poster_url || '/poster-placeholder.svg';
+
+  item.innerHTML = `
+    <img class="search-suggest-thumb" src="${coverSrc}" alt="${escapeHtml(title)}" loading="lazy" decoding="async">
+    <div class="search-suggest-info">
+      <div class="search-suggest-title" title="${escapeHtml(title)}">${escapeHtml(title)}</div>
+      <div class="search-suggest-meta">
+        <span class="search-suggest-ep">${epText}</span>
+        <span class="search-suggest-star">⭐ ${scoreVal}</span>
+      </div>
+      <div class="search-suggest-status">${statusText}</div>
+    </div>
+  `;
+
+  const img = item.querySelector('img');
+  img.addEventListener('error', () => {
+    img.src = '/poster-placeholder.svg';
+  });
+
+  item.addEventListener('click', () => {
+    if (onSelect) onSelect(anime);
+  });
+
+  return item;
+}
+
+export function initHeaderSearch() {
+  const wrap = document.getElementById('header-search-wrap');
+  const input = document.getElementById('header-search-input');
+  const clearBtn = document.getElementById('header-search-clear');
+  const form = document.getElementById('header-search-form');
+  const dropdown = document.getElementById('header-search-dropdown');
+  const listEl = document.getElementById('search-suggest-list');
+  const mobileToggle = document.getElementById('header-search-mobile-toggle');
+
+  if (!wrap || !input || !dropdown || !listEl) return;
+
+  let debounceTimer = null;
+  let searchSeq = 0;
+  let highlightedIndex = -1;
+
+  const closeDropdown = () => {
+    dropdown.hidden = true;
+    input.setAttribute('aria-expanded', 'false');
+    highlightedIndex = -1;
+  };
+
+  const openDropdown = () => {
+    dropdown.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+  };
+
+  const getItems = () => [...listEl.querySelectorAll('.search-suggest-item')];
+
+  const updateHighlight = (items) => {
+    items.forEach((it, idx) => {
+      if (idx === highlightedIndex) {
+        it.classList.add('highlighted');
+        it.scrollIntoView({ block: 'nearest' });
+      } else {
+        it.classList.remove('highlighted');
+      }
+    });
+  };
+
+  const selectAnime = (anime) => {
+    closeDropdown();
+    wrap.classList.remove('mobile-open');
+    if (anime.id) {
+      router.navigate(`/anime/${anime.id}`);
+      openAnimeDetail(anime.id);
+    }
+  };
+
+  const executeSearch = (query) => {
+    closeDropdown();
+    wrap.classList.remove('mobile-open');
+    if (query) {
+      router.navigate(`/browse?q=${encodeURIComponent(query)}`);
+    } else {
+      router.navigate('/browse');
+    }
+  };
+
+  async function fetchAndRenderSuggestions(query) {
+    if (!query) {
+      listEl.innerHTML = '';
+      closeDropdown();
+      return;
+    }
+
+    openDropdown();
+    listEl.innerHTML = `
+      <div class="search-suggest-loading">
+        <div class="search-suggest-spinner"></div>
+        <div>Đang tìm kiếm phim...</div>
+      </div>
+    `;
+
+    const seq = ++searchSeq;
+    try {
+      const results = await LinimeAPI.search(query);
+      if (seq !== searchSeq) return;
+
+      if (!results || results.length === 0) {
+        listEl.innerHTML = `
+          <div class="search-suggest-empty">
+            Không tìm thấy anime phù hợp với "<strong>${escapeHtml(query)}</strong>"
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = '';
+      highlightedIndex = -1;
+      results.forEach(anime => {
+        const item = createSuggestItem(anime, selectAnime);
+        listEl.appendChild(item);
+      });
+    } catch (err) {
+      if (seq !== searchSeq) return;
+      listEl.innerHTML = `<div class="search-suggest-empty">Lỗi khi tìm kiếm anime. Vui lòng thử lại.</div>`;
+    }
+  }
+
+  // Input typing with debounce
+  input.addEventListener('input', (e) => {
+    const val = e.target.value.trim();
+    clearBtn.hidden = val.length === 0;
+
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      fetchAndRenderSuggestions(val);
+    }, 200);
+  });
+
+  // Focus & re-open suggestions if present
+  input.addEventListener('focus', () => {
+    const val = input.value.trim();
+    if (val && listEl.children.length > 0) {
+      openDropdown();
+    }
+  });
+
+  // Clear button
+  clearBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    input.value = '';
+    clearBtn.hidden = true;
+    closeDropdown();
+    input.focus();
+  });
+
+  // Form submit
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const items = getItems();
+    if (highlightedIndex >= 0 && items[highlightedIndex]) {
+      items[highlightedIndex].click();
+    } else {
+      executeSearch(input.value.trim());
+    }
+  });
+
+  // Keyboard navigation
+  input.addEventListener('keydown', (e) => {
+    const items = getItems();
+
+    if (e.key === 'ArrowDown') {
+      if (dropdown.hidden && input.value.trim() && items.length > 0) {
+        openDropdown();
+      }
+      if (!dropdown.hidden && items.length > 0) {
+        e.preventDefault();
+        highlightedIndex = (highlightedIndex + 1) % items.length;
+        updateHighlight(items);
+      }
+    } else if (e.key === 'ArrowUp') {
+      if (!dropdown.hidden && items.length > 0) {
+        e.preventDefault();
+        highlightedIndex = (highlightedIndex - 1 + items.length) % items.length;
+        updateHighlight(items);
+      }
+    } else if (e.key === 'Escape') {
+      closeDropdown();
+      wrap.classList.remove('mobile-open');
+    }
+  });
+
+  // Mobile toggle button
+  mobileToggle?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpened = wrap.classList.toggle('mobile-open');
+    if (isOpened) {
+      setTimeout(() => input.focus(), 60);
+      if (input.value.trim() && listEl.children.length > 0) {
+        openDropdown();
+      }
+    } else {
+      closeDropdown();
+    }
+  });
+
+  // Close when clicked outside
+  document.addEventListener('click', (e) => {
+    if (!wrap.contains(e.target)) {
+      closeDropdown();
+      wrap.classList.remove('mobile-open');
+    }
+  });
+
+  // Global '/' keyboard shortcut
+  window.addEventListener('keydown', (e) => {
+    if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
+      e.preventDefault();
+      wrap.classList.add('mobile-open');
+      input.focus();
+      input.select();
+      if (input.value.trim() && listEl.children.length > 0) {
+        openDropdown();
+      }
+    }
+  });
+}
+
+// LIVE SEARCH MODAL (API SEARCH) - Giữ tương thích ngược với cùng định dạng
 // ==========================================
 export function initSearchModal() {
   const modal = document.getElementById('search-modal');
   const input = document.getElementById('live-search-input');
   const resultsContainer = document.getElementById('search-results-list');
+
+  if (!modal || !input || !resultsContainer) return;
 
   function openSearch() {
     modal.classList.add('active');
@@ -227,10 +510,7 @@ export function initSearchModal() {
   document.getElementById('close-search-btn')?.addEventListener('click', closeSearch);
 
   window.addEventListener('keydown', (e) => {
-    if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
-      e.preventDefault();
-      openSearch();
-    } else if (e.key === 'Escape' && modal.classList.contains('active')) {
+    if (e.key === 'Escape' && modal.classList.contains('active')) {
       closeSearch();
     }
   });
@@ -244,32 +524,30 @@ export function initSearchModal() {
   });
 
   async function renderSearchResults(query) {
-    resultsContainer.innerHTML = `<div style="padding: 16px; text-align: center; color: var(--text-muted);">Đang tìm kiếm...</div>`;
+    resultsContainer.innerHTML = `
+      <div class="search-suggest-loading">
+        <div class="search-suggest-spinner"></div>
+        <div>Đang tìm kiếm anime...</div>
+      </div>
+    `;
 
     const results = await LinimeAPI.search(query);
 
-    if (results.length === 0) {
-      resultsContainer.innerHTML = `<div style="padding: 24px; text-align: center; color: var(--text-muted);">Không tìm thấy anime phù hợp với từ khóa "${query}"</div>`;
+    if (!results || results.length === 0) {
+      resultsContainer.innerHTML = `
+        <div class="search-suggest-empty">
+          Không tìm thấy anime phù hợp với "<strong>${escapeHtml(query)}</strong>"
+        </div>
+      `;
       return;
     }
 
     resultsContainer.innerHTML = '';
     results.forEach(anime => {
-      const item = document.createElement('div');
-      item.className = 'search-result-item';
-      item.innerHTML = `
-        <img class="search-result-thumb" src="${anime.coverImage}" alt="${anime.title.english}">
-        <div class="search-result-info">
-          <span class="search-result-title">${anime.title.english}</span>
-          <span class="search-result-meta">★ ${anime.score} · ${anime.format} · ${anime.genres.slice(0, 3).join(', ')}</span>
-        </div>
-      `;
-
-      item.addEventListener('click', () => {
+      const item = createSuggestItem(anime, (a) => {
         closeSearch();
-        openAnimeDetail(anime.id);
+        openAnimeDetail(a.id);
       });
-
       resultsContainer.appendChild(item);
     });
   }

@@ -5,6 +5,7 @@ import { ConfigModel } from '../models/config.model.js';
 import { nguoncDetail, searchNguonc } from './nguonc.service.js';
 import { normalizeProviderAnime } from '../../../shared/providers.js';
 import { remember, cacheKey } from './cache.service.js';
+import { searchMeili, indexNguoncSearch } from './meilisearch.service.js';
 
 const cache = new Map();
 const pending = new Map();
@@ -294,12 +295,20 @@ export async function browseCatalog(params = {}) {
   if (year) query.year = year;
   const path = keyword ? '/v1/api/tim-kiem' : '/v1/api/danh-sach/hoat-hinh';
   if (keyword) query.keyword = keyword;
-  const results = await Promise.allSettled([
-    loadBrowseEntries(path, query),
-    keyword ? remember('nguonc-search:' + cacheKey(keyword), () => searchNguonc(keyword)) : Promise.resolve([])
-  ]);
-  if (results[0].status === 'rejected' && (!keyword || results[1].status === 'rejected')) throw new Error('Không tải được danh sách phim');
-  let items = [...(results[0].value || []), ...(results[1].value || [])];
+  const discoverNguonc = () => remember('nguonc-search:' + cacheKey(keyword), () => searchNguonc(keyword));
+  let items = keyword ? await searchMeili(keyword) : null;
+  if (!items?.length) {
+    const results = await Promise.allSettled([
+      loadBrowseEntries(path, query),
+      keyword ? discoverNguonc() : Promise.resolve([])
+    ]);
+    if (results[0].status === 'rejected' && (!keyword || results[1].status === 'rejected')) throw new Error('Không tải được danh sách phim');
+    items = [...(results[0].value || []), ...(results[1].value || [])];
+    if (keyword && results[1].value?.length) void indexNguoncSearch(results[1].value).catch(() => {});
+  } else {
+    // Discover supplemental sources in the background, without delaying hits.
+    void discoverNguonc().then(indexNguoncSearch).catch(() => {});
+  }
   items = items.filter(m => !hiddenSet.has(m.id)).map(m => {
     const override = overridesMap.get(m.id);
     return override ? applyAnimeOverride(m, override) : m;

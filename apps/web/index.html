@@ -48,17 +48,23 @@
         <li><a href="/library" class="nav-link" data-nav="library">Thư viện</a></li>
         <li><a href="/history" class="nav-link" data-nav="history">Lịch sử</a></li>
         <li class="nav-genres">
-          <button type="button" class="nav-link" id="genre-toggle" aria-expanded="false" aria-controls="genre-dropdown">Thể loại <span class="genre-chevron" aria-hidden="true">⌄</span><span id="genre-count" hidden></span></button>
+          <button type="button" class="nav-link" id="genre-toggle" aria-expanded="false"
+            aria-controls="genre-dropdown"><span>Thể loại</span><span id="genre-count" hidden></span>
+            <svg class="genre-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
+          </button>
           <form class="genre-dropdown" id="genre-dropdown" hidden aria-label="Chọn thể loại anime">
-            <div class="genre-dropdown-heading"><strong>Khám phá theo thể loại</strong><button type="button" id="genre-close" aria-label="Đóng bảng thể loại">✕</button></div>
+            <div class="genre-dropdown-heading"><strong>Khám phá theo thể loại</strong><button type="button"
+                id="genre-close" aria-label="Đóng bảng thể loại">✕</button></div>
             <p>Chọn một hoặc nhiều thể loại bạn muốn xem.</p>
-            <input type="search" class="genre-search" id="genre-search" placeholder="Tìm thể loại…" aria-label="Tìm thể loại" autocomplete="off">
+            <input type="search" class="genre-search" id="genre-search" placeholder="Tìm thể loại…"
+              aria-label="Tìm thể loại" autocomplete="off">
             <p id="genre-options-status" role="status">Đang tải thể loại…</p>
             <div class="genre-options" id="genre-options"></div>
             <p id="genre-search-empty" role="status" hidden>Không tìm thấy thể loại phù hợp.</p>
             <button type="button" id="genre-options-retry" class="btn-secondary" hidden>Thử lại</button>
             <div class="genre-dropdown-footer">
-              <div class="genre-selection-summary"><span id="genre-selection-label" aria-live="polite">Chưa chọn thể loại</span><button type="button" id="genre-reset">Bỏ chọn tất cả</button></div>
+              <div class="genre-selection-summary"><span id="genre-selection-label" aria-live="polite">Chưa chọn thể
+                  loại</span><button type="button" id="genre-reset">Bỏ chọn tất cả</button></div>
               <button type="submit" id="genre-apply" class="btn-primary" disabled>Xem anime →</button>
             </div>
           </form>
@@ -67,16 +73,48 @@
 
       <!-- Header Actions -->
       <div class="header-actions">
-        <!-- Live Search Trigger -->
-        <button class="search-trigger" id="open-search-btn" aria-label="Tìm kiếm anime">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          <span>Tìm kiếm anime...</span>
-          <span class="search-shortcut">/</span>
-        </button>
+        <!-- Live Search Bar with Suggestions Dropdown -->
+        <div class="header-search-wrap" id="header-search-wrap">
+          <button type="button" class="icon-btn header-search-mobile-toggle" id="header-search-mobile-toggle" aria-label="Mở tìm kiếm" title="Tìm kiếm">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
+          <div class="header-search-box" id="header-search-box">
+            <form class="header-search-form" id="header-search-form" role="search" autocomplete="off" onsubmit="return false;">
+              <input
+                type="text"
+                class="header-search-input"
+                id="header-search-input"
+                placeholder="Tìm kiếm anime..."
+                autocomplete="off"
+                spellcheck="false"
+                aria-label="Tìm kiếm anime"
+                aria-autocomplete="list"
+                aria-expanded="false"
+                aria-controls="header-search-dropdown"
+              >
+              <button type="button" class="header-search-clear" id="header-search-clear" aria-label="Xóa từ khóa" title="Xóa" hidden>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+              <button type="submit" class="header-search-btn" id="header-search-submit" aria-label="Tìm kiếm" title="Tìm kiếm">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </button>
+            </form>
+
+            <!-- Suggestions Dropdown (Styled 1:1 to user screenshot) -->
+            <div class="header-search-dropdown" id="header-search-dropdown" role="listbox" hidden>
+              <div class="search-suggest-list" id="search-suggest-list"></div>
+            </div>
+          </div>
+        </div>
 
         <!-- Watchlist / Library Button -->
         <a href="/library" class="icon-btn" id="open-watchlist-btn" title="Thư viện phim" aria-label="Thư viện phim">
@@ -220,7 +258,8 @@
 
       <!-- Carousel Progress Indicators -->
       <div class="spotlight-controls">
-        <button class="spotlight-pause" id="spotlight-pause" type="button" aria-label="Tạm dừng chuyển phim" aria-pressed="false">Ⅱ</button>
+        <button class="spotlight-pause" id="spotlight-pause" type="button" aria-label="Tạm dừng chuyển phim"
+          aria-pressed="false">Ⅱ</button>
         <div class="spotlight-nav" id="spotlight-nav"></div>
       </div>
     </section>
@@ -317,7 +356,8 @@
           <button type="button" class="section-link" id="view-all-seasonal">Xem tất cả →</button>
         </div>
         <div class="anime-grid" id="seasonal-grid"></div>
-        <button class="btn-secondary" id="load-more-seasonal" style="margin-top:24px">Xem thêm anime tâm lý & tình cảm</button>
+        <button class="btn-secondary" id="load-more-seasonal" style="margin-top:24px">Xem thêm anime tâm lý & tình
+          cảm</button>
       </section>
 
       <!-- Anime Movies Section -->
@@ -344,7 +384,8 @@
     <div class="container view-page">
       <div class="view-page-header">
         <h1 class="view-page-title">Khám Phá Anime</h1>
-        <p class="view-page-desc">Khám phá thế giới anime phong phú với bộ lọc thể loại, năm phát hành, trạng thái và sắp xếp thông minh</p>
+        <p class="view-page-desc">Khám phá thế giới anime phong phú với bộ lọc thể loại, năm phát hành, trạng thái và
+          sắp xếp thông minh</p>
       </div>
 
       <!-- Filter Controls Bar -->
@@ -386,7 +427,8 @@
           <option value="title">Tên A-Z</option>
         </select>
 
-        <button type="button" class="btn-secondary" id="browse-reset-btn" style="padding: 10px 16px; font-size: 13px;">Đặt lại</button>
+        <button type="button" class="btn-secondary" id="browse-reset-btn"
+          style="padding: 10px 16px; font-size: 13px;">Đặt lại</button>
       </form>
 
       <!-- Active Filter Chips -->
@@ -405,8 +447,10 @@
       <div class="view-empty-state" id="browse-empty" style="display: none;">
         <div class="view-empty-icon">🔍</div>
         <h3>Không tìm thấy anime phù hợp</h3>
-        <p>Không có kết quả nào khớp với các bộ lọc bạn đã chọn. Vui lòng thử tìm từ khóa khác hoặc bỏ bớt tiêu chí lọc.</p>
-        <button type="button" class="btn-primary" id="browse-empty-reset-btn" style="margin-top: 10px;">Xóa tất cả bộ lọc</button>
+        <p>Không có kết quả nào khớp với các bộ lọc bạn đã chọn. Vui lòng thử tìm từ khóa khác hoặc bỏ bớt tiêu chí lọc.
+        </p>
+        <button type="button" class="btn-primary" id="browse-empty-reset-btn" style="margin-top: 10px;">Xóa tất cả bộ
+          lọc</button>
       </div>
 
       <!-- Pagination -->
@@ -548,7 +592,8 @@
             </button>
 
             <div class="library-dropdown-wrap">
-              <button class="btn-secondary" id="detail-bookmark-btn" type="button" aria-haspopup="true" aria-expanded="false">
+              <button class="btn-secondary" id="detail-bookmark-btn" type="button" aria-haspopup="true"
+                aria-expanded="false">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
                 </svg>
@@ -668,8 +713,7 @@
           Trình duyệt của bạn không hỗ trợ phát video HTML5.
         </video>
         <iframe class="video-element" id="anime-iframe" title="Trình phát AniDoki / PhimAPI"
-          sandbox="allow-scripts allow-same-origin allow-presentation"
-          referrerpolicy="strict-origin-when-cross-origin"
+          sandbox="allow-scripts allow-same-origin allow-presentation" referrerpolicy="strict-origin-when-cross-origin"
           style="display: none; width: 100%; height: 100%; border: none;"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowfullscreen></iframe>
@@ -808,7 +852,8 @@
       <div class="view-empty-state" id="library-unauth-state" style="display: none;">
         <div class="view-empty-icon">🔒</div>
         <h3>Yêu cầu đăng nhập</h3>
-        <p>Vui lòng đăng nhập bằng tài khoản Google để lưu trữ, đồng bộ và phân loại phim trong thư viện cá nhân của bạn.</p>
+        <p>Vui lòng đăng nhập bằng tài khoản Google để lưu trữ, đồng bộ và phân loại phim trong thư viện cá nhân của
+          bạn.</p>
         <button type="button" class="btn-primary" id="library-login-btn">Đăng nhập ngay</button>
       </div>
 
@@ -816,7 +861,8 @@
       <div class="view-empty-state" id="library-empty-state" style="display: none;">
         <div class="view-empty-icon">📂</div>
         <h3 id="library-empty-title">Thư viện chưa có phim</h3>
-        <p id="library-empty-desc">Bạn chưa thêm anime nào vào mục này. Hãy khám phá kho anime đa dạng và chọn lưu phim nhé!</p>
+        <p id="library-empty-desc">Bạn chưa thêm anime nào vào mục này. Hãy khám phá kho anime đa dạng và chọn lưu phim
+          nhé!</p>
         <a href="/browse" class="btn-primary">Khám phá anime ngay</a>
       </div>
 
@@ -830,7 +876,8 @@
        ========================================== -->
   <div id="view-history" class="app-view" style="display: none;">
     <div class="container view-page">
-      <div class="view-page-header" style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+      <div class="view-page-header"
+        style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
         <div>
           <h1 class="view-page-title">Lịch Sử Xem Phim</h1>
           <p class="view-page-desc">Tiếp tục xem các tập anime dang dở hoặc xem lại các tập đã phát</p>
@@ -865,7 +912,8 @@
 
       <!-- Pagination / Load more -->
       <div style="text-align: center; margin-top: 32px;">
-        <button type="button" class="btn-secondary" id="history-load-more-btn" style="display: none;">Xem thêm lịch sử</button>
+        <button type="button" class="btn-secondary" id="history-load-more-btn" style="display: none;">Xem thêm lịch
+          sử</button>
       </div>
     </div>
   </div>
@@ -878,7 +926,8 @@
       <!-- Unauthenticated Guard -->
       <div id="account-unauth" class="view-empty-state" style="display: none;">
         <div class="view-empty-icon">🔒</div>
-        <h2 style="font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">Vui Lòng Đăng Nhập</h2>
+        <h2 style="font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">Vui Lòng Đăng
+          Nhập</h2>
         <p style="color: var(--text-muted); font-size: 14px; max-width: 480px; line-height: 1.6; margin-bottom: 24px;">
           Bạn cần đăng nhập tài khoản để xem thông tin cá nhân và thiết lập tùy chọn trải nghiệm xem phim.
         </p>
@@ -890,7 +939,8 @@
         <div class="view-header">
           <div>
             <h1 class="view-title">Tài Khoản & Tùy Chọn</h1>
-            <p class="view-subtitle">Quản lý hồ sơ cá nhân, tùy chọn trình phát video và các phiên đăng nhập hoạt động.</p>
+            <p class="view-subtitle">Quản lý hồ sơ cá nhân, tùy chọn trình phát video và các phiên đăng nhập hoạt động.
+            </p>
           </div>
         </div>
 
@@ -900,7 +950,8 @@
             <div class="account-card">
               <div class="account-profile-header">
                 <div class="account-avatar-wrapper">
-                  <img id="account-avatar-img" class="account-avatar-img" src="" alt="Avatar" referrerpolicy="no-referrer" />
+                  <img id="account-avatar-img" class="account-avatar-img" src="" alt="Avatar"
+                    referrerpolicy="no-referrer" />
                 </div>
                 <h3 class="account-name" id="account-profile-name">Tên người dùng</h3>
                 <span class="account-email" id="account-profile-email">email@example.com</span>
@@ -919,16 +970,22 @@
               </div>
 
               <!-- Profile Edit Form -->
-              <form id="account-profile-form" style="margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06);">
+              <form id="account-profile-form"
+                style="margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06);">
                 <div style="margin-bottom: 14px;">
-                  <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Tên hiển thị</label>
-                  <input type="text" id="account-input-name" required maxlength="100" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
+                  <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Tên hiển
+                    thị</label>
+                  <input type="text" id="account-input-name" required maxlength="100"
+                    style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
                 </div>
                 <div style="margin-bottom: 16px;">
-                  <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">URL Ảnh đại diện (tùy chọn)</label>
-                  <input type="url" id="account-input-avatar" placeholder="https://..." style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
+                  <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">URL Ảnh
+                    đại diện (tùy chọn)</label>
+                  <input type="url" id="account-input-avatar" placeholder="https://..."
+                    style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
                 </div>
-                <button type="submit" class="btn-primary" id="account-profile-submit-btn" style="width: 100%; padding: 10px; font-size: 13px;">Lưu Hồ Sơ</button>
+                <button type="submit" class="btn-primary" id="account-profile-submit-btn"
+                  style="width: 100%; padding: 10px; font-size: 13px;">Lưu Hồ Sơ</button>
               </form>
             </div>
           </div>
@@ -941,7 +998,7 @@
                 <h3 style="margin: 0; font-size: 16px; color: var(--text-primary);">🎬 Tùy Chọn Trình Phát Video</h3>
                 <span style="font-size: 11.5px; color: var(--text-muted);">Tự động lưu vào tài khoản</span>
               </div>
-              
+
               <div class="settings-group">
                 <div class="setting-row">
                   <div class="setting-info">
@@ -970,7 +1027,8 @@
                     <strong>Tốc độ phát mặc định</strong>
                     <p>Tốc độ chuẩn khi bắt đầu mỗi tập phim mới</p>
                   </div>
-                  <select id="pref-default-speed" style="padding: 6px 12px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
+                  <select id="pref-default-speed"
+                    style="padding: 6px 12px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
                     <option value="0.75">0.75x</option>
                     <option value="1" selected>1.0x (Chuẩn)</option>
                     <option value="1.25">1.25x</option>
@@ -984,7 +1042,8 @@
                     <strong>Chất lượng video ưu tiên</strong>
                     <p>Độ phân giải ưu tiên chọn trước khi tải video</p>
                   </div>
-                  <select id="pref-preferred-quality" style="padding: 6px 12px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
+                  <select id="pref-preferred-quality"
+                    style="padding: 6px 12px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
                     <option value="auto" selected>Tự động (Khuyên dùng)</option>
                     <option value="1080p">1080p Full HD</option>
                     <option value="720p">720p HD</option>
@@ -993,26 +1052,31 @@
                 </div>
 
                 <div style="text-align: right; margin-top: 10px;">
-                  <button type="button" class="btn-primary" id="save-player-settings-btn" style="padding: 8px 18px; font-size: 13px;">Lưu Tùy Chọn Xem</button>
+                  <button type="button" class="btn-primary" id="save-player-settings-btn"
+                    style="padding: 8px 18px; font-size: 13px;">Lưu Tùy Chọn Xem</button>
                 </div>
               </div>
             </div>
 
             <!-- 2. Active Sessions Card -->
             <div class="account-card">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+              <div
+                style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
                 <div>
                   <h3 style="margin: 0; font-size: 16px; color: var(--text-primary);">🔐 Quản Lý Phiên Đăng Nhập</h3>
-                  <p style="margin: 3px 0 0; font-size: 12px; color: var(--text-muted);">Danh sách thiết bị đang có quyền truy cập vào tài khoản của bạn.</p>
+                  <p style="margin: 3px 0 0; font-size: 12px; color: var(--text-muted);">Danh sách thiết bị đang có
+                    quyền truy cập vào tài khoản của bạn.</p>
                 </div>
-                <button type="button" class="btn-secondary" id="revoke-others-btn" style="padding: 6px 14px; font-size: 12px; border-color: rgba(255, 51, 75, 0.4); color: #ff5252;">
+                <button type="button" class="btn-secondary" id="revoke-others-btn"
+                  style="padding: 6px 14px; font-size: 12px; border-color: rgba(255, 51, 75, 0.4); color: #ff5252;">
                   Đăng xuất thiết bị khác
                 </button>
               </div>
 
               <div id="account-sessions-list">
                 <!-- Dynamically populated session cards -->
-                <div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px;">Đang tải danh sách thiết bị...</div>
+                <div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px;">Đang tải danh
+                  sách thiết bị...</div>
               </div>
             </div>
           </div>
@@ -1028,13 +1092,15 @@
     <div class="container view-page help-container">
       <div class="view-header" style="text-align: center; margin-bottom: 36px;">
         <h1 class="view-title">Trung Tâm Trợ Giúp & Góp Ý</h1>
-        <p class="view-subtitle" style="max-width: 600px; margin: 8px auto 0;">Giải đáp các sự cố xem phim thường gặp và tiếp nhận đóng góp ý kiến cải tiến anidoki.</p>
+        <p class="view-subtitle" style="max-width: 600px; margin: 8px auto 0;">Giải đáp các sự cố xem phim thường gặp và
+          tiếp nhận đóng góp ý kiến cải tiến anidoki.</p>
       </div>
 
       <div class="feedback-grid">
         <!-- FAQ Accordion -->
         <div>
-          <h2 style="font-size: 17px; font-weight: 700; color: var(--text-primary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+          <h2
+            style="font-size: 17px; font-weight: 700; color: var(--text-primary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
             <span>❓</span> Câu Hỏi Thường Gặp (FAQ)
           </h2>
           <div class="faq-list" id="faq-list">
@@ -1044,7 +1110,9 @@
                 <span class="faq-chevron">▼</span>
               </button>
               <div class="faq-body">
-                Nếu video không tải được, bạn hãy thử: (1) Đổi sang Server dự phòng nếu có; (2) Tạm thời tắt các tiện ích chặn quảng cáo mạnh có thể chặn nhầm tệp stream HLS / m3u8; (3) Tải lại trang hoặc xóa bộ nhớ đệm (cache) trình duyệt.
+                Nếu video không tải được, bạn hãy thử: (1) Đổi sang Server dự phòng nếu có; (2) Tạm thời tắt các tiện
+                ích chặn quảng cáo mạnh có thể chặn nhầm tệp stream HLS / m3u8; (3) Tải lại trang hoặc xóa bộ nhớ đệm
+                (cache) trình duyệt.
               </div>
             </div>
 
@@ -1054,7 +1122,8 @@
                 <span class="faq-chevron">▼</span>
               </button>
               <div class="faq-body">
-                Sự cố lệch sub hoặc mất tiếng có thể do nguồn video gốc bị lỗi encode. Bạn hãy bấm vào nút <strong>"Báo lỗi"</strong> trực tiếp dưới khung xem phim để đội ngũ kỹ thuật anidoki khắc phục ngay.
+                Sự cố lệch sub hoặc mất tiếng có thể do nguồn video gốc bị lỗi encode. Bạn hãy bấm vào nút <strong>"Báo
+                  lỗi"</strong> trực tiếp dưới khung xem phim để đội ngũ kỹ thuật anidoki khắc phục ngay.
               </div>
             </div>
 
@@ -1064,7 +1133,9 @@
                 <span class="faq-chevron">▼</span>
               </button>
               <div class="faq-body">
-                Bạn chỉ cần bấm nút <strong>"Đăng nhập"</strong> ở góc trên bên phải bằng tài khoản Google. Dữ liệu Danh sách xem sau (Watchlist) và Lịch sử xem (History) của bạn sẽ được lưu trữ an toàn trên máy chủ và tự động đồng bộ trên máy tính, điện thoại, máy tính bảng.
+                Bạn chỉ cần bấm nút <strong>"Đăng nhập"</strong> ở góc trên bên phải bằng tài khoản Google. Dữ liệu Danh
+                sách xem sau (Watchlist) và Lịch sử xem (History) của bạn sẽ được lưu trữ an toàn trên máy chủ và tự
+                động đồng bộ trên máy tính, điện thoại, máy tính bảng.
               </div>
             </div>
 
@@ -1074,7 +1145,8 @@
                 <span class="faq-chevron">▼</span>
               </button>
               <div class="faq-body">
-                anidoki hoàn toàn miễn phí và phi thương mại. Chúng tôi không bao giờ yêu cầu người dùng nạp tiền hay cài đặt thêm bất kỳ phần mềm/tiện ích lạ nào.
+                anidoki hoàn toàn miễn phí và phi thương mại. Chúng tôi không bao giờ yêu cầu người dùng nạp tiền hay
+                cài đặt thêm bất kỳ phần mềm/tiện ích lạ nào.
               </div>
             </div>
           </div>
@@ -1083,27 +1155,35 @@
         <!-- Feedback & Contact Form -->
         <div>
           <div class="account-card" style="padding: 24px;">
-            <h2 style="font-size: 17px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+            <h2
+              style="font-size: 17px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
               <span>💬</span> Gửi Phản Hồi & Đóng Góp
             </h2>
             <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 20px;">
-              Mọi ý kiến đóng góp, yêu cầu thêm anime mới hoặc báo lỗi hệ thống đều được ban quản trị tiếp nhận và phản hồi.
+              Mọi ý kiến đóng góp, yêu cầu thêm anime mới hoặc báo lỗi hệ thống đều được ban quản trị tiếp nhận và phản
+              hồi.
             </p>
 
             <form id="help-feedback-form" style="display: flex; flex-direction: column; gap: 14px;">
               <div>
-                <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Họ tên của bạn</label>
-                <input type="text" id="feedback-name" placeholder="Nguyễn Văn A" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
+                <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Họ tên của
+                  bạn</label>
+                <input type="text" id="feedback-name" placeholder="Nguyễn Văn A"
+                  style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
               </div>
 
               <div>
-                <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Email liên hệ (nếu cần nhận phản hồi)</label>
-                <input type="email" id="feedback-email" placeholder="email@example.com" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
+                <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Email liên
+                  hệ (nếu cần nhận phản hồi)</label>
+                <input type="email" id="feedback-email" placeholder="email@example.com"
+                  style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
               </div>
 
               <div>
-                <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Chủ đề</label>
-                <select id="feedback-subject" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
+                <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Chủ
+                  đề</label>
+                <select id="feedback-subject"
+                  style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
                   <option value="Góp ý giao diện & trải nghiệm">Góp ý giao diện & trải nghiệm</option>
                   <option value="Yêu cầu bổ sung Anime">Yêu cầu bổ sung Anime</option>
                   <option value="Báo lỗi tính năng">Báo lỗi tính năng</option>
@@ -1112,11 +1192,15 @@
               </div>
 
               <div>
-                <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Nội dung phản hồi (*)</label>
-                <textarea id="feedback-message" required rows="4" placeholder="Nhập chi tiết ý kiến hoặc thắc mắc của bạn..." style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px; resize: vertical;"></textarea>
+                <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Nội dung
+                  phản hồi (*)</label>
+                <textarea id="feedback-message" required rows="4"
+                  placeholder="Nhập chi tiết ý kiến hoặc thắc mắc của bạn..."
+                  style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px; resize: vertical;"></textarea>
               </div>
 
-              <button type="submit" class="btn-primary" id="feedback-submit-btn" style="padding: 10px; font-size: 13px; margin-top: 4px;">
+              <button type="submit" class="btn-primary" id="feedback-submit-btn"
+                style="padding: 10px; font-size: 13px; margin-top: 4px;">
                 Gửi Phản Hồi
               </button>
             </form>
@@ -1132,9 +1216,11 @@
   <div id="view-404" class="app-view" style="display: none;">
     <div class="container view-404-container">
       <div class="code-404">404</div>
-      <h2 style="font-size: 24px; font-weight: 700; color: var(--text-primary); margin-bottom: 12px;">Trang Không Tồn Tại</h2>
+      <h2 style="font-size: 24px; font-weight: 700; color: var(--text-primary); margin-bottom: 12px;">Trang Không Tồn
+        Tại</h2>
       <p style="color: var(--text-muted); font-size: 14px; max-width: 480px; line-height: 1.6; margin-bottom: 28px;">
-        Đường dẫn bạn yêu cầu không tìm thấy hoặc đã được chuyển sang địa chỉ khác. Hãy quay về trang chủ hoặc khám phá kho phim phong phú của anidoki!
+        Đường dẫn bạn yêu cầu không tìm thấy hoặc đã được chuyển sang địa chỉ khác. Hãy quay về trang chủ hoặc khám phá
+        kho phim phong phú của anidoki!
       </p>
       <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
         <a href="/" class="btn-primary">Về trang chủ</a>
@@ -1151,9 +1237,11 @@
     <div id="admin-unauth-view" class="container view-page" style="display: none;">
       <div class="view-empty-state">
         <div class="view-empty-icon">🛡️</div>
-        <h2 style="font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">Khu Vực Quản Trị Hệ Thống</h2>
+        <h2 style="font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">Khu Vực Quản Trị
+          Hệ Thống</h2>
         <p style="color: var(--text-muted); font-size: 14px; max-width: 480px; line-height: 1.6; margin-bottom: 24px;">
-          Trang quản trị yêu cầu quyền truy cập của Quản trị viên (Admin Role). Vui lòng đăng nhập với tài khoản có quyền quản trị để tiếp tục.
+          Trang quản trị yêu cầu quyền truy cập của Quản trị viên (Admin Role). Vui lòng đăng nhập với tài khoản có
+          quyền quản trị để tiếp tục.
         </p>
         <div style="display: flex; gap: 12px; justify-content: center;">
           <button type="button" class="btn-primary" id="admin-guard-login-btn">Đăng nhập tài khoản</button>
@@ -1231,9 +1319,11 @@
             <div class="admin-panel-header">
               <div>
                 <h2 class="admin-panel-title">Bảng Điều Khiển Quản Trị</h2>
-                <p class="admin-panel-desc">Số liệu tổng quan thời gian thực về dữ liệu phim, người dùng và sự cố vận hành.</p>
+                <p class="admin-panel-desc">Số liệu tổng quan thời gian thực về dữ liệu phim, người dùng và sự cố vận
+                  hành.</p>
               </div>
-              <button type="button" class="btn-secondary" id="admin-dashboard-refresh-btn" style="padding: 8px 16px; font-size: 13px;">
+              <button type="button" class="btn-secondary" id="admin-dashboard-refresh-btn"
+                style="padding: 8px 16px; font-size: 13px;">
                 🔄 Cập nhật số liệu
               </button>
             </div>
@@ -1329,7 +1419,8 @@
             <div class="admin-panel-header">
               <div>
                 <h2 class="admin-panel-title">Quản Lý Danh Sách Anime</h2>
-                <p class="admin-panel-desc">Tìm kiếm, chỉnh sửa siêu dữ liệu hiển thị (Vietnamese title, poster, banner) và kiểm soát trạng thái Ẩn/Hiện.</p>
+                <p class="admin-panel-desc">Tìm kiếm, chỉnh sửa siêu dữ liệu hiển thị (Vietnamese title, poster, banner)
+                  và kiểm soát trạng thái Ẩn/Hiện.</p>
               </div>
             </div>
 
@@ -1340,7 +1431,8 @@
                   <circle cx="11" cy="11" r="8"></circle>
                   <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
-                <input type="text" id="admin-anime-search" placeholder="Tìm theo tên gốc hoặc tên tiếng Việt..." autocomplete="off">
+                <input type="text" id="admin-anime-search" placeholder="Tìm theo tên gốc hoặc tên tiếng Việt..."
+                  autocomplete="off">
               </div>
 
               <select class="filter-select" id="admin-anime-visibility-filter" style="width: auto;">
@@ -1366,7 +1458,10 @@
                   </tr>
                 </thead>
                 <tbody id="admin-anime-tbody">
-                  <tr><td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">Đang tải danh sách phim...</td></tr>
+                  <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">Đang tải danh
+                      sách phim...</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -1385,10 +1480,12 @@
           <div class="admin-panel" id="admin-panel-episodes" style="display: none;">
             <div class="admin-panel-header">
               <div style="display: flex; align-items: center; gap: 14px;">
-                <a href="/admin/anime" class="btn-secondary" style="padding: 6px 12px; font-size: 12px;">← Trở về Anime</a>
+                <a href="/admin/anime" class="btn-secondary" style="padding: 6px 12px; font-size: 12px;">← Trở về
+                  Anime</a>
                 <div>
                   <h2 class="admin-panel-title" id="admin-episodes-anime-title">Quản lý Tập phim</h2>
-                  <p class="admin-panel-desc" id="admin-episodes-anime-sub">Kiểm tra nguồn phát, chỉnh sửa link nhúng hoặc ẩn tập phim hỏng.</p>
+                  <p class="admin-panel-desc" id="admin-episodes-anime-sub">Kiểm tra nguồn phát, chỉnh sửa link nhúng
+                    hoặc ẩn tập phim hỏng.</p>
                 </div>
               </div>
             </div>
@@ -1407,7 +1504,10 @@
                   </tr>
                 </thead>
                 <tbody id="admin-episodes-tbody">
-                  <tr><td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">Đang tải danh sách tập...</td></tr>
+                  <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">Đang tải danh
+                      sách tập...</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -1418,9 +1518,11 @@
             <div class="admin-panel-header">
               <div>
                 <h2 class="admin-panel-title">Đồng Bộ Dữ Liệu Phim</h2>
-                <p class="admin-panel-desc">Kéo dữ liệu mới nhất từ nguồn phát. Hệ thống tích hợp khóa chống trùng lặp tiến trình (Anti-concurrency Lock).</p>
+                <p class="admin-panel-desc">Kéo dữ liệu mới nhất từ nguồn phát. Hệ thống tích hợp khóa chống trùng lặp
+                  tiến trình (Anti-concurrency Lock).</p>
               </div>
-              <button type="button" class="btn-secondary" id="admin-sync-refresh-btn" style="padding: 8px 16px; font-size: 13px;">
+              <button type="button" class="btn-secondary" id="admin-sync-refresh-btn"
+                style="padding: 8px 16px; font-size: 13px;">
                 🔄 Làm mới lịch sử
               </button>
             </div>
@@ -1430,7 +1532,8 @@
               <span class="spin-icon">⏳</span>
               <div>
                 <strong>Một tác vụ đồng bộ đang chạy trên máy chủ!</strong>
-                <p>Khóa đồng thời đang hoạt động để ngăn chặn xung đột dữ liệu. Vui lòng chờ tác vụ hiện tại hoàn tất trước khi kích hoạt tác vụ mới.</p>
+                <p>Khóa đồng thời đang hoạt động để ngăn chặn xung đột dữ liệu. Vui lòng chờ tác vụ hiện tại hoàn tất
+                  trước khi kích hoạt tác vụ mới.</p>
               </div>
             </div>
 
@@ -1443,7 +1546,8 @@
                   Nhập mã định danh (slug) của anime để đồng bộ thông tin và toàn bộ danh sách tập phim.
                 </p>
                 <div style="display: flex; gap: 10px;">
-                  <input type="text" id="admin-sync-single-slug" placeholder="Ví dụ: one-piece, naruto..." style="flex: 1; padding: 10px; background: #121215; border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
+                  <input type="text" id="admin-sync-single-slug" placeholder="Ví dụ: one-piece, naruto..."
+                    style="flex: 1; padding: 10px; background: #121215; border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
                   <button type="button" class="btn-primary" id="admin-sync-single-btn" style="white-space: nowrap;">
                     🚀 Bắt đầu đồng bộ
                   </button>
@@ -1488,7 +1592,10 @@
                     </tr>
                   </thead>
                   <tbody id="admin-sync-logs-tbody">
-                    <tr><td colspan="7" style="text-align: center; padding: 30px; color: var(--text-muted);">Đang tải nhật ký...</td></tr>
+                    <tr>
+                      <td colspan="7" style="text-align: center; padding: 30px; color: var(--text-muted);">Đang tải nhật
+                        ký...</td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -1500,9 +1607,11 @@
             <div class="admin-panel-header">
               <div>
                 <h2 class="admin-panel-title">Quản Lý Phản Ánh & Báo Lỗi</h2>
-                <p class="admin-panel-desc">Theo dõi các phản ánh về sự cố video, âm thanh, phụ đề do người xem gửi lên.</p>
+                <p class="admin-panel-desc">Theo dõi các phản ánh về sự cố video, âm thanh, phụ đề do người xem gửi lên.
+                </p>
               </div>
-              <button type="button" class="btn-secondary" id="admin-reports-refresh-btn" style="padding: 8px 16px; font-size: 13px;">
+              <button type="button" class="btn-secondary" id="admin-reports-refresh-btn"
+                style="padding: 8px 16px; font-size: 13px;">
                 🔄 Cập nhật phản ánh
               </button>
             </div>
@@ -1542,7 +1651,10 @@
                   </tr>
                 </thead>
                 <tbody id="admin-reports-tbody">
-                  <tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">Đang tải phản ánh...</td></tr>
+                  <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">Đang tải phản
+                      ánh...</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -1553,9 +1665,11 @@
             <div class="admin-panel-header">
               <div>
                 <h2 class="admin-panel-title">Quản Lý Tài Khoản & Phân Quyền</h2>
-                <p class="admin-panel-desc">Danh sách tài khoản hệ thống, thiết lập vai trò (RBAC) và kiểm soát trạng thái khóa/mở tài khoản.</p>
+                <p class="admin-panel-desc">Danh sách tài khoản hệ thống, thiết lập vai trò (RBAC) và kiểm soát trạng
+                  thái khóa/mở tài khoản.</p>
               </div>
-              <button type="button" class="btn-secondary" id="admin-users-refresh-btn" style="padding: 8px 16px; font-size: 13px;">
+              <button type="button" class="btn-secondary" id="admin-users-refresh-btn"
+                style="padding: 8px 16px; font-size: 13px;">
                 🔄 Cập nhật danh sách
               </button>
             </div>
@@ -1568,7 +1682,8 @@
                 <button type="button" class="pill-tab-btn" data-user-status="banned">Bị khóa (Banned)</button>
               </div>
               <div style="display: flex; gap: 8px; flex: 1; max-width: 360px;">
-                <input type="text" id="admin-users-search-input" placeholder="Tìm theo tên hoặc email..." style="width: 100%; padding: 8px 12px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
+                <input type="text" id="admin-users-search-input" placeholder="Tìm theo tên hoặc email..."
+                  style="width: 100%; padding: 8px 12px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
               </div>
             </div>
 
@@ -1587,7 +1702,10 @@
                   </tr>
                 </thead>
                 <tbody id="admin-users-tbody">
-                  <tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">Đang tải danh sách tài khoản...</td></tr>
+                  <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">Đang tải danh
+                      sách tài khoản...</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -1598,23 +1716,30 @@
             <div class="admin-panel-header">
               <div>
                 <h2 class="admin-panel-title">Cấu Hình Trang Chủ</h2>
-                <p class="admin-panel-desc">Tùy biến danh sách anime nổi bật Spotlight và thứ tự hiển thị các danh mục trên trang chủ.</p>
+                <p class="admin-panel-desc">Tùy biến danh sách anime nổi bật Spotlight và thứ tự hiển thị các danh mục
+                  trên trang chủ.</p>
               </div>
-              <button type="button" class="btn-primary" id="admin-save-homepage-btn" style="padding: 8px 20px; font-size: 13px;">
+              <button type="button" class="btn-primary" id="admin-save-homepage-btn"
+                style="padding: 8px 20px; font-size: 13px;">
                 💾 Lưu cấu hình
               </button>
             </div>
 
             <div class="account-card" style="margin-bottom: 24px;">
-              <h3 style="font-size: 15px; color: var(--text-primary); margin-bottom: 6px;">🌟 Danh Sách Anime Spotlight (Hero Slider)</h3>
+              <h3 style="font-size: 15px; color: var(--text-primary); margin-bottom: 6px;">🌟 Danh Sách Anime Spotlight
+                (Hero Slider)</h3>
               <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 14px;">
-                Nhập danh sách mã phim (slug), phân cách bằng dấu phẩy. Các phim này sẽ được hiển thị trên banner trượt đầu trang chủ.
+                Nhập danh sách mã phim (slug), phân cách bằng dấu phẩy. Các phim này sẽ được hiển thị trên banner trượt
+                đầu trang chủ.
               </p>
-              <textarea id="admin-homepage-spotlight-input" rows="3" placeholder="dao-hai-tac-one-piece, chu-thuat-hoi-chien, thanh-guom-diet-quy" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px; font-family: monospace;"></textarea>
+              <textarea id="admin-homepage-spotlight-input" rows="3"
+                placeholder="dao-hai-tac-one-piece, chu-thuat-hoi-chien, thanh-guom-diet-quy"
+                style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px; font-family: monospace;"></textarea>
             </div>
 
             <div class="account-card">
-              <h3 style="font-size: 15px; color: var(--text-primary); margin-bottom: 6px;">📑 Thứ Tự & Ẩn/Hiện Các Mục Trang Chủ</h3>
+              <h3 style="font-size: 15px; color: var(--text-primary); margin-bottom: 6px;">📑 Thứ Tự & Ẩn/Hiện Các Mục
+                Trang Chủ</h3>
               <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 16px;">
                 Bật/tắt hoặc điều chỉnh thứ tự hiển thị của các khối anime trên trang chủ.
               </p>
@@ -1629,9 +1754,11 @@
             <div class="admin-panel-header">
               <div>
                 <h2 class="admin-panel-title">Quản Lý Ý Kiến & Đóng Góp</h2>
-                <p class="admin-panel-desc">Theo dõi và phản hồi các thông điệp góp ý, báo lỗi tính năng từ người xem gửi qua trang Trợ giúp.</p>
+                <p class="admin-panel-desc">Theo dõi và phản hồi các thông điệp góp ý, báo lỗi tính năng từ người xem
+                  gửi qua trang Trợ giúp.</p>
               </div>
-              <button type="button" class="btn-secondary" id="admin-feedback-refresh-btn" style="padding: 8px 16px; font-size: 13px;">
+              <button type="button" class="btn-secondary" id="admin-feedback-refresh-btn"
+                style="padding: 8px 16px; font-size: 13px;">
                 🔄 Cập nhật ý kiến
               </button>
             </div>
@@ -1659,7 +1786,10 @@
                   </tr>
                 </thead>
                 <tbody id="admin-feedback-tbody">
-                  <tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">Đang tải ý kiến phản hồi...</td></tr>
+                  <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">Đang tải ý kiến
+                      phản hồi...</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -1670,15 +1800,18 @@
             <div class="admin-panel-header">
               <div>
                 <h2 class="admin-panel-title">Nhật Ký Kiểm Toán (Audit Logs)</h2>
-                <p class="admin-panel-desc">Lưu vết toàn bộ thao tác can thiệp dữ liệu, cập nhật hệ thống và thay đổi phân quyền của Quản trị viên.</p>
+                <p class="admin-panel-desc">Lưu vết toàn bộ thao tác can thiệp dữ liệu, cập nhật hệ thống và thay đổi
+                  phân quyền của Quản trị viên.</p>
               </div>
-              <button type="button" class="btn-secondary" id="admin-audit-refresh-btn" style="padding: 8px 16px; font-size: 13px;">
+              <button type="button" class="btn-secondary" id="admin-audit-refresh-btn"
+                style="padding: 8px 16px; font-size: 13px;">
                 🔄 Làm mới nhật ký
               </button>
             </div>
 
             <div class="admin-filter-bar">
-              <input type="text" id="admin-audit-search" placeholder="Tìm theo quản trị viên hoặc đối tượng..." style="padding: 8px 12px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px; max-width: 320px;">
+              <input type="text" id="admin-audit-search" placeholder="Tìm theo quản trị viên hoặc đối tượng..."
+                style="padding: 8px 12px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px; max-width: 320px;">
               <select class="filter-select" id="admin-audit-action-filter" style="width: auto;">
                 <option value="">Tất cả hành động</option>
                 <option value="UPDATE_ANIME_OVERRIDE">Sửa anime</option>
@@ -1705,7 +1838,10 @@
                   </tr>
                 </thead>
                 <tbody id="admin-audit-tbody">
-                  <tr><td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">Đang tải nhật ký kiểm toán...</td></tr>
+                  <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">Đang tải nhật
+                      ký kiểm toán...</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -1713,8 +1849,10 @@
             <div class="admin-pagination-row" id="admin-audit-pagination" style="display: none;">
               <span id="admin-audit-page-info" style="font-size: 12.5px; color: var(--text-muted);">Trang 1 / 1</span>
               <div style="display: flex; gap: 8px;">
-                <button type="button" class="btn-secondary" id="admin-audit-prev-btn" style="padding: 6px 12px; font-size: 12px;">← Trước</button>
-                <button type="button" class="btn-secondary" id="admin-audit-next-btn" style="padding: 6px 12px; font-size: 12px;">Sau →</button>
+                <button type="button" class="btn-secondary" id="admin-audit-prev-btn"
+                  style="padding: 6px 12px; font-size: 12px;">← Trước</button>
+                <button type="button" class="btn-secondary" id="admin-audit-next-btn"
+                  style="padding: 6px 12px; font-size: 12px;">Sau →</button>
               </div>
             </div>
           </div>
@@ -1724,35 +1862,46 @@
             <div class="admin-panel-header">
               <div>
                 <h2 class="admin-panel-title">Cài Đặt Hệ Thống & Vận Hành</h2>
-                <p class="admin-panel-desc">Cấu hình thông số website chung, thông báo khẩn cấp toàn trang và chế độ bảo trì.</p>
+                <p class="admin-panel-desc">Cấu hình thông số website chung, thông báo khẩn cấp toàn trang và chế độ bảo
+                  trì.</p>
               </div>
-              <button type="button" class="btn-primary" id="admin-save-settings-btn" style="padding: 8px 20px; font-size: 13px;">
+              <button type="button" class="btn-primary" id="admin-save-settings-btn"
+                style="padding: 8px 20px; font-size: 13px;">
                 💾 Lưu cấu hình
               </button>
             </div>
 
             <form id="admin-settings-form" class="account-card" style="max-width: 680px;">
               <div style="margin-bottom: 16px;">
-                <label style="display: block; font-size: 12.5px; color: var(--text-muted); margin-bottom: 5px;">Tên Website (Site Name)</label>
-                <input type="text" id="admin-setting-sitename" placeholder="Linime" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13.5px;">
+                <label style="display: block; font-size: 12.5px; color: var(--text-muted); margin-bottom: 5px;">Tên
+                  Website (Site Name)</label>
+                <input type="text" id="admin-setting-sitename" placeholder="Linime"
+                  style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13.5px;">
               </div>
 
               <div style="margin-bottom: 16px;">
-                <label style="display: block; font-size: 12.5px; color: var(--text-muted); margin-bottom: 5px;">URL Logo Website</label>
-                <input type="text" id="admin-setting-logo" placeholder="https://... hoặc đường dẫn svg/png" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13.5px;">
+                <label style="display: block; font-size: 12.5px; color: var(--text-muted); margin-bottom: 5px;">URL Logo
+                  Website</label>
+                <input type="text" id="admin-setting-logo" placeholder="https://... hoặc đường dẫn svg/png"
+                  style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13.5px;">
               </div>
 
               <div style="margin-bottom: 16px;">
-                <label style="display: block; font-size: 12.5px; color: var(--text-muted); margin-bottom: 5px;">Email Liên Hệ Ban Quản Trị</label>
-                <input type="email" id="admin-setting-email" placeholder="contact@linime.org" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13.5px;">
+                <label style="display: block; font-size: 12.5px; color: var(--text-muted); margin-bottom: 5px;">Email
+                  Liên Hệ Ban Quản Trị</label>
+                <input type="email" id="admin-setting-email" placeholder="contact@linime.org"
+                  style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13.5px;">
               </div>
 
               <div style="margin-bottom: 18px;">
-                <label style="display: block; font-size: 12.5px; color: var(--text-muted); margin-bottom: 5px;">Thông Báo Nổi Bật Toàn Trang (Announcement Banner)</label>
-                <textarea id="admin-setting-announcement" rows="3" placeholder="Để trống nếu không có thông báo..." style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13.5px; resize: vertical;"></textarea>
+                <label style="display: block; font-size: 12.5px; color: var(--text-muted); margin-bottom: 5px;">Thông
+                  Báo Nổi Bật Toàn Trang (Announcement Banner)</label>
+                <textarea id="admin-setting-announcement" rows="3" placeholder="Để trống nếu không có thông báo..."
+                  style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13.5px; resize: vertical;"></textarea>
               </div>
 
-              <div class="setting-row" style="background: rgba(255, 51, 75, 0.06); padding: 14px 16px; border-radius: 10px; border: 1px solid rgba(255, 51, 75, 0.15);">
+              <div class="setting-row"
+                style="background: rgba(255, 51, 75, 0.06); padding: 14px 16px; border-radius: 10px; border: 1px solid rgba(255, 51, 75, 0.15);">
                 <div class="setting-info">
                   <strong style="color: #ff5252;">Chế độ bảo trì hệ thống (Maintenance Mode)</strong>
                   <p>Khi bật, người dùng thông thường sẽ nhận được thông báo bảo trì tạm thời.</p>
@@ -1772,10 +1921,13 @@
   <!-- User Ban / Unban Modal (Phase 4) -->
   <div class="login-modal" id="admin-user-ban-modal" role="dialog" aria-modal="true">
     <div class="login-card" style="max-width: 480px; text-align: left; padding: 26px;">
-      <button class="detail-close-btn" id="close-admin-ban-modal-btn" style="position: absolute; top: 16px; right: 16px; width: 36px; height: 36px;">✕</button>
-      <h3 id="admin-ban-modal-title" style="margin: 0 0 8px 0; font-size: 17px; color: var(--text-primary);">Khóa Tài Khoản Người Dùng</h3>
+      <button class="detail-close-btn" id="close-admin-ban-modal-btn"
+        style="position: absolute; top: 16px; right: 16px; width: 36px; height: 36px;">✕</button>
+      <h3 id="admin-ban-modal-title" style="margin: 0 0 8px 0; font-size: 17px; color: var(--text-primary);">Khóa Tài
+        Khoản Người Dùng</h3>
       <p id="admin-ban-modal-sub" style="margin: 0 0 16px 0; font-size: 12.5px; color: var(--text-muted);">
-        Khi bị khóa, người dùng sẽ bị thu hồi toàn bộ phiên làm việc và không thể đăng nhập hoặc thực hiện bất kỳ hành động nào.
+        Khi bị khóa, người dùng sẽ bị thu hồi toàn bộ phiên làm việc và không thể đăng nhập hoặc thực hiện bất kỳ hành
+        động nào.
       </p>
 
       <form id="admin-ban-modal-form" style="display: flex; flex-direction: column; gap: 14px;">
@@ -1783,18 +1935,25 @@
         <input type="hidden" id="admin-ban-user-action" value="ban">
 
         <div>
-          <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Tài khoản</label>
-          <input type="text" id="admin-ban-user-name" readonly style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
+          <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Tài
+            khoản</label>
+          <input type="text" id="admin-ban-user-name" readonly
+            style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
         </div>
 
         <div id="admin-ban-reason-wrap">
-          <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Lý do khóa tài khoản (*)</label>
-          <textarea id="admin-ban-reason-input" rows="3" placeholder="Nhập lý do khóa (vi phạm chính sách, spam, v.v.)..." style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px; resize: vertical;"></textarea>
+          <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Lý do khóa tài
+            khoản (*)</label>
+          <textarea id="admin-ban-reason-input" rows="3"
+            placeholder="Nhập lý do khóa (vi phạm chính sách, spam, v.v.)..."
+            style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px; resize: vertical;"></textarea>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px;">
-          <button type="button" class="btn-secondary" id="admin-ban-cancel-btn" style="padding: 8px 18px; font-size: 13px;">Hủy bỏ</button>
-          <button type="submit" class="btn-primary" id="admin-ban-submit-btn" style="padding: 8px 22px; font-size: 13px; background: #ff334b;">Xác nhận khóa</button>
+          <button type="button" class="btn-secondary" id="admin-ban-cancel-btn"
+            style="padding: 8px 18px; font-size: 13px;">Hủy bỏ</button>
+          <button type="submit" class="btn-primary" id="admin-ban-submit-btn"
+            style="padding: 8px 22px; font-size: 13px; background: #ff334b;">Xác nhận khóa</button>
         </div>
       </form>
     </div>
@@ -1805,32 +1964,41 @@
        ========================================== -->
   <div class="login-modal" id="report-modal" role="dialog" aria-modal="true">
     <div class="login-card report-card" style="max-width: 520px; text-align: left; padding: 28px;">
-      <button class="detail-close-btn" id="close-report-btn" style="position: absolute; top: 16px; right: 16px; width: 36px; height: 36px;">✕</button>
+      <button class="detail-close-btn" id="close-report-btn"
+        style="position: absolute; top: 16px; right: 16px; width: 36px; height: 36px;">✕</button>
       <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
         <span style="font-size: 24px;">⚠️</span>
         <div>
           <h2 style="margin: 0; font-size: 18px; color: var(--text-primary);">Báo Cáo Sự Cố Trình Phát</h2>
-          <p style="margin: 0; font-size: 12.5px; color: var(--text-muted);">Chúng tôi sẽ kiểm tra và khắc phục nguồn phát sớm nhất có thể.</p>
+          <p style="margin: 0; font-size: 12.5px; color: var(--text-muted);">Chúng tôi sẽ kiểm tra và khắc phục nguồn
+            phát sớm nhất có thể.</p>
         </div>
       </div>
       <form id="report-form" style="display: flex; flex-direction: column; gap: 14px; margin-top: 16px;">
         <div>
           <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Anime</label>
-          <input type="text" id="report-anime-title" readonly style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;" />
+          <input type="text" id="report-anime-title" readonly
+            style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;" />
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           <div>
-            <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Tập phim</label>
-            <input type="text" id="report-episode-num" readonly style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;" />
+            <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Tập
+              phim</label>
+            <input type="text" id="report-episode-num" readonly
+              style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;" />
           </div>
           <div>
-            <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Nguồn phát</label>
-            <input type="text" id="report-provider" readonly value="AniDoki" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;" />
+            <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Nguồn
+              phát</label>
+            <input type="text" id="report-provider" readonly value="AniDoki"
+              style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;" />
           </div>
         </div>
         <div>
-          <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Loại sự cố (*)</label>
-          <select id="report-issue-type" required style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
+          <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Loại sự cố
+            (*)</label>
+          <select id="report-issue-type" required
+            style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
             <option value="video_error">Video không tải được / Link hỏng</option>
             <option value="audio_error">Lỗi âm thanh / Mất tiếng</option>
             <option value="subtitle_error">Lỗi phụ đề / Lệch sub</option>
@@ -1839,12 +2007,16 @@
           </select>
         </div>
         <div>
-          <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Mô tả thêm (nếu có)</label>
-          <textarea id="report-desc" rows="3" placeholder="Ví dụ: Lỗi bắt đầu từ phút 12:30..." style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px; resize: vertical;"></textarea>
+          <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Mô tả thêm (nếu
+            có)</label>
+          <textarea id="report-desc" rows="3" placeholder="Ví dụ: Lỗi bắt đầu từ phút 12:30..."
+            style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px; resize: vertical;"></textarea>
         </div>
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px;">
-          <button type="button" class="btn-secondary" id="cancel-report-btn" style="padding: 10px 18px; font-size: 13px;">Hủy bỏ</button>
-          <button type="submit" class="btn-primary" id="submit-report-btn" style="padding: 10px 22px; font-size: 13px;">Gửi báo lỗi</button>
+          <button type="button" class="btn-secondary" id="cancel-report-btn"
+            style="padding: 10px 18px; font-size: 13px;">Hủy bỏ</button>
+          <button type="submit" class="btn-primary" id="submit-report-btn"
+            style="padding: 10px 22px; font-size: 13px;">Gửi báo lỗi</button>
         </div>
       </form>
     </div>
@@ -1855,11 +2027,15 @@
        ========================================== -->
   <div class="login-modal" id="confirm-modal" role="dialog" aria-modal="true">
     <div class="login-card" style="max-width: 440px; text-align: left; padding: 26px;">
-      <h3 id="confirm-modal-title" style="margin: 0 0 10px 0; font-size: 17px; color: var(--text-primary);">Xác nhận</h3>
-      <p id="confirm-modal-message" style="margin: 0 0 20px 0; font-size: 13.5px; color: var(--text-muted); line-height: 1.5;"></p>
+      <h3 id="confirm-modal-title" style="margin: 0 0 10px 0; font-size: 17px; color: var(--text-primary);">Xác nhận
+      </h3>
+      <p id="confirm-modal-message"
+        style="margin: 0 0 20px 0; font-size: 13.5px; color: var(--text-muted); line-height: 1.5;"></p>
       <div style="display: flex; justify-content: flex-end; gap: 10px;">
-        <button type="button" class="btn-secondary" id="confirm-cancel-btn" style="padding: 8px 18px; font-size: 13px;">Hủy</button>
-        <button type="button" class="btn-primary" id="confirm-ok-btn" style="padding: 8px 20px; font-size: 13px; background: #ff334b;">Xác nhận</button>
+        <button type="button" class="btn-secondary" id="confirm-cancel-btn"
+          style="padding: 8px 18px; font-size: 13px;">Hủy</button>
+        <button type="button" class="btn-primary" id="confirm-ok-btn"
+          style="padding: 8px 20px; font-size: 13px; background: #ff334b;">Xác nhận</button>
       </div>
     </div>
   </div>
@@ -1903,16 +2079,28 @@
         style="position: absolute; top: 16px; right: 16px; width: 36px; height: 36px;" title="Đóng">✕</button>
 
       <div class="auth-header">
-        <img class="brand-logo login-logo" src="/brand/anidoki-white.svg?v=6" alt="AniDoki" width="1616" height="358" style="max-height: 38px; margin: 0 auto 12px; display: block;">
-        
+        <img class="brand-logo login-logo" src="/brand/anidoki-white.svg?v=6" alt="AniDoki" width="1616" height="358"
+          style="max-height: 38px; margin: 0 auto 12px; display: block;">
+
         <!-- Auth Tabs (Đăng nhập / Đăng ký) -->
         <div class="auth-tabs" id="auth-tabs">
           <button type="button" class="auth-tab-btn active" id="tab-btn-login" data-tab="login">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+              <polyline points="10 17 15 12 10 7" />
+              <line x1="15" y1="12" x2="3" y2="12" />
+            </svg>
             Đăng nhập
           </button>
           <button type="button" class="auth-tab-btn" id="tab-btn-register" data-tab="register">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="8.5" cy="7" r="4" />
+              <line x1="20" y1="8" x2="20" y2="14" />
+              <line x1="23" y1="11" x2="17" y2="11" />
+            </svg>
             Đăng ký
           </button>
         </div>
@@ -1924,10 +2112,14 @@
 
         <button class="oauth-btn" id="google-login-btn">
           <svg width="20" height="20" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+            <path fill="#4285F4"
+              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+            <path fill="#34A853"
+              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+            <path fill="#FBBC05"
+              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+            <path fill="#EA4335"
+              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
           </svg>
           <span>Tiếp tục với Google</span>
         </button>
@@ -1940,21 +2132,32 @@
 
         <form id="admin-login-form" class="auth-form">
           <div id="admin-login-error" class="auth-error-box" style="display: none;"></div>
-          
+
           <div class="auth-field">
             <label for="admin-login-username">Tài khoản hoặc Email</label>
             <div class="auth-input-wrap">
-              <svg class="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              <input type="text" id="admin-login-username" placeholder="Email hoặc tên tài khoản" required autocomplete="username" />
+              <svg class="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              <input type="text" id="admin-login-username" placeholder="Email hoặc tên tài khoản" required
+                autocomplete="username" />
             </div>
           </div>
 
           <div class="auth-field">
             <label for="admin-login-password">Mật khẩu</label>
             <div class="auth-input-wrap">
-              <svg class="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              <input type="password" id="admin-login-password" placeholder="••••••••" required autocomplete="current-password" />
-              <button type="button" class="auth-toggle-pwd" data-target="admin-login-password" title="Ẩn/Hiện mật khẩu">👁</button>
+              <svg class="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              <input type="password" id="admin-login-password" placeholder="••••••••" required
+                autocomplete="current-password" />
+              <button type="button" class="auth-toggle-pwd" data-target="admin-login-password"
+                title="Ẩn/Hiện mật khẩu">👁</button>
             </div>
           </div>
 
@@ -1965,9 +2168,7 @@
           <div class="auth-footer-prompt">
             Chưa có tài khoản? <a href="#" id="switch-to-register">Đăng ký ngay</a>
           </div>
-          <div class="auth-sub-hint">
-            <span>Dành cho cả Thành viên & Quản trị viên</span>
-          </div>
+
         </form>
       </div>
 
@@ -1981,15 +2182,24 @@
           <div class="auth-field">
             <label for="reg-fullname">Họ và tên</label>
             <div class="auth-input-wrap">
-              <svg class="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              <input type="text" id="reg-fullname" placeholder="Ví dụ: Nguyễn Văn A" required minlength="2" autocomplete="name" />
+              <svg class="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              <input type="text" id="reg-fullname" placeholder="Ví dụ: Nguyễn Văn A" required minlength="2"
+                autocomplete="name" />
             </div>
           </div>
 
           <div class="auth-field">
             <label for="reg-email">Địa chỉ Email</label>
             <div class="auth-input-wrap">
-              <svg class="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <svg class="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                <polyline points="22,6 12,13 2,6" />
+              </svg>
               <input type="email" id="reg-email" placeholder="name@example.com" required autocomplete="email" />
             </div>
           </div>
@@ -1997,17 +2207,28 @@
           <div class="auth-field">
             <label for="reg-username">Tên tài khoản (viết liền, không dấu)</label>
             <div class="auth-input-wrap">
-              <svg class="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"/></svg>
-              <input type="text" id="reg-username" placeholder="nguyenvana123" required minlength="3" autocomplete="username" />
+              <svg class="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <circle cx="12" cy="12" r="4" />
+                <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94" />
+              </svg>
+              <input type="text" id="reg-username" placeholder="nguyenvana123" required minlength="3"
+                autocomplete="username" />
             </div>
           </div>
 
           <div class="auth-field">
             <label for="reg-password">Mật khẩu</label>
             <div class="auth-input-wrap">
-              <svg class="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              <input type="password" id="reg-password" placeholder="Tối thiểu 6 ký tự" required minlength="6" autocomplete="new-password" />
-              <button type="button" class="auth-toggle-pwd" data-target="reg-password" title="Ẩn/Hiện mật khẩu">👁</button>
+              <svg class="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              <input type="password" id="reg-password" placeholder="Tối thiểu 6 ký tự" required minlength="6"
+                autocomplete="new-password" />
+              <button type="button" class="auth-toggle-pwd" data-target="reg-password"
+                title="Ẩn/Hiện mật khẩu">👁</button>
             </div>
           </div>
 
@@ -2028,8 +2249,10 @@
        ========================================== -->
   <!-- 1. Anime Edit Modal -->
   <div class="login-modal" id="admin-anime-edit-modal" role="dialog" aria-modal="true">
-    <div class="login-card" style="max-width: 680px; text-align: left; padding: 28px; max-height: 90vh; overflow-y: auto;">
-      <button class="detail-close-btn" id="close-admin-anime-modal-btn" style="position: absolute; top: 16px; right: 16px; width: 36px; height: 36px;">✕</button>
+    <div class="login-card"
+      style="max-width: 680px; text-align: left; padding: 28px; max-height: 90vh; overflow-y: auto;">
+      <button class="detail-close-btn" id="close-admin-anime-modal-btn"
+        style="position: absolute; top: 16px; right: 16px; width: 36px; height: 36px;">✕</button>
       <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
         <span style="font-size: 22px;">🎬</span>
         <h2 style="margin: 0; font-size: 18px; color: var(--text-primary);">Chỉnh Sửa Thông Tin Anime</h2>
@@ -2043,39 +2266,53 @@
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           <div>
-            <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Tên Tiếng Việt</label>
-            <input type="text" id="admin-edit-title-vi" placeholder="Ví dụ: Đảo Hải Tặc" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
+            <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Tên Tiếng
+              Việt</label>
+            <input type="text" id="admin-edit-title-vi" placeholder="Ví dụ: Đảo Hải Tặc"
+              style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
           </div>
           <div>
-            <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Tên Tiếng Anh / Tên Quốc Tế</label>
-            <input type="text" id="admin-edit-title-en" placeholder="Ví dụ: One Piece" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
+            <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Tên Tiếng Anh
+              / Tên Quốc Tế</label>
+            <input type="text" id="admin-edit-title-en" placeholder="Ví dụ: One Piece"
+              style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
           </div>
         </div>
 
         <div>
-          <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Mô tả / Tóm tắt nội dung</label>
-          <textarea id="admin-edit-desc" rows="3" placeholder="Nhập mô tả phim..." style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px; resize: vertical;"></textarea>
+          <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Mô tả / Tóm tắt
+            nội dung</label>
+          <textarea id="admin-edit-desc" rows="3" placeholder="Nhập mô tả phim..."
+            style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px; resize: vertical;"></textarea>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           <div>
-            <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Poster URL (Ảnh đại diện dọc)</label>
-            <input type="text" id="admin-edit-poster" placeholder="https://..." style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
+            <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Poster URL
+              (Ảnh đại diện dọc)</label>
+            <input type="text" id="admin-edit-poster" placeholder="https://..."
+              style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
           </div>
           <div>
-            <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Banner URL (Ảnh nền ngang)</label>
-            <input type="text" id="admin-edit-banner" placeholder="https://..." style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
+            <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Banner URL
+              (Ảnh nền ngang)</label>
+            <input type="text" id="admin-edit-banner" placeholder="https://..."
+              style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
           </div>
         </div>
 
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
           <div>
-            <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Thể loại (phân cách bằng dấu phẩy)</label>
-            <input type="text" id="admin-edit-genres" placeholder="Hành Động, Phiêu Lưu, Hài Hước" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
+            <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Thể loại (phân
+              cách bằng dấu phẩy)</label>
+            <input type="text" id="admin-edit-genres" placeholder="Hành Động, Phiêu Lưu, Hài Hước"
+              style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
           </div>
           <div>
-            <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Trạng thái phát sóng</label>
-            <select id="admin-edit-status" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
+            <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Trạng thái
+              phát sóng</label>
+            <select id="admin-edit-status"
+              style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
               <option value="">Giữ nguyên từ nguồn</option>
               <option value="ongoing">Đang phát sóng (Ongoing)</option>
               <option value="completed">Đã hoàn thành (Completed)</option>
@@ -2084,21 +2321,30 @@
         </div>
 
         <div>
-          <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Ghi chú nội bộ quản trị</label>
-          <input type="text" id="admin-edit-notes" placeholder="Ghi chú về bản quyền, nguồn sub hoặc lý do can thiệp..." style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
+          <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Ghi chú nội bộ
+            quản trị</label>
+          <input type="text" id="admin-edit-notes" placeholder="Ghi chú về bản quyền, nguồn sub hoặc lý do can thiệp..."
+            style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
         </div>
 
-        <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: rgba(255, 51, 75, 0.08); border: 1px solid rgba(255, 51, 75, 0.2); border-radius: 8px;">
-          <input type="checkbox" id="admin-edit-hidden" style="width: 18px; height: 18px; accent-color: #ff334b; cursor: pointer;">
+        <div
+          style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: rgba(255, 51, 75, 0.08); border: 1px solid rgba(255, 51, 75, 0.2); border-radius: 8px;">
+          <input type="checkbox" id="admin-edit-hidden"
+            style="width: 18px; height: 18px; accent-color: #ff334b; cursor: pointer;">
           <div>
-            <label for="admin-edit-hidden" style="font-weight: 600; font-size: 13px; color: var(--text-primary); cursor: pointer;">Ẩn anime này khỏi giao diện người dùng</label>
-            <div style="font-size: 12px; color: var(--text-muted);">Khi bật, phim sẽ bị ẩn trên trang chủ, trang khám phá và trả về 404 khi người dùng truy cập trực tiếp.</div>
+            <label for="admin-edit-hidden"
+              style="font-weight: 600; font-size: 13px; color: var(--text-primary); cursor: pointer;">Ẩn anime này khỏi
+              giao diện người dùng</label>
+            <div style="font-size: 12px; color: var(--text-muted);">Khi bật, phim sẽ bị ẩn trên trang chủ, trang khám
+              phá và trả về 404 khi người dùng truy cập trực tiếp.</div>
           </div>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
-          <button type="button" class="btn-secondary" id="admin-anime-edit-cancel" style="padding: 10px 18px; font-size: 13px;">Hủy bỏ</button>
-          <button type="submit" class="btn-primary" id="admin-anime-edit-save" style="padding: 10px 24px; font-size: 13px;">Lưu thay đổi</button>
+          <button type="button" class="btn-secondary" id="admin-anime-edit-cancel"
+            style="padding: 10px 18px; font-size: 13px;">Hủy bỏ</button>
+          <button type="submit" class="btn-primary" id="admin-anime-edit-save"
+            style="padding: 10px 24px; font-size: 13px;">Lưu thay đổi</button>
         </div>
       </form>
     </div>
@@ -2107,7 +2353,8 @@
   <!-- 2. Episode Edit Modal -->
   <div class="login-modal" id="admin-ep-edit-modal" role="dialog" aria-modal="true">
     <div class="login-card" style="max-width: 580px; text-align: left; padding: 28px;">
-      <button class="detail-close-btn" id="close-admin-ep-modal-btn" style="position: absolute; top: 16px; right: 16px; width: 36px; height: 36px;">✕</button>
+      <button class="detail-close-btn" id="close-admin-ep-modal-btn"
+        style="position: absolute; top: 16px; right: 16px; width: 36px; height: 36px;">✕</button>
       <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
         <span style="font-size: 22px;">🎞️</span>
         <div>
@@ -2121,10 +2368,13 @@
         <input type="hidden" id="admin-ep-edit-num">
 
         <div>
-          <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Link Nhúng / Phát Thay Thế (Embed URL)</label>
+          <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Link Nhúng /
+            Phát Thay Thế (Embed URL)</label>
           <div style="display: flex; gap: 8px;">
-            <input type="text" id="admin-ep-edit-embed" placeholder="https://..." style="flex: 1; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
-            <button type="button" class="btn-secondary" id="admin-ep-test-link-btn" style="padding: 0 14px; font-size: 12px; white-space: nowrap;">
+            <input type="text" id="admin-ep-edit-embed" placeholder="https://..."
+              style="flex: 1; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
+            <button type="button" class="btn-secondary" id="admin-ep-test-link-btn"
+              style="padding: 0 14px; font-size: 12px; white-space: nowrap;">
               🔍 Kiểm tra link
             </button>
           </div>
@@ -2132,21 +2382,30 @@
         </div>
 
         <div>
-          <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Ghi chú quản trị</label>
-          <input type="text" id="admin-ep-edit-notes" placeholder="Ví dụ: Link dự phòng do server chính mất kết nối..." style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
+          <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Ghi chú quản
+            trị</label>
+          <input type="text" id="admin-ep-edit-notes" placeholder="Ví dụ: Link dự phòng do server chính mất kết nối..."
+            style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
         </div>
 
-        <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: rgba(255, 51, 75, 0.08); border: 1px solid rgba(255, 51, 75, 0.2); border-radius: 8px;">
-          <input type="checkbox" id="admin-ep-edit-hidden" style="width: 18px; height: 18px; accent-color: #ff334b; cursor: pointer;">
+        <div
+          style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: rgba(255, 51, 75, 0.08); border: 1px solid rgba(255, 51, 75, 0.2); border-radius: 8px;">
+          <input type="checkbox" id="admin-ep-edit-hidden"
+            style="width: 18px; height: 18px; accent-color: #ff334b; cursor: pointer;">
           <div>
-            <label for="admin-ep-edit-hidden" style="font-weight: 600; font-size: 13px; color: var(--text-primary); cursor: pointer;">Ẩn tập phim này</label>
-            <div style="font-size: 12px; color: var(--text-muted);">Người dùng sẽ không thể chọn hoặc phát tập này (trả về 404).</div>
+            <label for="admin-ep-edit-hidden"
+              style="font-weight: 600; font-size: 13px; color: var(--text-primary); cursor: pointer;">Ẩn tập phim
+              này</label>
+            <div style="font-size: 12px; color: var(--text-muted);">Người dùng sẽ không thể chọn hoặc phát tập này (trả
+              về 404).</div>
           </div>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
-          <button type="button" class="btn-secondary" id="admin-ep-edit-cancel" style="padding: 10px 18px; font-size: 13px;">Hủy</button>
-          <button type="submit" class="btn-primary" id="admin-ep-edit-save" style="padding: 10px 24px; font-size: 13px;">Lưu tập phim</button>
+          <button type="button" class="btn-secondary" id="admin-ep-edit-cancel"
+            style="padding: 10px 18px; font-size: 13px;">Hủy</button>
+          <button type="submit" class="btn-primary" id="admin-ep-edit-save"
+            style="padding: 10px 24px; font-size: 13px;">Lưu tập phim</button>
         </div>
       </form>
     </div>
@@ -2155,7 +2414,8 @@
   <!-- 3. Report Process Modal -->
   <div class="login-modal" id="admin-report-process-modal" role="dialog" aria-modal="true">
     <div class="login-card" style="max-width: 540px; text-align: left; padding: 28px;">
-      <button class="detail-close-btn" id="close-admin-report-modal-btn" style="position: absolute; top: 16px; right: 16px; width: 36px; height: 36px;">✕</button>
+      <button class="detail-close-btn" id="close-admin-report-modal-btn"
+        style="position: absolute; top: 16px; right: 16px; width: 36px; height: 36px;">✕</button>
       <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
         <span style="font-size: 22px;">🛠️</span>
         <div>
@@ -2164,13 +2424,17 @@
         </div>
       </div>
 
-      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-line); border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 13px;">
+      <div
+        style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-line); border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 13px;">
         <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
           <strong id="admin-report-detail-anime">Anime Title</strong>
           <span class="badge-role" id="admin-report-detail-type" style="font-size: 11px;">Lỗi video</span>
         </div>
-        <div style="color: var(--text-muted); font-size: 12px;" id="admin-report-detail-ep">Tập 1 · Gửi từ 127.0.0.1</div>
-        <div style="margin-top: 8px; color: var(--text-primary); background: rgba(0,0,0,0.25); padding: 8px; border-radius: 6px;" id="admin-report-detail-desc">
+        <div style="color: var(--text-muted); font-size: 12px;" id="admin-report-detail-ep">Tập 1 · Gửi từ 127.0.0.1
+        </div>
+        <div
+          style="margin-top: 8px; color: var(--text-primary); background: rgba(0,0,0,0.25); padding: 8px; border-radius: 6px;"
+          id="admin-report-detail-desc">
           "Không tải được video"
         </div>
       </div>
@@ -2179,8 +2443,10 @@
         <input type="hidden" id="admin-report-process-id">
 
         <div>
-          <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Cập nhật trạng thái</label>
-          <select id="admin-report-process-status" style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
+          <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Cập nhật trạng
+            thái</label>
+          <select id="admin-report-process-status"
+            style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px;">
             <option value="pending">Chờ xử lý (Pending)</option>
             <option value="in_progress">Đang kiểm tra / Sửa chữa (In Progress)</option>
             <option value="resolved">Đã giải quyết xong (Resolved)</option>
@@ -2189,13 +2455,18 @@
         </div>
 
         <div>
-          <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Ghi chú phản hồi / Hành động khắc phục</label>
-          <textarea id="admin-report-process-notes" rows="3" placeholder="Ví dụ: Đã đổi link embed của server dự phòng..." style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px; resize: vertical;"></textarea>
+          <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Ghi chú phản hồi
+            / Hành động khắc phục</label>
+          <textarea id="admin-report-process-notes" rows="3"
+            placeholder="Ví dụ: Đã đổi link embed của server dự phòng..."
+            style="width: 100%; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-line); border-radius: 8px; color: var(--text-primary); font-size: 13px; resize: vertical;"></textarea>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px;">
-          <button type="button" class="btn-secondary" id="admin-report-process-cancel" style="padding: 10px 18px; font-size: 13px;">Đóng</button>
-          <button type="submit" class="btn-primary" id="admin-report-process-save" style="padding: 10px 24px; font-size: 13px;">Cập nhật báo cáo</button>
+          <button type="button" class="btn-secondary" id="admin-report-process-cancel"
+            style="padding: 10px 18px; font-size: 13px;">Đóng</button>
+          <button type="submit" class="btn-primary" id="admin-report-process-save"
+            style="padding: 10px 24px; font-size: 13px;">Cập nhật báo cáo</button>
         </div>
       </form>
     </div>
@@ -2225,10 +2496,19 @@
   </footer>
 
   <nav class="mobile-bottom-nav" aria-label="Điều hướng nhanh">
-    <a href="/" class="mobile-nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3zM9 20v-7h6v7"/></svg><span>Trang chủ</span></a>
-    <a href="/browse" class="mobile-nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m16 8-3 5-5 3 3-5z"/></svg><span>Khám phá</span></a>
-    <a href="/library" class="mobile-nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg><span>Thư viện</span></a>
-    <a href="/history" class="mobile-nav-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11a9 9 0 1 1 2 7M3 4v7h7M12 7v5l3 2"/></svg><span>Lịch sử</span></a>
+    <a href="/" class="mobile-nav-link"><svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="m3 10 9-7 9 7v10H3zM9 20v-7h6v7" />
+      </svg><span>Trang chủ</span></a>
+    <a href="/browse" class="mobile-nav-link"><svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" />
+        <path d="m16 8-3 5-5 3 3-5z" />
+      </svg><span>Khám phá</span></a>
+    <a href="/library" class="mobile-nav-link"><svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 3h12v18l-6-4-6 4z" />
+      </svg><span>Thư viện</span></a>
+    <a href="/history" class="mobile-nav-link"><svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 11a9 9 0 1 1 2 7M3 4v7h7M12 7v5l3 2" />
+      </svg><span>Lịch sử</span></a>
   </nav>
   <script type="module" src="/src/main.js"></script>
 </body>

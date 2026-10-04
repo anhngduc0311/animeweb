@@ -3,6 +3,8 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { app } from './app.js';
 import { initKKUserData } from './kkphim.js';
+import { loadBrowseEntries } from './services/kkphim.service.js';
+import { syncPrimarySearch } from './services/meilisearch.service.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,6 +24,19 @@ const isDirectRun = process.argv[1] && (
 );
 
 if (isDirectRun) {
+  let refreshingSearch = false;
+  const refreshSearch = async () => {
+    if (refreshingSearch || !process.env.MEILI_MASTER_KEY) return;
+    refreshingSearch = true;
+    try {
+      const items = await loadBrowseEntries('/v1/api/danh-sach/hoat-hinh', { country: 'nhat-ban' });
+      const count = await syncPrimarySearch(items);
+      console.log(`Meilisearch: indexed ${count} anime entries`);
+    } catch (error) { console.warn('Meilisearch sync unavailable:', error.message); }
+    finally { refreshingSearch = false; }
+  };
+  void refreshSearch();
+  setInterval(refreshSearch, 15 * 60 * 1000).unref();
   app.listen(PORT, () => {
     console.log(`🚀 Linime API Server is running on http://localhost:${PORT}`);
     console.log(`🐘 Connected to PostgreSQL (Docker container on port ${process.env.PGPORT || 5438})`);

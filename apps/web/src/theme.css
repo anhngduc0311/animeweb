@@ -44,6 +44,23 @@ button:disabled { cursor: not-allowed; opacity: .5; }
 .nav-link { font-size: 13px; color: var(--text-muted); }
 .nav-link:hover, .nav-link.active { color: var(--accent-brand); }
 .nav-link.active::after { display: none; }
+#genre-toggle {
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  min-height: 42px; padding: 10px 14px; border: 1px solid #ffffff14;
+  border-radius: 11px; background: #ffffff04; color: #d6d6dc;
+  font-weight: 600; line-height: 1.2; white-space: nowrap; cursor: pointer;
+  transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+#genre-toggle:hover, #genre-toggle[aria-expanded="true"] {
+  color: #edb4d0; border-color: #b76e9166; background: #b76e911a;
+}
+#genre-toggle .genre-chevron { flex-shrink: 0; margin: 0; transition: transform .18s ease; }
+#genre-toggle[aria-expanded="true"] .genre-chevron { transform: rotate(180deg); }
+#genre-toggle #genre-count:not([hidden]) {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 20px; height: 20px; padding: 0 5px; border-radius: 6px;
+  background: #b76e9133; color: #f1c2da; font-size: 11px;
+}
 .search-trigger, .btn-login, .icon-btn, .rail-arrow {
   border: 1px solid var(--border-line);
   background: #16171b;
