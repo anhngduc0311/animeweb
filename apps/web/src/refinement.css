@@ -10,6 +10,33 @@
   --detail-sidebar: 240px;
 }
 body { background: var(--bg-primary); }
+.nav-genres { position: relative; }
+.nav-genres > .nav-link { display: inline-flex; align-items: center; gap: 6px; }
+.genre-chevron { transition: transform .2s; }
+#genre-toggle[aria-expanded="true"] .genre-chevron { transform: rotate(180deg); }
+#genre-count { min-width: 18px; padding: 1px 5px; border-radius: 6px; background: var(--accent-brand); color: #171719; font-size: 10px; }
+.genre-dropdown { position: absolute; right: 0; top: calc(100% + 23px); width: 420px; max-height: calc(100dvh - 105px); overflow-y: auto; padding: 22px; background: #161618; border: 1px solid #ffffff20; border-radius: 16px; box-shadow: 0 20px 60px #0009; z-index: 110; white-space: normal; }
+.genre-dropdown[hidden], #genre-count[hidden], #genre-options-retry[hidden], #section-genre-results[hidden], #genre-results-more[hidden] { display: none; }
+.genre-dropdown-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.genre-dropdown-heading strong { font-size: 15px; }
+#genre-reset { color: var(--text-muted); font-size: 12px; }
+.genre-dropdown > p { margin: 8px 0 14px; color: var(--text-muted); font-size: 12px; line-height: 1.6; }
+.genre-dropdown > p:empty { display: none; }
+.genre-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 18px; }
+.genre-options label { display: flex; gap: 9px; align-items: center; min-height: 38px; padding: 8px 10px; border: 1px solid #ffffff12; border-radius: 8px; font-size: 12px; cursor: pointer; }
+.genre-options label:has(input:checked) { background: #f2f0e911; border-color: #f2f0e960; color: #fff; }
+.genre-options input { accent-color: var(--accent-brand); width: 15px; height: 15px; flex-shrink: 0; }
+#genre-apply { width: 100%; justify-content: center; font-size: 13px; }
+#genre-apply:disabled { opacity: .45; cursor: not-allowed; }
+#genre-results-status { margin-bottom: 20px; }
+#genre-results-more { margin-top: 24px; }
+@media (max-width: 1250px) { .nav-links .nav-genres { display: block; } }
+@media (max-width: 1024px) {
+  .site-header.menu-open .nav-links { max-height: calc(100dvh - 72px); overflow-y: auto; }
+  .site-header.menu-open .nav-genres > .nav-link { display: flex; width: 100%; text-align: left; }
+  .genre-dropdown { position: static; width: 100%; max-height: none; margin: 4px 0 12px; box-shadow: none; padding: 16px; }
+  .genre-options { max-height: 235px; overflow-y: auto; }
+}
 #load-more-trending[hidden], #view-all-trending[hidden] { display: none; }
 .detail-seasons { margin: 24px 0; padding: 18px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 14px; }
 .detail-seasons[hidden] { display: none; }

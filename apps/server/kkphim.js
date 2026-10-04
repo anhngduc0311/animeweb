@@ -110,6 +110,40 @@ export async function trendingCatalog(page = 1, limit = 12, request = kkRequest)
   } while (eligible.length <= end && upstreamPage <= totalPages);
   return { data: eligible.slice((page - 1) * limit, end), pagination: { page, limit, hasMore: eligible.length > end } };
 }
+export async function genreOptions(request = kkRequest) {
+  const json = await request('/the-loai');
+  if (!Array.isArray(json.data?.items)) throw new Error('Danh sách thể loại không hợp lệ');
+  return json.data.items.filter(item => slugOK(item.slug)).map(({ name, slug }) => ({ name, slug }));
+}
+export async function genreCatalog(categories, page = 1, limit = 12, request = kkRequest) {
+  const chosen = [...new Set(categories)];
+  const options = await genreOptions(request);
+  if (!chosen.length || chosen.some(slug => !options.some(option => option.slug === slug))) {
+    const error = new Error('Vui lòng chọn thể loại hợp lệ');
+    error.status = 400;
+    throw error;
+  }
+  page = Math.min(100, Math.max(1, parseInt(page) || 1));
+  limit = Math.min(24, Math.max(1, parseInt(limit) || 12));
+  const end = page * limit;
+  const series = new Map();
+  let upstreamPage = 1, totalPages = 1;
+  do {
+    const query = new URLSearchParams({ country: 'nhat-ban', category: chosen[0], limit: '64', page: String(upstreamPage) });
+    const json = await request('/v1/api/danh-sach/hoat-hinh?' + query);
+    if (!Array.isArray(json.data?.items)) throw new Error('Danh sách anime không hợp lệ');
+    totalPages = Number(json.data.params?.pagination?.totalPages) || upstreamPage;
+    for (const raw of json.data.items) {
+      const slugs = new Set((raw.category || []).map(category => category.slug));
+      if (!chosen.every(slug => slugs.has(slug))) continue;
+      const item = mapMovie(raw);
+      if (slugOK(item.id) && !series.has(seriesKey(item))) series.set(seriesKey(item), item);
+    }
+    upstreamPage++;
+  } while (series.size <= end && upstreamPage <= totalPages);
+  const items = [...series.values()];
+  return { data: items.slice((page - 1) * limit, end), pagination: { page, limit, hasMore: items.length > end } };
+}
 // Paginate matching movies, not the mixed TV/movie upstream pages.
 export async function movieCatalog(page = 1, limit = 12, request = kkRequest) {
   page = Math.min(100, Math.max(1, parseInt(page) || 1));
@@ -134,7 +168,7 @@ export async function movieCatalog(page = 1, limit = 12, request = kkRequest) {
 }
 export const router = express.Router();
 const route = (method, path, fn) => router[method](path, async (req,res) => {
-  try { await fn(req,res); } catch (err) { console.warn('KKPhim:', err.message); res.status(502).json({ success:false, message:'Không tải được dữ liệu KKPhim. Hãy thử lại.' }); }
+  try { await fn(req,res); } catch (err) { console.warn('KKPhim:', err.message); res.status(err.status === 400 ? 400 : 502).json({ success:false, message:err.status === 400 ? err.message : 'Không tải được dữ liệu KKPhim. Hãy thử lại.' }); }
 });
 const send = (res, data) => res.json({ success:true, data, total: Array.isArray(data) ? data.length : undefined });
 route('get','/anime/spotlight', async (req,res) => {
@@ -188,6 +222,12 @@ route('get','/anime/movies', async (req,res) => {
 route('get','/anime/genres', async (req,res) => {
   const [action,romance] = await Promise.all([listing({category:'hanh-dong',limit:'8'}),listing({category:'tinh-cam',limit:'8'})]);
   send(res,{Action:action.items,Romance:romance.items});
+});
+route('get','/genre-options', async (req,res) => send(res, await genreOptions()));
+route('get','/anime/by-genres', async (req,res) => {
+  const categories = String(req.query.categories || '').split(',').filter(Boolean);
+  const result = await genreCatalog(categories, req.query.page, req.query.limit);
+  res.json({ success: true, ...result });
 });
 route('get','/anime/:id', async (req,res) => send(res,await movieDetail(req.params.id)));
 route('get','/anime/:id/seasons', async (req,res) => send(res,await relatedSeasons(await movieDetail(req.params.id))));

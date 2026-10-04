@@ -59,6 +59,7 @@ function initHeader() {
   });
   document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', () => {
+      if (link.id === 'genre-toggle') return;
       document.querySelectorAll('.nav-link').forEach(item => item.classList.remove('active'));
       link.classList.add('active');
       closeMenu();
@@ -67,6 +68,139 @@ function initHeader() {
   document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMenu(); });
   document.addEventListener('click', event => { if (!header.contains(event.target)) closeMenu(); });
   updateUserUI();
+}
+
+function initGenreDropdown() {
+  const toggle = document.getElementById('genre-toggle');
+  const form = document.getElementById('genre-dropdown');
+  const options = document.getElementById('genre-options');
+  const optionsStatus = document.getElementById('genre-options-status');
+  const retryOptions = document.getElementById('genre-options-retry');
+  const apply = document.getElementById('genre-apply');
+  const count = document.getElementById('genre-count');
+  const section = document.getElementById('section-genre-results');
+  const grid = document.getElementById('genre-results-grid');
+  const status = document.getElementById('genre-results-status');
+  const more = document.getElementById('genre-results-more');
+  let loaded = false, loadingOptions = false, selected = [], page = 0, busy = false, generation = 0;
+  const close = (focus = false) => {
+    form.hidden = true;
+    toggle.setAttribute('aria-expanded', 'false');
+    if (focus) toggle.focus();
+  };
+  const chosen = () => [...options.querySelectorAll('input:checked')];
+  const sync = () => {
+    const size = chosen().length;
+    count.hidden = size === 0;
+    count.textContent = String(size);
+    apply.disabled = size === 0;
+  };
+  async function loadOptions() {
+    if (loaded || loadingOptions) return;
+    loadingOptions = true;
+    retryOptions.hidden = true;
+    optionsStatus.textContent = 'Đang tải thể loại…';
+    try {
+      const response = await fetch('/api/genre-options');
+      const result = await response.json();
+      if (!response.ok || !result.success || !Array.isArray(result.data)) throw new Error();
+      options.replaceChildren();
+      result.data.forEach(genre => {
+        const label = document.createElement('label');
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.value = genre.slug;
+        input.dataset.label = genre.name;
+        label.append(input, document.createTextNode(genre.name));
+        options.appendChild(label);
+      });
+      loaded = true;
+      optionsStatus.textContent = '';
+    } catch {
+      optionsStatus.textContent = 'Không tải được thể loại.';
+      retryOptions.hidden = false;
+    } finally { loadingOptions = false; }
+  }
+  toggle.addEventListener('click', () => {
+    if (!form.hidden) return close();
+    form.hidden = false;
+    toggle.setAttribute('aria-expanded', 'true');
+    void loadOptions();
+  });
+  options.addEventListener('change', sync);
+  retryOptions.addEventListener('click', loadOptions);
+  document.getElementById('genre-reset').addEventListener('click', () => {
+    chosen().forEach(input => { input.checked = false; });
+    sync();
+  });
+  document.addEventListener('click', event => {
+    if (!event.target.closest('.nav-genres')) close();
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !form.hidden) close(true);
+  });
+  async function loadResults(reset = false) {
+    if (busy && !reset) return;
+    const request = ++generation;
+    busy = true;
+    more.disabled = true;
+    grid.setAttribute('aria-busy', 'true');
+    status.textContent = 'Đang tìm anime…';
+    try {
+      const params = new URLSearchParams({ categories: selected.join(','), page: reset ? 1 : page + 1, limit: 12 });
+      const response = await fetch('/api/anime/by-genres?' + params);
+      const result = await response.json();
+      if (request !== generation) return;
+      if (!response.ok || !result.success || !Array.isArray(result.data)) throw new Error();
+      const existing = new Set([...grid.children].map(card => card.dataset.seriesKey));
+      result.data.filter(anime => !existing.has(seriesKey(anime))).forEach(anime => grid.appendChild(renderCard(anime)));
+      page = result.pagination.page;
+      status.textContent = grid.children.length ? `Đã hiển thị ${grid.children.length} anime.` : 'Không tìm thấy anime có đủ các thể loại đã chọn. Hãy thử thay đổi lựa chọn.';
+      more.hidden = !result.pagination.hasMore;
+      more.textContent = 'Xem thêm anime';
+    } catch {
+      if (request !== generation) return;
+      status.textContent = 'Không tải được phim. Hãy thử lại.';
+      more.hidden = false;
+      more.textContent = 'Thử lại';
+    } finally {
+      if (request === generation) {
+        busy = false;
+        more.disabled = false;
+        grid.setAttribute('aria-busy', 'false');
+      }
+    }
+  }
+  form.addEventListener('submit', event => {
+    event.preventDefault();
+    const inputs = chosen();
+    if (!inputs.length) return;
+    selected = inputs.map(input => input.value);
+    page = 0;
+    grid.replaceChildren();
+    more.hidden = true;
+    section.hidden = false;
+    document.getElementById('genre-results-summary').textContent = inputs.map(input => input.dataset.label).join(' + ');
+    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+    toggle.classList.add('active');
+    close();
+    document.getElementById('site-header').classList.remove('menu-open');
+    document.getElementById('mobile-toggle-btn').setAttribute('aria-expanded', 'false');
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    void loadResults(true);
+  });
+  more.addEventListener('click', () => loadResults());
+  document.getElementById('genre-clear-filter').addEventListener('click', () => {
+    generation++;
+    busy = false;
+    selected = [];
+    section.hidden = true;
+    grid.replaceChildren();
+    chosen().forEach(input => { input.checked = false; });
+    sync();
+    toggle.classList.remove('active');
+    document.querySelector('[data-nav="home"]').classList.add('active');
+  });
 }
 
 async function refreshWatchlistCount() {
@@ -1216,6 +1350,7 @@ function initLoginModal() {
 document.addEventListener('DOMContentLoaded', async () => {
   initMovies();
   initHeader();
+  initGenreDropdown();
   await refreshWatchlistCount();
   await loadSpotlight();
   await loadCatalogs();
