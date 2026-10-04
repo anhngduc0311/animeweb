@@ -39,7 +39,9 @@ export async function verifyGoogleCredential(credential, expectedClientId) {
   if (!credential) {
     throw new Error('Thiếu thông tin Google ID Token (credential)');
   }
-  const verifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
+  const verifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`, {
+    signal: AbortSignal.timeout(10000)
+  });
   const payload = await verifyRes.json();
   if (!verifyRes.ok || payload.error) {
     throw new Error(payload.error_description || payload.error || 'Google ID Token không hợp lệ');
@@ -62,7 +64,9 @@ export async function verifyGoogleAccessToken(accessToken, expectedClientId) {
     throw new Error('Thiếu thông tin Google Access Token');
   }
 
-  const tokenInfoRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?access_token=${encodeURIComponent(accessToken)}`);
+  const tokenInfoRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?access_token=${encodeURIComponent(accessToken)}`, {
+    signal: AbortSignal.timeout(10000)
+  });
   const tokenInfo = await tokenInfoRes.json();
   if (!tokenInfoRes.ok || tokenInfo.error) {
     throw new Error(tokenInfo.error_description || tokenInfo.error || 'Google Access Token không hợp lệ hoặc đã hết hạn');
@@ -73,7 +77,8 @@ export async function verifyGoogleAccessToken(accessToken, expectedClientId) {
   }
 
   const userinfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-    headers: { Authorization: `Bearer ${accessToken}` }
+    headers: { Authorization: `Bearer ${accessToken}` },
+    signal: AbortSignal.timeout(10000)
   });
   const profile = await userinfoRes.json();
   if (!userinfoRes.ok || profile.error) {

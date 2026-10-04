@@ -67,24 +67,37 @@ export function updateUserUI() {
 }
 
 export function initGoogleServices(onSuccess) {
+  const resetGoogleBtn = () => {
+    const btn = document.getElementById('google-login-btn');
+    if (btn) {
+      const span = btn.querySelector('span');
+      if (span) span.textContent = 'Tiếp tục với Google';
+    }
+  };
+
   if (window.google?.accounts?.oauth2) {
     try {
       googleTokenClient = google.accounts.oauth2.initTokenClient({
         client_id: GOOGLE_CLIENT_ID,
         scope: 'email profile openid',
         callback: async (tokenResponse) => {
-          if (tokenResponse && tokenResponse.access_token) {
-            const res = await LinimeAPI.googleLogin({ access_token: tokenResponse.access_token });
-            if (res.success && res.user) {
-              await onSuccess(res.user);
-            } else {
-              showToast(res.message || 'Đăng nhập Google thất bại');
+          try {
+            if (tokenResponse && tokenResponse.access_token) {
+              const res = await LinimeAPI.googleLogin({ access_token: tokenResponse.access_token });
+              if (res.success && res.user) {
+                await onSuccess(res.user);
+              } else {
+                showToast(res.message || 'Đăng nhập Google thất bại');
+              }
             }
+          } finally {
+            resetGoogleBtn();
           }
         }
       });
     } catch (err) {
       console.warn('Google Token Client init error:', err);
+      resetGoogleBtn();
     }
   }
 
@@ -93,19 +106,24 @@ export function initGoogleServices(onSuccess) {
       google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: async (response) => {
-          if (response && response.credential) {
-            const res = await LinimeAPI.googleLogin({ credential: response.credential });
-            if (res.success && res.user) {
-              await onSuccess(res.user);
-            } else {
-              showToast(res.message || 'Đăng nhập Google thất bại');
+          try {
+            if (response && response.credential) {
+              const res = await LinimeAPI.googleLogin({ credential: response.credential });
+              if (res.success && res.user) {
+                await onSuccess(res.user);
+              } else {
+                showToast(res.message || 'Đăng nhập Google thất bại');
+              }
             }
+          } finally {
+            resetGoogleBtn();
           }
         },
         auto_select: false
       });
     } catch (err) {
       console.warn('Google GSI init error:', err);
+      resetGoogleBtn();
     }
   }
 }

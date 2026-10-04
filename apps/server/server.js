@@ -37,8 +37,8 @@ if (isDirectRun) {
   };
   void refreshSearch();
   setInterval(refreshSearch, 15 * 60 * 1000).unref();
-  app.listen(PORT, () => {
-    console.log(`🚀 Linime API Server is running on http://localhost:${PORT}`);
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Linime API Server is running on http://127.0.0.1:${PORT}`);
     console.log(`🐘 Connected to PostgreSQL (Docker container on port ${process.env.PGPORT || 5438})`);
   });
 }

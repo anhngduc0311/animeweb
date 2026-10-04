@@ -354,14 +354,29 @@ export const LinimeAPI = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(authPayload)
       });
-      const data = await res.json();
-      if (data.success && data.token) {
+      const contentType = res.headers.get('content-type') || '';
+      const data = contentType.includes('application/json') ? await res.json() : null;
+
+      if (!res.ok) {
+        if (res.status === 502) {
+          return {
+            success: false,
+            message: 'Máy chủ backend đang khởi động hoặc chưa sẵn sàng (502 Bad Gateway). Vui lòng thử lại sau vài giây.'
+          };
+        }
+        return {
+          success: false,
+          message: data?.message || `Lỗi máy chủ (${res.status})`
+        };
+      }
+
+      if (data?.success && data.token) {
         this.setToken(data.token);
       }
-      return data;
+      return data || { success: false, message: 'Dữ liệu phản hồi không hợp lệ' };
     } catch (err) {
       console.error('googleLogin error:', err);
-      return { success: false, message: 'Lỗi kết nối máy chủ xác thực' };
+      return { success: false, message: 'Lỗi kết nối máy chủ xác thực. Vui lòng thử lại.' };
     }
   },
 
@@ -372,11 +387,26 @@ export const LinimeAPI = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
       });
-      const data = await res.json();
-      if (data.success && data.token) {
+      const contentType = res.headers.get('content-type') || '';
+      const data = contentType.includes('application/json') ? await res.json() : null;
+
+      if (!res.ok) {
+        if (res.status === 502) {
+          return {
+            success: false,
+            message: 'Máy chủ backend đang khởi động hoặc chưa sẵn sàng (502 Bad Gateway). Vui lòng thử lại sau vài giây.'
+          };
+        }
+        return {
+          success: false,
+          message: data?.message || `Lỗi máy chủ (${res.status})`
+        };
+      }
+
+      if (data?.success && data.token) {
         this.setToken(data.token);
       }
-      return data;
+      return data || { success: false, message: 'Dữ liệu phản hồi không hợp lệ' };
     } catch (err) {
       console.error('loginWithCredentials error:', err);
       return { success: false, message: 'Lỗi kết nối máy chủ xác thực' };
