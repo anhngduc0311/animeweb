@@ -2,6 +2,8 @@ import { pool } from '../db/db.js';
 import { seriesKey, seriesTitle, seasonNumber, groupSeries } from '../../../shared/series.js';
 import { AdminAnimeModel } from '../models/adminAnime.model.js';
 import { ConfigModel } from '../models/config.model.js';
+import { nguoncDetail, searchNguonc } from './nguonc.service.js';
+import { normalizeProviderAnime } from '../../../shared/providers.js';
 
 const cache = new Map();
 const pending = new Map();
@@ -37,7 +39,7 @@ const image = value => {
 
 export function mapMovie(m) {
   const movie = m.tmdb?.type === 'movie' || m.type === 'single';
-  return {
+  return normalizeProviderAnime({
     id: m.slug,
     title: { english: m.origin_name || m.name, vietnamese: m.name, romaji: m.origin_name || m.name },
     seriesId: !movie && m.tmdb?.type === 'tv' ? m.tmdb.id || null : null,
@@ -62,7 +64,7 @@ export function mapMovie(m) {
     isMovie: movie,
     language: m.lang || '',
     source: 'AniDoki'
-  };
+  });
 }
 
 export function extractEpisodes(detail) {
@@ -79,6 +81,7 @@ export function extractEpisodes(detail) {
     id: ep.slug,
     title: ep.name,
     embed: ep.link_embed,
+    stream: /^https:\/\//i.test(ep.link_m3u8 || '') ? ep.link_m3u8 : null,
     duration: detail.movie?.time || ''
   }));
 }
@@ -122,9 +125,14 @@ export async function movieDetail(slug) {
     throw error;
   }
 
-  const detail = await kkRequest('/phim/' + slug);
-  if (!detail.movie) throw new Error('Không tìm thấy phim');
-  let anime = { ...mapMovie(detail.movie), episodes: extractEpisodes(detail) };
+  let anime;
+  if (slug.startsWith('nguonc-')) {
+    anime = await nguoncDetail(slug);
+  } else {
+    const detail = await kkRequest('/phim/' + slug);
+    if (!detail.movie) throw new Error('Không tìm thấy phim');
+    anime = { ...mapMovie(detail.movie), episodes: extractEpisodes(detail) };
+  }
 
   if (override) {
     anime = applyAnimeOverride(anime, override);
@@ -282,8 +290,14 @@ export async function browseCatalog(params = {}) {
   if (q && q.trim()) {
     const keyword = q.trim().slice(0, 150);
     const query = new URLSearchParams({ keyword, limit: '64', country: 'nhat-ban' });
-    const data = await kkRequest('/v1/api/tim-kiem?' + query);
-    let items = (data.data?.items || []).filter(m => m.type === 'hoathinh').map(mapMovie);
+    const results = await Promise.allSettled([
+      kkRequest('/v1/api/tim-kiem?' + query), searchNguonc(keyword)
+    ]);
+    if (results.every(r => r.status === 'rejected')) throw new Error('Không tải được các nguồn phim');
+    let items = [
+      ...(results[0].value?.data?.items || []).filter(m => m.type === 'hoathinh').map(mapMovie),
+      ...(results[1].value || [])
+    ];
 
     items = items.filter(m => !hiddenSet.has(m.id)).map(m => {
       const o = overridesMap.get(m.id);

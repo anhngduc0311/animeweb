@@ -4,6 +4,7 @@ import { router } from '../router.js';
 import { showToast, formatTime } from '../utils/ui.js';
 import { openAnimeDetail } from './DetailView.js';
 import { loadContinueWatching } from './HomeView.js';
+import { validEmbed } from '../../../../shared/providers.js';
 
 const INITIAL_ANIME_DATA = [];
 
@@ -13,6 +14,7 @@ let streamRequest = 0;
 let lastProgressSave = 0;
 let activeProvider = 'AniDoki';
 let activeLanguage = 'sub';
+let hlsPlayer = null;
 
 
 export async function openPlayerByRoute(animeId, episodeNumber = 1) {
@@ -42,7 +44,11 @@ export async function openPlayerByRoute(animeId, episodeNumber = 1) {
 
   const epNum = parseInt(episodeNumber, 10) || 1;
   let idx = state.currentEpisodes.findIndex(e => Number(e.number) === epNum);
-  if (idx === -1) idx = 0;
+  if (idx === -1) {
+    showToast('Nguồn này chưa có tập được chọn. Hãy chọn tập trong danh sách.');
+    router.navigate(`/anime/${animeId}`, true);
+    return;
+  }
 
   await openPlayer(anime, idx, 0, false);
 }
@@ -50,6 +56,8 @@ export async function openPlayerByRoute(animeId, episodeNumber = 1) {
 async function openPlayer(anime, episodeIndex = 0, resumeTime = 0, pushRoute = true) {
   state.currentVideoAnime = anime;
   state.currentEpisodeIndex = episodeIndex;
+  activeProvider = anime.source || 'AniDoki';
+  void renderSourceChoices(anime, state.currentEpisodes[episodeIndex]?.number || 1);
 
   // Đảm bảo nạp đầy đủ danh sách tập từ API nếu chưa có
   if (!state.currentEpisodes.length || state.currentVideoAnime?.id !== anime.id) {
@@ -62,7 +70,7 @@ async function openPlayer(anime, episodeIndex = 0, resumeTime = 0, pushRoute = t
   }
 
   if (!state.currentEpisodes.length) {
-    showToast('AniDoki chưa có tập Vietsub cho phim này.');
+    showToast('Nguồn này chưa có tập Vietsub cho phim này.');
     return;
   }
 
@@ -132,6 +140,10 @@ async function loadLiveAnimeStream(animeId, episodeNumber, provider, language, r
   const controls = document.getElementById('player-controls');
 
   const requestId = ++streamRequest;
+  hlsPlayer?.destroy();
+  hlsPlayer = null;
+  video.onloadedmetadata = null;
+  video.onerror = null;
   lastProgressSave = 0;
   video.pause();
   video.removeAttribute('src');
@@ -140,7 +152,8 @@ async function loadLiveAnimeStream(animeId, episodeNumber, provider, language, r
   iframe.style.display = 'none';
   if (controls) controls.style.display = 'none';
   document.getElementById('player-notice-banner')?.remove();
-  showToast('Đang tải nguồn AniDoki • Vietsub...');
+  showToast(`Đang tải nguồn ${provider} • Vietsub...`);
+  document.getElementById('player-source-label').textContent = `${provider} • Phụ đề Việt`;
   try {
     const res = await fetch('/api/watch/sources', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -148,10 +161,44 @@ async function loadLiveAnimeStream(animeId, episodeNumber, provider, language, r
     });
     const data = await res.json();
     if (requestId !== streamRequest) return;
-    if (!res.ok || !data.success || data.type !== 'embed') throw new Error(data.message || 'Tập hoặc ngôn ngữ này chưa có nguồn phát.');
+    if (!res.ok || !data.success) throw new Error(data.message || 'Tập hoặc ngôn ngữ này chưa có nguồn phát.');
+    if (data.type === 'hls') {
+      const streamUrl = new URL(data.stream_url);
+      if (streamUrl.protocol !== 'https:' || streamUrl.username || streamUrl.password) throw new Error('Địa chỉ video không hợp lệ.');
+      video.controls = true;
+      video.style.display = 'block';
+      video.onloadedmetadata = () => {
+        if (requestId !== streamRequest) return;
+        if (resumeTime > 0 && Number.isFinite(video.duration)) video.currentTime = Math.min(resumeTime, Math.max(0, video.duration - 1));
+      };
+      video.onerror = () => {
+        if (requestId === streamRequest) showPlayerNotice('Không tải được video trực tiếp. Hãy thử lại hoặc chọn nguồn khác.');
+      };
+      const { default: Hls } = await import('hls.js');
+      if (requestId !== streamRequest) return;
+      if (!Hls.isSupported() && video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = streamUrl.href;
+      } else {
+        if (!Hls.isSupported()) throw new Error('Trình duyệt này chưa hỗ trợ phát video trực tiếp.');
+        hlsPlayer = new Hls();
+        hlsPlayer.on(Hls.Events.ERROR, (_event, error) => {
+          if (error.fatal && requestId === streamRequest) {
+            console.warn('Direct playback failed:', error.details);
+            hlsPlayer?.destroy();
+            hlsPlayer = null;
+            showPlayerNotice('Không tải được video trực tiếp. Hãy thử lại hoặc chọn nguồn khác.');
+          }
+        });
+        hlsPlayer.loadSource(streamUrl.href);
+        hlsPlayer.attachMedia(video);
+      }
+      return;
+    }
+    if (data.type !== 'embed') throw new Error('Nguồn phát không hợp lệ.');
     const url = new URL(data.embed_url);
-    if (url.origin !== ('https://player.phimapi.com')) throw new Error('Địa chỉ trình phát không hợp lệ.');
-    document.getElementById('player-source-label').textContent = 'AniDoki • Phụ đề Việt';
+    if (!validEmbed(url.href, data.provider)) throw new Error('Địa chỉ trình phát không hợp lệ.');
+    document.getElementById('player-source-label').textContent = `${data.provider} • Phụ đề Việt`;
+    iframe.title = `Trình phát ${data.provider}`;
     iframe.src = url.href;
     iframe.style.display = 'block';
     LinimeAPI.saveProgress(animeId, episodeNumber, 0, 0);
@@ -160,6 +207,34 @@ async function loadLiveAnimeStream(animeId, episodeNumber, provider, language, r
   } catch (err) {
     if (requestId === streamRequest) showPlayerNotice(err.message);
   }
+}
+
+let sourceRequest = 0;
+async function renderSourceChoices(anime, episodeNumber) {
+  const request = ++sourceRequest;
+  const container = document.getElementById('player-source-options');
+  const render = sources => {
+    container.replaceChildren();
+    for (const source of sources) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = `prov-btn${source.id === anime.id ? ' active' : ''}`;
+      button.textContent = source.source;
+      button.setAttribute('aria-pressed', String(source.id === anime.id));
+      button.addEventListener('click', () => {
+        if (source.id !== anime.id) router.navigate(`/watch/${source.id}/${episodeNumber}`);
+      });
+      container.append(button);
+    }
+  };
+  render([{ id: anime.id, source: anime.source || 'AniDoki' }]);
+  try {
+    const response = await fetch(`/api/anime/${encodeURIComponent(anime.id)}/seasons`);
+    const result = await response.json();
+    if (request !== sourceRequest || state.currentVideoAnime?.id !== anime.id) return;
+    const season = result.data?.find(s => s.sources?.some(source => source.id === anime.id));
+    if (season?.sources?.length) render(season.sources);
+  } catch { /* The current source remains usable when discovery is unavailable. */ }
 }
 
 function showPlayerNotice(message) {
@@ -272,6 +347,8 @@ export function initPlayerControls() {
   // Đóng player
   document.getElementById('close-player-btn')?.addEventListener('click', async () => {
     ++streamRequest;
+    hlsPlayer?.destroy();
+    hlsPlayer = null;
     if (state.currentVideoAnime && video && video.currentTime > 0) {
       const episodeList = state.currentEpisodes.length ? state.currentEpisodes : (state.currentVideoAnime.episodes || []);
       const episode = episodeList[state.currentEpisodeIndex];
@@ -315,7 +392,8 @@ export function initPlayerControls() {
       timeDisplay.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
 
       // Sync progress to API every 5 seconds
-      if (Math.floor(video.currentTime) % 5 === 0 && state.currentVideoAnime) {
+      if (Date.now() - lastProgressSave >= 5000 && state.currentVideoAnime && video.currentTime > 0) {
+        lastProgressSave = Date.now();
         const episodeList = state.currentEpisodes.length ? state.currentEpisodes : (state.currentVideoAnime.episodes || []);
         const episode = episodeList[state.currentEpisodeIndex];
         LinimeAPI.saveProgress(state.currentVideoAnime.id, episode?.number || 1, video.currentTime, video.duration);
@@ -450,4 +528,3 @@ export function updatePlayPauseIcon(isPlaying) {
 
 
 // ==========================================
-

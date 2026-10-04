@@ -14,6 +14,7 @@ import {
 } from '../services/kkphim.service.js';
 import { ConfigModel } from '../models/config.model.js';
 import { pool } from '../db/db.js';
+import { allRelatedSeasons } from '../services/catalogSources.service.js';
 
 const send = (res, data) => res.json({ success: true, data, total: Array.isArray(data) ? data.length : undefined });
 
@@ -167,7 +168,7 @@ export const CatalogController = {
   async getAnimeSeasons(req, res) {
     try {
       const detail = await movieDetail(req.params.id);
-      send(res, await relatedSeasons(detail));
+      send(res, await allRelatedSeasons(detail));
     } catch (err) {
       const status = err.status && [400, 401, 403, 404, 409, 429].includes(err.status) ? err.status : 502;
       res.status(status).json({ success: false, message: err.message || 'Không tải được các mùa phim' });
@@ -211,8 +212,9 @@ export const CatalogController = {
 
       const movie = await movieDetail(anime_id);
       const ep = movie.episodes.find(ep => ep.number === Number(episode_number));
-      if (!ep) return res.status(404).json({ success: false, message: 'AniDoki chưa có tập Vietsub này.' });
-      res.json({ success: true, type: 'embed', provider: 'AniDoki', language: 'vi', embed_url: ep.embed });
+      if (!ep) return res.status(404).json({ success: false, message: 'Nguồn này chưa có tập Vietsub được yêu cầu.' });
+      if (ep.stream) return res.json({ success: true, type: 'hls', provider: movie.source, language: 'vi', stream_url: ep.stream });
+      res.json({ success: true, type: 'embed', provider: movie.source, language: 'vi', embed_url: ep.embed });
     } catch (err) {
       const status = err.status && [400, 401, 403, 404, 409, 429].includes(err.status) ? err.status : 502;
       res.status(status).json({ success: false, message: err.message || 'Không thể phát tập phim này' });
@@ -223,8 +225,8 @@ export const CatalogController = {
     try {
       const keyword = String(req.query.q || '').slice(0, 150);
       if (!keyword.trim()) return send(res, []);
-      const data = await kkRequest('/v1/api/tim-kiem?' + new URLSearchParams({ keyword, limit: '64', country: 'nhat-ban' }));
-      send(res, (data.data?.items || []).filter(m => m.type === 'hoathinh').map(mapMovie));
+      const result = await browseCatalog({ q: keyword, limit: 48 });
+      send(res, result.items);
     } catch (err) {
       console.warn('AniDoki Search Error:', err.message);
       res.status(502).json({ success: false, message: 'Lỗi tìm kiếm phim' });

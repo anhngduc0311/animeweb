@@ -130,7 +130,7 @@ async function loadSeasonSelector(anime, request) {
       button.className = 'season-option';
       button.dataset.animeId = season.id;
       button.textContent = `Mùa ${seasonNumber(season)}${season.year ? ` · ${season.year}` : ''}`;
-      button.title = season.title.vietnamese || season.title.english;
+      button.title = `${season.title.vietnamese || season.title.english} · ${(season.sources || [{ source: season.source }]).map(s => s.source).join(', ')}`;
       button.setAttribute('aria-pressed', String(season.id === anime.id));
       button.addEventListener('click', () => {
         if (season.id === state.currentDetailAnime?.id) return;

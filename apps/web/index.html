@@ -677,6 +677,7 @@
           Trình duyệt của bạn không hỗ trợ phát video HTML5.
         </video>
         <iframe class="video-element" id="anime-iframe" title="Trình phát AniDoki / PhimAPI"
+          sandbox="allow-scripts allow-same-origin allow-presentation"
           referrerpolicy="strict-origin-when-cross-origin"
           style="display: none; width: 100%; height: 100%; border: none;"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -757,7 +758,7 @@
           <div class="servers-groups">
             <div class="server-group">
               <span class="group-label">NGUỒN PHÁT</span>
-              <div class="server-buttons">
+              <div class="server-buttons" id="player-source-options">
                 <span class="prov-btn active" data-provider="AniDoki">AniDoki</span>
               </div>
             </div>
