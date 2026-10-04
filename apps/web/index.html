@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="description" content="anidoki — Nền tảng xem anime online độ nét cao, giao diện chuẩn điện ảnh, vietsub mượt mà và cập nhật nhanh nhất.">
+  <meta name="description"
+    content="anidoki — Nền tảng xem anime online độ nét cao, giao diện chuẩn điện ảnh, vietsub mượt mà và cập nhật nhanh nhất.">
   <meta name="keywords" content="anime vietsub, xem anime online, anidoki, one piece, jujutsu kaisen, anime mùa mới">
   <meta property="og:title" content="anidoki — Xem anime online">
-  <meta property="og:description" content="Xem anime mới, anime thịnh hành và phim lẻ chất lượng cao miễn phí trên anidoki.">
+  <meta property="og:description"
+    content="Xem anime mới, anime thịnh hành và phim lẻ chất lượng cao miễn phí trên anidoki.">
   <meta property="og:type" content="website">
   <meta name="theme-color" content="#0c0c0e">
 
@@ -15,11 +18,14 @@
   <!-- Google Fonts: Space Grotesk & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
 
   <link rel="stylesheet" href="/src/style.css">
   <link rel="stylesheet" href="/src/refinement.css">
 </head>
+
 <body>
   <!-- ==========================================
        SITE HEADER
@@ -45,7 +51,8 @@
       <div class="header-actions">
         <!-- Live Search Trigger -->
         <button class="search-trigger" id="open-search-btn" aria-label="Tìm kiếm anime">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
@@ -55,7 +62,8 @@
 
         <!-- Watchlist Button -->
         <button class="icon-btn" id="open-watchlist-btn" title="Danh sách xem sau" aria-label="Danh sách xem sau">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
             <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
           </svg>
           <span class="badge-count" id="watchlist-count">0</span>
@@ -63,7 +71,8 @@
 
         <!-- User / Login Button -->
         <button class="btn-login" id="open-login-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
@@ -71,7 +80,8 @@
         </button>
 
         <!-- Mobile Menu Toggle -->
-        <button class="icon-btn mobile-menu-btn" id="mobile-toggle-btn" aria-label="Menu di động" aria-controls="main-navigation" aria-expanded="false">
+        <button class="icon-btn mobile-menu-btn" id="mobile-toggle-btn" aria-label="Menu di động"
+          aria-controls="main-navigation" aria-expanded="false">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="3" y1="12" x2="21" y2="12"></line>
             <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -222,7 +232,8 @@
         <button type="button" class="section-link" id="view-all-seasonal">Xem tất cả →</button>
       </div>
       <div class="anime-grid" id="seasonal-grid"></div>
-      <button class="btn-secondary" id="load-more-seasonal" style="margin-top:24px">Xem thêm anime tâm lý & tình cảm</button>
+      <button class="btn-secondary" id="load-more-seasonal" style="margin-top:24px">Xem thêm anime tâm lý & tình
+        cảm</button>
     </section>
 
     <!-- Anime Movies Section -->
@@ -298,7 +309,9 @@
           <div class="detail-eyebrow">
             <div class="detail-score-badge" id="detail-score-wrap">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                <polygon
+                  points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                </polygon>
               </svg>
               <span id="detail-score-val">8.7</span>
             </div>
@@ -444,7 +457,8 @@
           <!-- Tab Content: Related Manga -->
           <div class="tab-pane" id="tab-related" style="display: none;">
             <p class="detail-synopsis" id="detail-related-text">
-              Truyện tranh One Piece sáng tác bởi Eiichiro Oda, phát hành hàng tuần trên tạp chí Weekly Shonen Jump. Đang ở cao trào Final Saga và Đảo Tương Lai Egghead.
+              Truyện tranh One Piece sáng tác bởi Eiichiro Oda, phát hành hàng tuần trên tạp chí Weekly Shonen Jump.
+              Đang ở cao trào Final Saga và Đảo Tương Lai Egghead.
             </p>
           </div>
         </div>
@@ -475,7 +489,11 @@
           <source src="" type="video/mp4">
           Trình duyệt của bạn không hỗ trợ phát video HTML5.
         </video>
-        <iframe class="video-element" id="anime-iframe" title="Trình phát Anikoto / MegaPlay" referrerpolicy="strict-origin-when-cross-origin" style="display: none; width: 100%; height: 100%; border: none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <iframe class="video-element" id="anime-iframe" title="Trình phát Anikoto / MegaPlay"
+          referrerpolicy="strict-origin-when-cross-origin"
+          style="display: none; width: 100%; height: 100%; border: none;"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen></iframe>
 
         <!-- Custom Controls Overlay -->
         <div class="custom-controls" id="player-controls">
@@ -512,7 +530,9 @@
               <button class="player-btn" id="speed-btn" style="font-size: 13px; font-weight: 700;">1.0x</button>
               <button class="player-btn" id="fullscreen-btn" aria-label="Toàn màn hình">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                  <path
+                    d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3">
+                  </path>
                 </svg>
               </button>
             </div>
@@ -524,7 +544,8 @@
       <div class="watch-bottom-panel" id="watch-bottom-panel">
         <!-- Quick toggles row -->
         <div class="watch-quick-bar">
-          <label class="quick-toggle" title="Player KKPhim chưa hỗ trợ tự chuyển tập"><input type="checkbox" id="chk-autonext" disabled> <span>Tự chuyển tập</span></label>
+          <label class="quick-toggle" title="Player KKPhim chưa hỗ trợ tự chuyển tập"><input type="checkbox"
+              id="chk-autonext" disabled> <span>Tự chuyển tập</span></label>
           <button class="quick-btn" id="btn-light">💡 Tắt đèn</button>
         </div>
 
@@ -548,7 +569,7 @@
         <div class="watch-servers-box">
           <h3 class="current-ep-heading" id="current-ep-heading">1. Episode 1</h3>
           <div class="servers-groups">
-<div class="server-group">
+            <div class="server-group">
               <span class="group-label">NGUỒN PHÁT</span>
               <div class="server-buttons">
                 <span class="prov-btn active">KKPhim</span>
@@ -596,16 +617,21 @@
        ========================================== -->
   <div class="login-modal" id="login-modal">
     <div class="login-card">
-      <button class="detail-close-btn" id="close-login-btn" style="position: absolute; top: 16px; right: 16px; width: 36px; height: 36px;">✕</button>
+      <button class="detail-close-btn" id="close-login-btn"
+        style="position: absolute; top: 16px; right: 16px; width: 36px; height: 36px;">✕</button>
       <img class="brand-logo login-logo" src="/brand/anidoki-white.svg?v=6" alt="anidoki" width="1616" height="358">
       <h2>Chào mừng đến anidoki</h2>
       <p>Lưu tiến trình xem, đồng bộ danh sách yêu thích và nhận thông báo khi có tập mới.</p>
       <button class="oauth-btn" id="google-login-btn">
         <svg width="20" height="20" viewBox="0 0 24 24">
-          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          <path fill="#4285F4"
+            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+          <path fill="#34A853"
+            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+          <path fill="#FBBC05"
+            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+          <path fill="#EA4335"
+            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
         </svg>
         <span>Tiếp tục với Google</span>
       </button>
@@ -624,14 +650,15 @@
         <img class="brand-logo" src="/brand/anidoki-white.svg?v=6" alt="anidoki" width="1616" height="358">
       </div>
       <p class="footer-disclaimer">
-        anidoki không lưu trữ bất kỳ tệp video nào trên máy chủ của mình. Tất cả nội dung được cung cấp bởi các bên thứ ba không liên kết. Trang web hoạt động phi thương mại nhằm phục vụ cộng đồng người yêu thích hoạt hình anime.
+        anidoki không lưu trữ bất kỳ tệp video nào trên máy chủ của mình. Tất cả nội dung được cung cấp bởi các bên thứ
+        ba không liên kết. Trang web hoạt động phi thương mại nhằm phục vụ cộng đồng người yêu thích hoạt hình anime.
       </p>
-      <div class="footer-copy">© 2026 anidoki. Toàn bộ hình ảnh và dữ liệu bản quyền thuộc về tác giả và nhà sản xuất gốc.</div>
+      <div class="footer-copy">© 2026 anidoki. Toàn bộ hình ảnh và dữ liệu bản quyền thuộc về tác giả và nhà sản xuất
+        gốc.</div>
     </div>
   </footer>
 
   <script type="module" src="/src/main.js"></script>
 </body>
+
 </html>
-
-

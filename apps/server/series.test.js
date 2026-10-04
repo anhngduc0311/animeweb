@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { groupSeries, seriesTitle, seasonNumber } from '../../shared/series.js';
+import { groupSeries, seriesKey, seriesTitle, seasonNumber } from '../../shared/series.js';
 import { mapMovie, relatedSeasons } from './kkphim.js';
 
 const raw = (slug, season, id = '134667') => ({ slug, name: `Chuyển Sinh Thành Kiếm (Phần ${season})`, origin_name: `Reincarnated As A Sword (Season ${season})`, type: 'hoathinh', tmdb: { id, type: 'tv', season } });
@@ -32,4 +32,22 @@ test('related seasons discovers other result pages, excludes remakes and movies,
     return { data: { items, params: { pagination: { totalPages: 2 } } } };
   });
   assert.deepEqual(result.map(s => s.id), ['sword-one', 'sword-two']);
+});
+
+test('season-suffixed provider IDs resolve all four Classroom seasons from any season', async () => {
+  const entries = [1, 2, 3, 4].map(n => ({
+    slug: `classroom-season-${n}`, type: 'hoathinh',
+    name: `Chào Mừng Đến Với Lớp Học Đề Cao Thực Lực (Phần ${n})`,
+    origin_name: `Classroom Of The Elite (Season ${n})`,
+    tmdb: { type: 'tv', id: n <= 2 ? `72517-${n}` : '72517', season: n }
+  }));
+  const mapped = entries.map(mapMovie);
+  assert.equal(groupSeries(mapped).length, 1);
+  for (const current of mapped) {
+    const seasons = await relatedSeasons(current, async () => ({ data: { items: entries } }));
+    assert.deepEqual(seasons.map(seasonNumber), [1, 2, 3, 4]);
+  }
+  assert.equal(seriesKey({ ...mapped[0], seriesId: '72517-9' }), 'tv:72517-9');
+  assert.equal(seriesKey({ seriesId: '72517-1', title: {} }), 'tv:72517-1');
+  assert.notEqual(seriesKey({ ...mapped[0], seriesId: '99999-1' }), seriesKey(mapped[0]));
 });
