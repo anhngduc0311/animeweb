@@ -68,3 +68,6 @@ npm install
 - **Frontend (`apps/web`)**: Chạy tại `http://localhost:5173`, tích hợp proxy tự động `/api` sang backend `http://localhost:3000`.
 - **Backend API (`apps/server`)**: Cung cấp dữ liệu anime qua KKPhim API (`https://phimapi.com`), quản lý watchlist và watch history bằng PostgreSQL.
 - **Turborepo Pipelines (`turbo.json`)**: Tối ưu hóa build cache, song song hóa dev/build/test pipelines.
+
+
+sudo apt update && sudo apt install -y git && sudo apt install nano -y

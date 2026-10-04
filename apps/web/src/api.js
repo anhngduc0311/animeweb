@@ -1,7 +1,7 @@
-// API Client - Giao tiếp với Linime Backend REST API
+// API Client - Giao tiếp với AniDoki Backend REST API
 const API_BASE = '/api';
 
-export const LinimeAPI = {
+export const AniDokiAPI = {
   // 1. Catalog APIs
   async getSpotlight() {
     try {
@@ -131,19 +131,17 @@ export const LinimeAPI = {
 
   // Token Storage Helpers
   getToken() {
-    return localStorage.getItem('anidoki_token') || localStorage.getItem('linime_token');
+    return localStorage.getItem('anidoki_token');
   },
 
   setToken(token) {
     if (token) {
       localStorage.setItem('anidoki_token', token);
-      localStorage.setItem('linime_token', token);
     }
   },
 
   clearToken() {
     localStorage.removeItem('anidoki_token');
-    localStorage.removeItem('linime_token');
   },
 
   getAuthHeaders(extra = {}) {

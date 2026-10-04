@@ -1,4 +1,4 @@
-import { LinimeAPI } from '../api.js';
+import { AniDokiAPI } from '../api.js';
 import { state } from '../store/state.js';
 import { showToast } from '../utils/ui.js';
 
@@ -83,7 +83,7 @@ export function initGoogleServices(onSuccess) {
         callback: async (tokenResponse) => {
           try {
             if (tokenResponse && tokenResponse.access_token) {
-              const res = await LinimeAPI.googleLogin({ access_token: tokenResponse.access_token });
+              const res = await AniDokiAPI.googleLogin({ access_token: tokenResponse.access_token });
               if (res.success && res.user) {
                 await onSuccess(res.user);
               } else {
@@ -108,7 +108,7 @@ export function initGoogleServices(onSuccess) {
         callback: async (response) => {
           try {
             if (response && response.credential) {
-              const res = await LinimeAPI.googleLogin({ credential: response.credential });
+              const res = await AniDokiAPI.googleLogin({ credential: response.credential });
               if (res.success && res.user) {
                 await onSuccess(res.user);
               } else {
@@ -129,7 +129,7 @@ export function initGoogleServices(onSuccess) {
 }
 
 export async function restoreUserSession() {
-  const token = LinimeAPI.getToken();
+  const token = AniDokiAPI.getToken();
   if (!token) {
     state.user = null;
     updateUserUI();
@@ -137,16 +137,15 @@ export async function restoreUserSession() {
   }
 
   try {
-    const res = await LinimeAPI.getMe();
+    const res = await AniDokiAPI.getMe();
     if (res.success && res.user) {
       state.user = res.user;
       localStorage.setItem('anidoki_user', JSON.stringify(res.user));
     } else {
       state.user = null;
       state.watchlistIds = [];
-      LinimeAPI.clearToken();
+      AniDokiAPI.clearToken();
       localStorage.removeItem('anidoki_user');
-      localStorage.removeItem('linime_user');
       if (res.code === 'SESSION_EXPIRED') {
         showToast('Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.');
       } else if (res.code === 'ACCOUNT_BANNED') {
@@ -214,11 +213,10 @@ export function initLoginModal(callbacks = {}) {
 
   // Nút Đăng xuất
   logoutBtn?.addEventListener('click', async () => {
-    await LinimeAPI.logout();
+    await AniDokiAPI.logout();
     state.user = null;
     state.watchlistIds = [];
     localStorage.removeItem('anidoki_user');
-    localStorage.removeItem('linime_user');
     updateUserUI();
     if (onLogout) await onLogout();
     showToast('Đã đăng xuất tài khoản.');
@@ -332,7 +330,7 @@ export function initLoginModal(callbacks = {}) {
     }
 
     try {
-      const res = await LinimeAPI.loginWithCredentials(username, password);
+      const res = await AniDokiAPI.loginWithCredentials(username, password);
       if (res.success && res.user) {
         await handleLoginSuccess(res.user);
         if (adminForm) adminForm.reset();
@@ -378,7 +376,7 @@ export function initLoginModal(callbacks = {}) {
     }
 
     try {
-      const res = await LinimeAPI.registerWithCredentials({ name, email, username, password });
+      const res = await AniDokiAPI.registerWithCredentials({ name, email, username, password });
       if (res.success && res.user) {
         if (registerForm) registerForm.reset();
         await handleLoginSuccess(res.user);

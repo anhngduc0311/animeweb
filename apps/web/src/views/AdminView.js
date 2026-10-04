@@ -1,4 +1,4 @@
-import { LinimeAPI } from '../api.js';
+import { AniDokiAPI } from '../api.js';
 import { state } from '../store/state.js';
 import { switchView, showToast, showConfirmModal } from '../utils/ui.js';
 import { router } from '../router.js';
@@ -92,7 +92,7 @@ export async function loadAdminView(subTab = 'dashboard', param = null) {
 }
 
 async function loadAdminDashboard() {
-  const res = await LinimeAPI.getAdminDashboard();
+  const res = await AniDokiAPI.getAdminDashboard();
   if (!res.success) {
     showToast(res.message || 'Lỗi tải dữ liệu tổng quan admin');
     return;
@@ -160,7 +160,7 @@ async function loadAdminAnimeList(page = 1) {
     visibility: visibilitySelect?.value || 'all'
   };
 
-  const res = await LinimeAPI.getAdminAnime(params);
+  const res = await AniDokiAPI.getAdminAnime(params);
   if (!res.success) {
     if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 40px; color: #ff5252;">${res.message || 'Lỗi tải danh sách anime'}</td></tr>`;
     return;
@@ -230,7 +230,7 @@ async function loadAdminAnimeList(page = 1) {
           title: nextHidden ? 'Xác nhận ẩn phim' : 'Xác nhận mở lại phim',
           message: confirmMsg,
           onConfirm: async () => {
-            const toggleRes = await LinimeAPI.toggleAdminAnimeVisibility(anime.id, nextHidden);
+            const toggleRes = await AniDokiAPI.toggleAdminAnimeVisibility(anime.id, nextHidden);
             if (toggleRes.success) {
               showToast(toggleRes.message || 'Cập nhật trạng thái thành công');
               await loadAdminAnimeList(currentAdminAnimePage);
@@ -267,7 +267,7 @@ async function openAdminAnimeEditModal(animeId) {
 
   modal.classList.add('active');
 
-  const res = await LinimeAPI.getAdminAnimeDetail(animeId);
+  const res = await AniDokiAPI.getAdminAnimeDetail(animeId);
   if (!res.success) {
     showToast(res.message || 'Lỗi tải chi tiết anime');
     modal.classList.remove('active');
@@ -303,7 +303,7 @@ async function loadAdminEpisodes(animeSlug) {
     tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">Đang tải danh sách tập...</td></tr>`;
   }
 
-  const res = await LinimeAPI.getAdminEpisodes(animeSlug);
+  const res = await AniDokiAPI.getAdminEpisodes(animeSlug);
   if (!res.success) {
     if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 40px; color: #ff5252;">${res.message || 'Lỗi tải danh sách tập'}</td></tr>`;
     return;
@@ -363,7 +363,7 @@ async function loadAdminEpisodes(animeSlug) {
       tr.querySelector('.btn-check-ep')?.addEventListener('click', async () => {
         const healthCol = tr.querySelector('.col-health-status');
         if (healthCol) healthCol.innerHTML = `<span style="font-size: 11px; color: var(--text-muted);">Đang check...</span>`;
-        const checkRes = await LinimeAPI.checkAdminEpisode(animeSlug, ep.episodeNumber, embedUrl);
+        const checkRes = await AniDokiAPI.checkAdminEpisode(animeSlug, ep.episodeNumber, embedUrl);
         if (checkRes.success) {
           if (healthCol) {
             healthCol.innerHTML = checkRes.status === 'healthy'
@@ -385,7 +385,7 @@ async function loadAdminEpisodes(animeSlug) {
       // Toggle visibility
       tr.querySelector('.btn-toggle-ep-vis')?.addEventListener('click', async () => {
         const nextHidden = !isHidden;
-        const updateRes = await LinimeAPI.updateAdminEpisode(animeSlug, ep.episodeNumber, { is_hidden: nextHidden });
+        const updateRes = await AniDokiAPI.updateAdminEpisode(animeSlug, ep.episodeNumber, { is_hidden: nextHidden });
         if (updateRes.success) {
           showToast(`Tập ${ep.episodeNumber}: Đã ${nextHidden ? 'ẩn' : 'mở lại'}`);
           await loadAdminEpisodes(animeSlug);
@@ -435,7 +435,7 @@ async function loadAdminSync() {
     tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 30px; color: var(--text-muted);">Đang tải nhật ký...</td></tr>`;
   }
 
-  const res = await LinimeAPI.getAdminSyncLogs(20);
+  const res = await AniDokiAPI.getAdminSyncLogs(20);
   if (!res.success) {
     if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 30px; color: #ff5252;">${res.message || 'Lỗi tải nhật ký đồng bộ'}</td></tr>`;
     return;
@@ -496,7 +496,7 @@ async function loadAdminReports() {
     tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">Đang tải phản ánh...</td></tr>`;
   }
 
-  const res = await LinimeAPI.getAdminReports(currentAdminReportFilter);
+  const res = await AniDokiAPI.getAdminReports(currentAdminReportFilter);
   if (!res.success) {
     if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 40px; color: #ff5252;">${res.message || 'Lỗi tải danh sách phản ánh'}</td></tr>`;
     return;
@@ -596,7 +596,7 @@ async function loadAdminUsers() {
     tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">Đang tải danh sách tài khoản...</td></tr>`;
   }
 
-  const res = await LinimeAPI.getAdminUsers({
+  const res = await AniDokiAPI.getAdminUsers({
     q: currentAdminUserSearch,
     status: currentAdminUserStatus === 'all' ? '' : currentAdminUserStatus
   });
@@ -661,7 +661,7 @@ async function loadAdminUsers() {
           title: 'Xác nhận thay đổi vai trò',
           message: `Bạn có chắc muốn ${actionText} cho tài khoản "${u.name || u.email}"?`,
           onConfirm: async () => {
-            const updateRes = await LinimeAPI.updateAdminUserRole(u.id, targetRole);
+            const updateRes = await AniDokiAPI.updateAdminUserRole(u.id, targetRole);
             if (updateRes.success) {
               showToast(updateRes.message || 'Cập nhật quyền thành công');
               await loadAdminUsers();
@@ -677,7 +677,7 @@ async function loadAdminUsers() {
           title: 'Mở khóa tài khoản',
           message: `Bạn có chắc muốn mở khóa cho tài khoản "${u.name || u.email}"?`,
           onConfirm: async () => {
-            const banRes = await LinimeAPI.banAdminUser(u.id, { is_banned: false });
+            const banRes = await AniDokiAPI.banAdminUser(u.id, { is_banned: false });
             if (banRes.success) {
               showToast(banRes.message || 'Đã mở khóa tài khoản');
               await loadAdminUsers();
@@ -717,7 +717,7 @@ async function loadAdminHomepage() {
   const spotlightInput = document.getElementById('admin-homepage-spotlight-input');
   const sectionsList = document.getElementById('admin-homepage-sections-list');
 
-  const res = await LinimeAPI.getAdminHomepageConfig();
+  const res = await AniDokiAPI.getAdminHomepageConfig();
   if (!res.success) {
     showToast(res.message || 'Lỗi tải cấu hình trang chủ');
     return;
@@ -788,7 +788,7 @@ async function loadAdminHomepage() {
         };
       });
 
-      const updateRes = await LinimeAPI.updateAdminHomepageConfig({
+      const updateRes = await AniDokiAPI.updateAdminHomepageConfig({
         spotlight_slugs: slugs,
         sections_config: newSections
       });
@@ -817,7 +817,7 @@ async function loadAdminFeedback(status = currentFeedbackStatus) {
     tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">Đang tải phản hồi...</td></tr>`;
   }
 
-  const res = await LinimeAPI.getAdminFeedback({ status: status === 'all' ? '' : status });
+  const res = await AniDokiAPI.getAdminFeedback({ status: status === 'all' ? '' : status });
   if (!res.success) {
     if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 40px; color: #ff5252;">${res.message || 'Lỗi tải phản hồi'}</td></tr>`;
     return;
@@ -860,7 +860,7 @@ async function loadAdminFeedback(status = currentFeedbackStatus) {
       `;
 
       tr.querySelector('.btn-mark-reviewed')?.addEventListener('click', async () => {
-        const uRes = await LinimeAPI.updateAdminFeedback(fb.id, { status: 'reviewed' });
+        const uRes = await AniDokiAPI.updateAdminFeedback(fb.id, { status: 'reviewed' });
         if (uRes.success) {
           showToast('Đã đánh dấu là đã đọc');
           await loadAdminFeedback(currentFeedbackStatus);
@@ -870,7 +870,7 @@ async function loadAdminFeedback(status = currentFeedbackStatus) {
       });
 
       tr.querySelector('.btn-mark-resolved')?.addEventListener('click', async () => {
-        const uRes = await LinimeAPI.updateAdminFeedback(fb.id, { status: 'resolved' });
+        const uRes = await AniDokiAPI.updateAdminFeedback(fb.id, { status: 'resolved' });
         if (uRes.success) {
           showToast('Đã đánh dấu là đã giải quyết');
           await loadAdminFeedback(currentFeedbackStatus);
@@ -904,7 +904,7 @@ async function loadAdminAuditLogs(page = 1) {
   const q = searchInput?.value || '';
   const action = actionFilter?.value || '';
 
-  const res = await LinimeAPI.getAdminAuditLogs({ q, action, page, limit: 25 });
+  const res = await AniDokiAPI.getAdminAuditLogs({ q, action, page, limit: 25 });
   if (!res.success) {
     if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 40px; color: #ff5252;">${res.message || 'Lỗi tải nhật ký'}</td></tr>`;
     return;
@@ -978,7 +978,7 @@ async function loadAdminSettings() {
   const maintenanceChk = document.getElementById('admin-setting-maintenance');
   const saveBtn = document.getElementById('admin-save-settings-btn');
 
-  const res = await LinimeAPI.getAdminSettings();
+  const res = await AniDokiAPI.getAdminSettings();
   if (res.success && res.settings) {
     const s = res.settings;
     if (nameInput) nameInput.value = s.site_name || '';
@@ -994,14 +994,14 @@ async function loadAdminSettings() {
       saveBtn.textContent = 'Đang lưu...';
 
       const payload = {
-        site_name: nameInput?.value?.trim() || 'Linime',
+        site_name: nameInput?.value?.trim() || 'AniDoki',
         site_logo: logoInput?.value?.trim() || '',
         contact_email: emailInput?.value?.trim() || '',
         site_announcement: announcementInput?.value?.trim() || '',
         maintenance_mode: Boolean(maintenanceChk?.checked)
       };
 
-      const updateRes = await LinimeAPI.updateAdminSettings(payload);
+      const updateRes = await AniDokiAPI.updateAdminSettings(payload);
       saveBtn.disabled = false;
       saveBtn.textContent = '💾 Lưu cấu hình';
 
@@ -1112,7 +1112,7 @@ export function initAdminView() {
     const saveBtn = document.getElementById('admin-anime-edit-save');
     if (saveBtn) saveBtn.textContent = 'Đang lưu...';
 
-    const res = await LinimeAPI.updateAdminAnime(animeId, payload);
+    const res = await AniDokiAPI.updateAdminAnime(animeId, payload);
     if (saveBtn) saveBtn.textContent = 'Lưu thay đổi';
 
     if (res.success) {
@@ -1159,7 +1159,7 @@ export function initAdminView() {
       resultDiv.textContent = 'Đang kiểm tra kết nối nguồn...';
     }
 
-    const res = await LinimeAPI.checkAdminEpisode(animeSlug, epNum, embedUrl);
+    const res = await AniDokiAPI.checkAdminEpisode(animeSlug, epNum, embedUrl);
     if (resultDiv) {
       if (res.status === 'healthy') {
         resultDiv.style.color = '#2ecc71';
@@ -1186,7 +1186,7 @@ export function initAdminView() {
     const saveBtn = document.getElementById('admin-ep-edit-save');
     if (saveBtn) saveBtn.textContent = 'Đang lưu...';
 
-    const res = await LinimeAPI.updateAdminEpisode(animeSlug, epNum, payload);
+    const res = await AniDokiAPI.updateAdminEpisode(animeSlug, epNum, payload);
     if (saveBtn) saveBtn.textContent = 'Lưu tập phim';
 
     if (res.success) {
@@ -1218,7 +1218,7 @@ export function initAdminView() {
       statusDiv.textContent = `⏳ Đang đồng bộ "${slug}" từ máy chủ...`;
     }
 
-    const res = await LinimeAPI.syncAdminAnime(slug);
+    const res = await AniDokiAPI.syncAdminAnime(slug);
     if (res.success) {
       if (statusDiv) {
         statusDiv.style.color = '#2ecc71';
@@ -1248,7 +1248,7 @@ export function initAdminView() {
       statusDiv.textContent = `⏳ Đang đồng bộ danh mục phim trang ${page}...`;
     }
 
-    const res = await LinimeAPI.syncAdminRecent(page);
+    const res = await AniDokiAPI.syncAdminRecent(page);
     if (res.success) {
       if (statusDiv) {
         statusDiv.style.color = '#2ecc71';
@@ -1307,7 +1307,7 @@ export function initAdminView() {
       admin_notes: document.getElementById('admin-report-process-notes')?.value.trim()
     };
 
-    const res = await LinimeAPI.updateAdminReport(reportId, payload);
+    const res = await AniDokiAPI.updateAdminReport(reportId, payload);
     if (res.success) {
       showToast('Đã cập nhật trạng thái phản ánh!');
       closeReportModal();
@@ -1365,7 +1365,7 @@ export function initAdminView() {
       return;
     }
 
-    const res = await LinimeAPI.banAdminUser(userId, { is_banned: true, ban_reason: reason });
+    const res = await AniDokiAPI.banAdminUser(userId, { is_banned: true, ban_reason: reason });
     if (res.success) {
       showToast('Đã khóa tài khoản người dùng thành công');
       closeBanModal();

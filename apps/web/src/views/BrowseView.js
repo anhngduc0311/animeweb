@@ -1,4 +1,4 @@
-import { LinimeAPI } from '../api.js';
+import { AniDokiAPI } from '../api.js';
 import { router } from '../router.js';
 import { renderCard } from '../components/MovieCard.js';
 import { initBrowseFilters, syncBrowseFilters } from '../components/BrowseFilters.js';
@@ -107,7 +107,7 @@ export async function loadBrowseView(route) {
   if (paginationWrap) paginationWrap.style.display = 'none';
 
   try {
-    const res = await LinimeAPI.getBrowse({ q, category, year, status, sort, page, limit: 24 });
+    const res = await AniDokiAPI.getBrowse({ q, category, year, status, sort, page, limit: 24 });
     const items = res.data || [];
     const pagination = res.pagination || { page: 1, totalPages: 1, totalItems: items.length, hasMore: false };
 

@@ -1,4 +1,4 @@
-import { LinimeAPI } from '../api.js';
+import { AniDokiAPI } from '../api.js';
 import { renderCard } from '../components/MovieCard.js';
 
 let currentLibTab = 'all';
@@ -39,7 +39,7 @@ export async function loadLibraryView(tab = currentLibTab, query = currentLibQue
   const countPlan = document.getElementById('lib-count-plan');
   const countCompleted = document.getElementById('lib-count-completed');
 
-  if (!LinimeAPI.getToken()) {
+  if (!AniDokiAPI.getToken()) {
     if (unauthEl) unauthEl.style.display = 'flex';
     if (emptyEl) emptyEl.style.display = 'none';
     if (grid) grid.innerHTML = '';
@@ -58,7 +58,7 @@ export async function loadLibraryView(tab = currentLibTab, query = currentLibQue
     if (tab && tab !== 'all') params.status = tab;
     if (query) params.q = query;
 
-    const res = await LinimeAPI.getLibrary(params);
+    const res = await AniDokiAPI.getLibrary(params);
     const items = res.data || [];
     const counts = res.counts || { all: 0, plan_to_watch: 0, watching: 0, completed: 0 };
 

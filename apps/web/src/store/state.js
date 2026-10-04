@@ -15,7 +15,7 @@ export const state = {
   activePlaybackSpeed: 1,
   countdownInterval: null,
   watchlistIds: [],
-  user: JSON.parse(localStorage.getItem('linime_user') || localStorage.getItem('anidoki_user') || 'null')
+  user: JSON.parse(localStorage.getItem('anidoki_user') || 'null')
 };
 
 export function getUser() {
@@ -25,10 +25,8 @@ export function getUser() {
 export function setUser(user) {
   state.user = user;
   if (user) {
-    localStorage.setItem('linime_user', JSON.stringify(user));
     localStorage.setItem('anidoki_user', JSON.stringify(user));
   } else {
-    localStorage.removeItem('linime_user');
     localStorage.removeItem('anidoki_user');
     state.watchlistIds = [];
   }

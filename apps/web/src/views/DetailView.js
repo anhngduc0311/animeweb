@@ -1,4 +1,4 @@
-import { LinimeAPI } from '../api.js';
+import { AniDokiAPI } from '../api.js';
 import { state } from '../store/state.js';
 import { router } from '../router.js';
 import { showToast } from '../utils/ui.js';
@@ -6,8 +6,6 @@ import { renderCard } from '../components/MovieCard.js';
 import { refreshWatchlistCount } from '../components/Header.js';
 import { openPlayerByRoute } from './PlayerView.js';
 import { seasonNumber } from '../../../../shared/series.js';
-
-const INITIAL_ANIME_DATA = [];
 
 // ANIME DETAIL VIEW (1:1 VỚI BẢN ONE PIECE TRONG ẢNH)
 // ==========================================
@@ -18,11 +16,8 @@ export async function openAnimeDetail(animeId, pushRoute = true) {
     return;
   }
   const request = ++detailRequest;
-  let anime = await LinimeAPI.getAnimeDetail(animeId);
+  let anime = await AniDokiAPI.getAnimeDetail(animeId);
   if (request !== detailRequest || router.currentRoute?.pathname !== `/anime/${animeId}`) return;
-  if (!anime) {
-    anime = INITIAL_ANIME_DATA.find(a => a.id === animeId);
-  }
   if (!anime) {
     showToast('Không tìm thấy thông tin phim.');
     router.navigate('/');
@@ -96,7 +91,7 @@ export async function openAnimeDetail(animeId, pushRoute = true) {
 
   // Episodes List from API
   try {
-    const epData = await LinimeAPI.getEpisodes(anime.id);
+    const epData = await AniDokiAPI.getEpisodes(anime.id);
     if (request !== detailRequest || router.currentRoute?.pathname !== `/anime/${animeId}`) return;
     state.currentEpisodes = epData.length ? epData : (anime.episodes || []);
   } catch {
@@ -265,9 +260,9 @@ export function initDetailEvents() {
     if (!state.currentDetailAnime) return;
     const anime = state.currentDetailAnime;
     let targetEp = 1;
-    if (LinimeAPI.getToken()) {
+    if (AniDokiAPI.getToken()) {
       try {
-        const hist = await LinimeAPI.getHistory();
+        const hist = await AniDokiAPI.getHistory();
         const items = Array.isArray(hist) ? hist : (Array.isArray(hist?.data) ? hist.data : []);
         const found = items.find(h => h.animeId === anime.id);
         if (found && found.episodeNumber) {
@@ -283,7 +278,7 @@ export function initDetailEvents() {
 
   bookmarkBtn?.addEventListener('click', (e) => {
     e.stopPropagation();
-    if (!LinimeAPI.getToken()) {
+    if (!AniDokiAPI.getToken()) {
       showToast('Vui lòng đăng nhập để lưu phim vào thư viện');
       document.getElementById('login-modal')?.classList.add('active');
       return;
@@ -305,13 +300,13 @@ export function initDetailEvents() {
 
       const targetStatus = btn.dataset.status;
       if (targetStatus === 'remove') {
-        await LinimeAPI.deleteLibraryItem(state.currentDetailAnime.id);
+        await AniDokiAPI.deleteLibraryItem(state.currentDetailAnime.id);
         state.watchlistIds = state.watchlistIds.filter(id => id !== state.currentDetailAnime.id);
         updateDetailBookmarkBtn(state.currentDetailAnime.id, null);
         await refreshWatchlistCount();
         showToast(`Đã xóa khỏi thư viện`);
       } else {
-        const res = await LinimeAPI.updateLibraryStatus(state.currentDetailAnime.id, targetStatus);
+        const res = await AniDokiAPI.updateLibraryStatus(state.currentDetailAnime.id, targetStatus);
         if (res.success) {
           if (!state.watchlistIds.includes(state.currentDetailAnime.id)) {
             state.watchlistIds.push(state.currentDetailAnime.id);

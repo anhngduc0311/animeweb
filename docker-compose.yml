@@ -3,7 +3,7 @@ version: '3.8'
 services:
   meilisearch:
     image: getmeili/meilisearch:v1.12
-    container_name: linime_meilisearch
+    container_name: anidoki_meilisearch
     restart: unless-stopped
     ports:
       - "127.0.0.1:7700:7700"
@@ -13,7 +13,7 @@ services:
       MEILI_NO_ANALYTICS: "true"
       MEILI_MAX_INDEXING_MEMORY: 256Mb
     volumes:
-      - linime_meili_data:/meili_data
+      - anidoki_meili_data:/meili_data
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:7700/health"]
       interval: 5s
@@ -21,13 +21,13 @@ services:
       retries: 10
   redis:
     image: redis:7-alpine
-    container_name: linime_redis_cache
+    container_name: anidoki_redis_cache
     restart: unless-stopped
     ports:
       - "127.0.0.1:6380:6379"
     command: ["redis-server", "--appendonly", "yes", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru"]
     volumes:
-      - linime_redis_data:/data
+      - anidoki_redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -35,27 +35,27 @@ services:
       retries: 5
   postgres:
     image: postgres:16-alpine
-    container_name: linime_postgres_db
+    container_name: anidoki_postgres_db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: linime_db
-      POSTGRES_USER: linime_user
-      POSTGRES_PASSWORD: linime_secure_pass_2026
+      POSTGRES_DB: anidoki_db
+      POSTGRES_USER: anidoki_user
+      POSTGRES_PASSWORD: anidoki_secure_pass_2026
     ports:
       # Ánh xạ ra cổng 5438 ở máy chủ để tránh xung đột với cổng 5432 / 5433 của dự án khác
       - "5438:5432"
     volumes:
-      - linime_pgdata:/var/lib/postgresql/data
+      - anidoki_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U linime_user -d linime_db"]
+      test: ["CMD-SHELL", "pg_isready -U anidoki_user -d anidoki_db"]
       interval: 5s
       timeout: 5s
       retries: 5
 
 volumes:
-  linime_meili_data:
+  anidoki_meili_data:
     driver: local
-  linime_redis_data:
+  anidoki_redis_data:
     driver: local
-  linime_pgdata:
+  anidoki_pgdata:
     driver: local

@@ -1,4 +1,4 @@
-import { LinimeAPI } from '../api.js';
+import { AniDokiAPI } from '../api.js';
 import { state } from '../store/state.js';
 import { router } from '../router.js';
 import { showToast } from '../utils/ui.js';
@@ -189,13 +189,13 @@ export function initGenreDropdown() {
 
 export async function refreshWatchlistCount() {
   const badge = document.getElementById('watchlist-count');
-  if (!LinimeAPI.getToken()) {
+  if (!AniDokiAPI.getToken()) {
     state.watchlistIds = [];
     if (badge) badge.textContent = '0';
     return;
   }
   try {
-    const list = await LinimeAPI.getWatchlist();
+    const list = await AniDokiAPI.getWatchlist();
     state.watchlistIds = list.map(a => a.id);
     if (badge) badge.textContent = list.length;
   } catch {
@@ -362,7 +362,7 @@ export function initHeaderSearch() {
 
     const seq = ++searchSeq;
     try {
-      const results = await LinimeAPI.search(query);
+      const results = await AniDokiAPI.search(query);
       if (seq !== searchSeq) return;
 
       if (!results || results.length === 0) {
@@ -451,6 +451,28 @@ export function initHeaderSearch() {
     }
   });
 
+  const backBtn = document.getElementById('header-search-back-btn');
+  const backdrop = document.getElementById('header-search-backdrop');
+
+  const closeMobileSearch = () => {
+    closeDropdown();
+    wrap.classList.remove('mobile-open');
+  };
+
+  // Back button in mobile search bar
+  backBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    closeMobileSearch();
+  });
+
+  // Backdrop click to close search
+  backdrop?.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    closeMobileSearch();
+  });
+
   // Mobile toggle button
   mobileToggle?.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -531,7 +553,7 @@ export function initSearchModal() {
       </div>
     `;
 
-    const results = await LinimeAPI.search(query);
+    const results = await AniDokiAPI.search(query);
 
     if (!results || results.length === 0) {
       resultsContainer.innerHTML = `
@@ -577,7 +599,7 @@ export function initWatchlistDrawer() {
   });
 
   async function renderWatchlistItems() {
-    if (!LinimeAPI.getToken()) {
+    if (!AniDokiAPI.getToken()) {
       listEl.innerHTML = `
         <div style="text-align: center; padding: 48px 16px; color: var(--text-muted);">
           <div style="font-size: 2.2rem; margin-bottom: 12px;">🔒</div>
@@ -594,7 +616,7 @@ export function initWatchlistDrawer() {
     }
 
     listEl.innerHTML = `<div style="text-align: center; padding: 20px; color: var(--text-muted);">Đang tải danh sách...</div>`;
-    const list = await LinimeAPI.getWatchlist();
+    const list = await AniDokiAPI.getWatchlist();
 
     if (list.length === 0) {
       listEl.innerHTML = `<div style="text-align: center; padding: 40px 10px; color: var(--text-muted);">Bạn chưa lưu anime nào vào danh sách xem sau.</div>`;
@@ -616,7 +638,7 @@ export function initWatchlistDrawer() {
 
       item.querySelector('button').addEventListener('click', async (e) => {
         e.stopPropagation();
-        await LinimeAPI.toggleWatchlist(anime.id);
+        await AniDokiAPI.toggleWatchlist(anime.id);
         await refreshWatchlistCount();
         await renderWatchlistItems();
         showToast(`Đã xóa "${anime.title.english}" khỏi danh sách`);

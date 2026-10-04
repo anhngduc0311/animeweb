@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LINIME / YUMEZONE - CINEMATIC ANIME STREAMING DESIGN SYSTEM
+   ANIDOKI - CINEMATIC ANIME STREAMING DESIGN SYSTEM
    Modern, Dark Mode, High-End Glassmorphism & Apple/Netflix Aesthetics
    ========================================================================== */
 
@@ -1593,6 +1593,68 @@ img {
 
 .header-search-mobile-toggle {
   display: none;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: 10px;
+  background: #16171b;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f0f0f3;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.12s ease;
+}
+
+.header-search-mobile-toggle:hover {
+  background: #25262d;
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.header-search-mobile-toggle:active {
+  transform: scale(0.95);
+}
+
+.header-search-mobile-toggle svg {
+  display: block;
+  pointer-events: none;
+}
+
+.header-search-back-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: #8e95a5;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.header-search-back-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.header-search-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1190;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
 }
 
 .header-search-box {
@@ -1894,7 +1956,24 @@ img {
   }
 
   .header-search-mobile-toggle {
-    display: flex;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+    border-radius: 10px;
+    background: #16171b;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f0f0f3;
+    padding: 0;
+    flex-shrink: 0;
+  }
+
+  .header-search-wrap.mobile-open .header-search-backdrop {
+    opacity: 1;
+    pointer-events: auto;
   }
 
   .header-search-wrap.mobile-open .header-search-mobile-toggle {
@@ -1905,27 +1984,53 @@ img {
     display: flex;
     position: fixed;
     top: 10px;
-    left: 12px;
-    right: 12px;
+    left: 10px;
+    right: 10px;
     width: auto;
     z-index: 1200;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.95);
+    animation: searchPopDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .header-search-wrap.mobile-open .header-search-form {
     width: 100%;
-    height: 44px;
-    background: #161822;
+    height: 48px;
+    background: #14161f;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 14px;
+    padding: 0 10px 0 6px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .header-search-wrap.mobile-open .header-search-back-btn {
+    display: inline-flex;
   }
 
   .header-search-wrap.mobile-open .header-search-dropdown {
     position: fixed;
-    top: 62px;
-    left: 12px;
-    right: 12px;
-    min-width: auto;
-    max-width: none;
-    max-height: calc(100vh - 120px);
+    top: 66px;
+    left: 10px;
+    right: 10px;
+    width: auto;
+    max-height: calc(100dvh - 85px);
+    background: #14161f;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 14px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.95);
+    z-index: 1200;
+  }
+}
+
+@keyframes searchPopDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -2321,7 +2426,7 @@ img {
   opacity: 1;
 }
 
-/* Subtitle styling matching Linime */
+/* Subtitle styling matching AniDoki */
 ::cue {
   background-color: rgba(0, 0, 0, 0.75);
   color: #ffffff;
@@ -2402,7 +2507,7 @@ video::cue {
 }
 
 /* ==========================================================================
-   LINIME WATCH BOTTOM PANEL (MATCHING SCREENSHOT 1:1)
+   ANIDOKI WATCH BOTTOM PANEL (MATCHING SCREENSHOT 1:1)
    ========================================================================== */
 .watch-bottom-panel {
   width: 100%;

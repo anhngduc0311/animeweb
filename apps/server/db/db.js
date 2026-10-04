@@ -16,9 +16,9 @@ const { Pool } = pg;
 export const pool = new Pool({
   host: process.env.PGHOST || 'localhost',
   port: parseInt(process.env.PGPORT || '5438'),
-  user: process.env.PGUSER || 'linime_user',
-  password: process.env.PGPASSWORD || 'linime_secure_pass_2026',
-  database: process.env.PGDATABASE || 'linime_db',
+  user: process.env.PGUSER || 'anidoki_user',
+  password: process.env.PGPASSWORD || 'anidoki_secure_pass_2026',
+  database: process.env.PGDATABASE || 'anidoki_db',
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000

@@ -277,8 +277,8 @@ describe('Giai đoạn 4: Quản trị cấu hình trang chủ & hệ thống', 
 
   test('Admin cập nhật cài đặt hệ thống thành công và ghi nhật ký kiểm toán', async () => {
     const payload = {
-      site_name: 'Linime Premium',
-      contact_email: 'support@linime.vn',
+      site_name: 'AniDoki Premium',
+      contact_email: 'support@anidoki.vn',
       site_announcement: 'Chào mừng bản cập nhật Giai đoạn 4!',
       maintenance_mode: false
     };
@@ -299,7 +299,7 @@ describe('Giai đoạn 4: Quản trị cấu hình trang chủ & hệ thống', 
     // Xác nhận cài đặt công khai
     const checkRes = await fetch(`${baseUrl}/api/settings`);
     const checkData = await checkRes.json();
-    assert.equal(checkData.settings.site_name, 'Linime Premium');
+    assert.equal(checkData.settings.site_name, 'AniDoki Premium');
     assert.equal(checkData.settings.site_announcement, 'Chào mừng bản cập nhật Giai đoạn 4!');
   });
 });

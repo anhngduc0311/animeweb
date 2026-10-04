@@ -1,12 +1,10 @@
-import { LinimeAPI } from '../api.js';
+import { AniDokiAPI } from '../api.js';
 import { state } from '../store/state.js';
 import { router } from '../router.js';
 import { showToast, formatTime } from '../utils/ui.js';
 import { openAnimeDetail } from './DetailView.js';
 import { loadContinueWatching } from './HomeView.js';
 import { validEmbed } from '../../../../shared/providers.js';
-
-const INITIAL_ANIME_DATA = [];
 
 // CINEMA VIDEO PLAYER (ANIDOKI EMBED)
 // ==========================================
@@ -21,10 +19,7 @@ export async function openPlayerByRoute(animeId, episodeNumber = 1) {
   // Hide detail view if currently open
   document.getElementById('detail-view')?.classList.remove('active');
 
-  let anime = (state.currentDetailAnime?.id === animeId) ? state.currentDetailAnime : await LinimeAPI.getAnimeDetail(animeId);
-  if (!anime) {
-    anime = INITIAL_ANIME_DATA.find(a => a.id === animeId);
-  }
+  let anime = (state.currentDetailAnime?.id === animeId) ? state.currentDetailAnime : await AniDokiAPI.getAnimeDetail(animeId);
   if (!anime) {
     showToast('Không tìm thấy thông tin phim để phát.');
     router.navigate('/');
@@ -35,7 +30,7 @@ export async function openPlayerByRoute(animeId, episodeNumber = 1) {
   // Nạp danh sách tập nếu chưa có
   if (!state.currentEpisodes.length || state.currentVideoAnime?.id !== animeId) {
     try {
-      const epData = await LinimeAPI.getEpisodes(animeId);
+      const epData = await AniDokiAPI.getEpisodes(animeId);
       state.currentEpisodes = epData.length ? epData : (anime.episodes || []);
     } catch {
       state.currentEpisodes = anime.episodes || [];
@@ -62,7 +57,7 @@ async function openPlayer(anime, episodeIndex = 0, resumeTime = 0, pushRoute = t
   // Đảm bảo nạp đầy đủ danh sách tập từ API nếu chưa có
   if (!state.currentEpisodes.length || state.currentVideoAnime?.id !== anime.id) {
     try {
-      const epData = await LinimeAPI.getEpisodes(anime.id);
+      const epData = await AniDokiAPI.getEpisodes(anime.id);
       state.currentEpisodes = epData.length ? epData : (anime.episodes || []);
     } catch {
       state.currentEpisodes = anime.episodes || [];
@@ -201,7 +196,7 @@ async function loadLiveAnimeStream(animeId, episodeNumber, provider, language, r
     iframe.title = `Trình phát ${data.provider}`;
     iframe.src = url.href;
     iframe.style.display = 'block';
-    LinimeAPI.saveProgress(animeId, episodeNumber, 0, 0);
+    AniDokiAPI.saveProgress(animeId, episodeNumber, 0, 0);
     // AniDoki owns playback controls; its public API does not document seeking.
     if (resumeTime > 0) showToast('Chọn vị trí xem tiếp trong trình phát.');
   } catch (err) {
@@ -352,7 +347,7 @@ export function initPlayerControls() {
     if (state.currentVideoAnime && video && video.currentTime > 0) {
       const episodeList = state.currentEpisodes.length ? state.currentEpisodes : (state.currentVideoAnime.episodes || []);
       const episode = episodeList[state.currentEpisodeIndex];
-      LinimeAPI.saveProgress(state.currentVideoAnime.id, episode?.number || 1, video.currentTime, video.duration);
+      AniDokiAPI.saveProgress(state.currentVideoAnime.id, episode?.number || 1, video.currentTime, video.duration);
     }
     video.pause();
     video.src = '';
@@ -371,7 +366,7 @@ export function initPlayerControls() {
     if (state.currentVideoAnime && video.currentTime > 0) {
       const episodeList = state.currentEpisodes.length ? state.currentEpisodes : (state.currentVideoAnime.episodes || []);
       const episode = episodeList[state.currentEpisodeIndex];
-      LinimeAPI.saveProgress(state.currentVideoAnime.id, episode?.number || 1, video.currentTime, video.duration);
+      AniDokiAPI.saveProgress(state.currentVideoAnime.id, episode?.number || 1, video.currentTime, video.duration);
     }
   });
 
@@ -396,7 +391,7 @@ export function initPlayerControls() {
         lastProgressSave = Date.now();
         const episodeList = state.currentEpisodes.length ? state.currentEpisodes : (state.currentVideoAnime.episodes || []);
         const episode = episodeList[state.currentEpisodeIndex];
-        LinimeAPI.saveProgress(state.currentVideoAnime.id, episode?.number || 1, video.currentTime, video.duration);
+        AniDokiAPI.saveProgress(state.currentVideoAnime.id, episode?.number || 1, video.currentTime, video.duration);
       }
     }
   });
@@ -484,7 +479,7 @@ export function initReportModal() {
     }
 
     try {
-      const res = await LinimeAPI.submitReport({
+      const res = await AniDokiAPI.submitReport({
         anime_id: state.currentVideoAnime.id,
         episode_number: epNum,
         provider: activeProvider || 'AniDoki',

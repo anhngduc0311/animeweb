@@ -1,4 +1,4 @@
-import { LinimeAPI } from '../api.js';
+import { AniDokiAPI } from '../api.js';
 import { state } from '../store/state.js';
 import { showToast } from '../utils/ui.js';
 
@@ -51,7 +51,7 @@ export function loadHelpView() {
         submitBtn.textContent = 'Đang gửi...';
       }
 
-      const res = await LinimeAPI.sendFeedback({
+      const res = await AniDokiAPI.sendFeedback({
         name: nameInput?.value?.trim() || undefined,
         email: emailInput?.value?.trim() || undefined,
         subject: subjectInput?.value || 'Góp ý chung',

@@ -1,4 +1,4 @@
-import { LinimeAPI } from '../api.js';
+import { AniDokiAPI } from '../api.js';
 import { showToast, showConfirmModal, formatTime } from '../utils/ui.js';
 import { router } from '../router.js';
 
@@ -23,7 +23,7 @@ export function initHistoryView(callbacks = {}) {
       title: 'Xóa toàn bộ lịch sử',
       message: 'Bạn có chắc chắn muốn xóa tất cả lịch sử xem phim trên tài khoản này? Hành động này không thể hoàn tác.',
       onConfirm: async () => {
-        await LinimeAPI.clearAllHistory();
+        await AniDokiAPI.clearAllHistory();
         showToast('Đã xóa toàn bộ lịch sử xem phim');
         await loadHistoryView(1);
         if (onHistoryChangedCallback) await onHistoryChangedCallback();
@@ -44,7 +44,7 @@ export async function loadHistoryView(page = 1, append = false) {
   const clearBtn = document.getElementById('clear-all-history-btn');
   const loadMoreBtn = document.getElementById('history-load-more-btn');
 
-  if (!LinimeAPI.getToken()) {
+  if (!AniDokiAPI.getToken()) {
     if (unauthEl) unauthEl.style.display = 'flex';
     if (emptyEl) emptyEl.style.display = 'none';
     if (grid) grid.innerHTML = '';
@@ -59,7 +59,7 @@ export async function loadHistoryView(page = 1, append = false) {
   }
 
   try {
-    const res = await LinimeAPI.getHistory(page, 20);
+    const res = await AniDokiAPI.getHistory(page, 20);
     const items = res.data || [];
     const pagination = res.pagination || { hasMore: false };
 
@@ -101,7 +101,7 @@ export async function loadHistoryView(page = 1, append = false) {
 
       card.querySelector('.history-del-btn')?.addEventListener('click', async (e) => {
         e.stopPropagation();
-        await LinimeAPI.deleteHistory(item.animeId);
+        await AniDokiAPI.deleteHistory(item.animeId);
         showToast('Đã xóa tập khỏi lịch sử');
         await loadHistoryView(1);
         if (onHistoryChangedCallback) await onHistoryChangedCallback();

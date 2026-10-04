@@ -1,4 +1,4 @@
-import { LinimeAPI } from '../api.js';
+import { AniDokiAPI } from '../api.js';
 import { state } from '../store/state.js';
 import { router } from '../router.js';
 import { showToast, formatTime } from '../utils/ui.js';
@@ -8,16 +8,14 @@ import { groupSeries, seriesKey, seasonNumber } from '../../../../shared/series.
 import { openAnimeDetail } from './DetailView.js';
 import { openPlayerByRoute } from './PlayerView.js';
 
-const INITIAL_ANIME_DATA = [];
-
 // SPOTLIGHT HERO CAROUSEL
 // ==========================================
 export async function loadSpotlight() {
   try {
-    const spotlights = await LinimeAPI.getSpotlight();
-    state.spotlights = groupSeries(spotlights.length ? spotlights : INITIAL_ANIME_DATA.filter(a => a.isSpotlight));
+    const spotlights = await AniDokiAPI.getSpotlight();
+    state.spotlights = groupSeries(spotlights || []);
   } catch {
-    state.spotlights = INITIAL_ANIME_DATA.filter(a => a.isSpotlight);
+    state.spotlights = [];
   }
 
   const navContainer = document.getElementById('spotlight-nav');
@@ -69,12 +67,12 @@ export async function loadSpotlight() {
   document.getElementById('spotlight-bookmark-btn')?.addEventListener('click', async () => {
     const anime = state.spotlights[state.spotlightIndex];
     if (!anime) return;
-    if (!LinimeAPI.getToken()) {
+    if (!AniDokiAPI.getToken()) {
       showToast('Vui lòng đăng nhập để lưu phim vào danh sách yêu thích');
       document.getElementById('login-modal')?.classList.add('active');
       return;
     }
-    const res = await LinimeAPI.toggleWatchlist(anime.id);
+    const res = await AniDokiAPI.toggleWatchlist(anime.id);
     if (res.code === 'UNAUTHORIZED' || res.code === 'SESSION_EXPIRED') {
       showToast('Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.');
       document.getElementById('login-modal')?.classList.add('active');
@@ -181,22 +179,22 @@ export function resetSpotlightTimer() {
 export async function loadCatalogs() {
   try {
     const [trending, recent, seasonal, genres] = await Promise.all([
-      LinimeAPI.getTrendingCatalog().catch(() => null),
-      LinimeAPI.getRecentlyUpdated(24),
-      LinimeAPI.getSeasonal(),
-      LinimeAPI.getGenres()
+      AniDokiAPI.getTrendingCatalog().catch(() => null),
+      AniDokiAPI.getRecentlyUpdated(24),
+      AniDokiAPI.getSeasonal(),
+      AniDokiAPI.getGenres()
     ]);
 
     state.trending = trending?.data || [];
     state.trendingPagination = trending?.pagination || { page: 0, hasMore: true };
-    state.recent = recent.length ? recent : INITIAL_ANIME_DATA;
-    state.seasonal = seasonal.length ? seasonal : INITIAL_ANIME_DATA.filter(a => a.status === 'Currently Airing');
-    state.genres = genres;
+    state.recent = recent || [];
+    state.seasonal = seasonal || [];
+    state.genres = genres || {};
   } catch (err) {
     console.error('Error loading catalogs from API:', err);
-    state.trending = INITIAL_ANIME_DATA.filter(a => a.isTrending);
-    state.recent = INITIAL_ANIME_DATA;
-    state.seasonal = INITIAL_ANIME_DATA.filter(a => a.status === 'Currently Airing');
+    state.trending = [];
+    state.recent = [];
+    state.seasonal = [];
   }
 
   // Trending Grid (2 hàng x 6 ô = 12 ô)
@@ -239,7 +237,7 @@ export async function loadCatalogs() {
     moreTrending.textContent = 'Đang tải…';
     trendingGrid.setAttribute('aria-busy', 'true');
     try {
-      const result = await LinimeAPI.getTrendingCatalog((state.trendingPagination?.page || 0) + 1);
+      const result = await AniDokiAPI.getTrendingCatalog((state.trendingPagination?.page || 0) + 1);
       const existing = new Set(state.trending.map(seriesKey));
       const added = result.data.filter(item => !existing.has(seriesKey(item)));
       if (!state.trending.length && added.length) trendingGrid.replaceChildren();
@@ -302,7 +300,7 @@ export async function loadCatalogs() {
     loadMoreSeasonal.disabled = true;
     loadMoreSeasonal.textContent = 'Đang tải phim...';
     try {
-      const moreItems = await LinimeAPI.getSeasonal(seasonalPage + 1);
+      const moreItems = await AniDokiAPI.getSeasonal(seasonalPage + 1);
       if (!moreItems.length) {
         loadMoreSeasonal.hidden = true;
         showToast('Đã tải hết phim tâm lý & tình cảm.');
@@ -339,7 +337,7 @@ export function initMovies() {
     grid.setAttribute('aria-busy', 'true');
     status.textContent = 'Đang tải phim lẻ…';
     try {
-      const result = await LinimeAPI.getMovies(page + 1);
+      const result = await AniDokiAPI.getMovies(page + 1);
       const existing = new Set(state.movies.map(movie => movie.id));
       const movies = result.data.filter(movie => !existing.has(movie.id));
       movies.forEach(movie => grid.appendChild(renderCard(movie)));
@@ -366,8 +364,8 @@ function renderGenreRails() {
   const actionRail = document.getElementById('genre-action-rail');
   const romanceRail = document.getElementById('genre-romance-rail');
 
-  const actionAnimes = state.genres['Action'] || INITIAL_ANIME_DATA.filter(a => a.genres.includes('Action'));
-  const romanceAnimes = state.genres['Romance'] || INITIAL_ANIME_DATA.filter(a => a.genres.includes('Romance') || a.genres.includes('Drama'));
+  const actionAnimes = state.genres?.['Action'] || [];
+  const romanceAnimes = state.genres?.['Romance'] || [];
 
   actionRail.innerHTML = '';
   groupSeries(actionAnimes).forEach(anime => {
@@ -415,7 +413,7 @@ export async function loadContinueWatching() {
   const section = document.getElementById('section-continue-watching');
   const grid = document.getElementById('continue-watching-grid');
 
-  if (!LinimeAPI.getToken()) {
+  if (!AniDokiAPI.getToken()) {
     if (section) section.style.display = 'none';
     if (grid) grid.innerHTML = '';
     return;
@@ -423,7 +421,7 @@ export async function loadContinueWatching() {
 
   let history = [];
   try {
-    const res = await LinimeAPI.getHistory();
+    const res = await AniDokiAPI.getHistory();
     history = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
   } catch {
     history = [];
@@ -483,7 +481,7 @@ export async function loadContinueWatching() {
 
     card.querySelector('.cw-delete-item-btn')?.addEventListener('click', async (e) => {
       e.stopPropagation();
-      await LinimeAPI.deleteHistory(item.animeId);
+      await AniDokiAPI.deleteHistory(item.animeId);
       await loadContinueWatching();
       showToast('Đã xóa khỏi tiếp tục xem');
     });

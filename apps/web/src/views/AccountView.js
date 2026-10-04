@@ -1,4 +1,4 @@
-import { LinimeAPI } from '../api.js';
+import { AniDokiAPI } from '../api.js';
 import { state } from '../store/state.js';
 import { showToast, showConfirmModal } from '../utils/ui.js';
 import { updateUserUI } from '../components/AuthModal.js';
@@ -20,7 +20,7 @@ export async function loadAccountView() {
   if (contentView) contentView.style.display = 'block';
 
   // Tải thông tin mới nhất từ máy chủ
-  const res = await LinimeAPI.getAccountProfile();
+  const res = await AniDokiAPI.getAccountProfile();
   if (res.success && res.user) {
     state.user = res.user;
   }
@@ -71,7 +71,7 @@ export async function loadAccountView() {
         return;
       }
 
-      const updateRes = await LinimeAPI.updateAccountProfile({ name: newName, avatar: newAvatar });
+      const updateRes = await AniDokiAPI.updateAccountProfile({ name: newName, avatar: newAvatar });
       if (updateRes.success && updateRes.user) {
         state.user = updateRes.user;
         updateUserUI();
@@ -106,7 +106,7 @@ export async function loadAccountView() {
         preferredQuality: preferredQualitySel?.value || 'auto'
       };
 
-      const updateRes = await LinimeAPI.updateAccountProfile({ player_settings: newSettings });
+      const updateRes = await AniDokiAPI.updateAccountProfile({ player_settings: newSettings });
       if (updateRes.success && updateRes.user) {
         state.user.player_settings = newSettings;
         showToast('Đã lưu tùy chọn xem phim vào tài khoản!');
@@ -127,7 +127,7 @@ export async function loadAccountView() {
         title: 'Đăng xuất khỏi thiết bị khác',
         message: 'Bạn có chắc chắn muốn thu hồi quyền truy cập của tất cả các phiên đăng nhập khác?',
         onConfirm: async () => {
-          const revRes = await LinimeAPI.revokeOtherSessions();
+          const revRes = await AniDokiAPI.revokeOtherSessions();
           if (revRes.success) {
             showToast(revRes.message || 'Đã đăng xuất các thiết bị khác');
             await renderAccountSessions();
@@ -146,7 +146,7 @@ export async function renderAccountSessions() {
 
   sessionsContainer.innerHTML = `<div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px;">Đang tải danh sách thiết bị...</div>`;
 
-  const res = await LinimeAPI.getAccountSessions();
+  const res = await AniDokiAPI.getAccountSessions();
   if (!res.success) {
     sessionsContainer.innerHTML = `<div style="text-align: center; padding: 20px; color: #ff5252; font-size: 13px;">${res.message || 'Lỗi tải danh sách phiên'}</div>`;
     return;

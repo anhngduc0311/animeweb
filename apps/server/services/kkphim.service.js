@@ -119,7 +119,7 @@ export async function movieDetail(slug) {
   let override = null;
   try {
     override = await AdminAnimeModel.getAnimeOverride(slug);
-  } catch {}
+  } catch { }
 
   if (override && override.is_hidden) {
     const error = new Error('Nội dung không còn khả dụng hoặc đã bị ẩn');
@@ -175,7 +175,7 @@ export function selectSpotlights(items) {
   return groupSeries(latest)
     .filter(item => Number.isFinite(item.score) && item.score > 0)
     .sort((a, b) => b.score - a.score || updated(b) - updated(a))
-    .slice(0, 7);
+    .slice(0, 10);
 }
 
 export function selectTrending(items) {
@@ -304,10 +304,10 @@ export async function browseCatalog(params = {}) {
     ]);
     if (results[0].status === 'rejected' && (!keyword || results[1].status === 'rejected')) throw new Error('Không tải được danh sách phim');
     items = [...(results[0].value || []), ...(results[1].value || [])];
-    if (keyword && results[1].value?.length) void indexNguoncSearch(results[1].value).catch(() => {});
+    if (keyword && results[1].value?.length) void indexNguoncSearch(results[1].value).catch(() => { });
   } else {
     // Discover supplemental sources in the background, without delaying hits.
-    void discoverNguonc().then(indexNguoncSearch).catch(() => {});
+    void discoverNguonc().then(indexNguoncSearch).catch(() => { });
   }
   items = items.filter(m => !hiddenSet.has(m.id)).map(m => {
     const override = overridesMap.get(m.id);

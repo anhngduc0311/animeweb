@@ -8,7 +8,7 @@ If the API is containerized on the same Compose network, use `redis://redis:6379
 Set `REDIS_DISABLED=1` for memory-only operation.
 
 Redis is bound to loopback, has a 128 MB eviction limit, and persists cache in
-the `linime_redis_data` volume. Only catalog data is cached; database records,
+the `anidoki_redis_data` volume. Only catalog data is cached; database records,
 sessions and watch history are not moved into Redis.
 
 Full upstream browse listings, NguonC searches and grouped/sorted catalogs are
