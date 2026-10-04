@@ -393,19 +393,28 @@ function renderCard(anime) {
   const card = document.createElement('div');
   card.className = 'anime-card';
   card.dataset.seriesKey = seriesKey(anime);
-  card.dataset.animeId = anime.id;
+  card.dataset.animeId = anime.id || '';
   card.tabIndex = 0;
   card.setAttribute('role', 'button');
-  card.setAttribute('aria-label', `Xem chi tiết ${anime.title.english || anime.title.vietnamese}`);
+
+  const engTitle = anime.title?.english || (typeof anime.title === 'string' ? anime.title : '');
+  const vieTitle = anime.title?.vietnamese || '';
+  const mainTitle = engTitle || vieTitle || 'Anime';
+  const coverSrc = anime.coverImage || anime.posterUrl || anime.poster_url || '/poster-placeholder.svg';
+  const scoreText = anime.score ? `★ ${anime.score}` : '';
+  const epText = anime.format === 'MOVIE' ? 'Movie' : `Tập ${anime.currentEpisode || anime.totalEpisodes || 'Full'}`;
+  const subMeta = [anime.studio, anime.year].filter(Boolean).join(' · ');
+
+  card.setAttribute('aria-label', `Xem chi tiết ${mainTitle}`);
   card.addEventListener('keydown', event => {
     if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); card.click(); }
   });
   card.innerHTML = `
     <div class="anime-card-poster">
-      <img src="${anime.coverImage}" alt="${anime.title.english}" loading="lazy" decoding="async">
+      <img src="${coverSrc}" alt="${mainTitle}" loading="lazy" decoding="async">
       <div class="anime-card-badges">
-        <span class="badge-score">★ ${anime.score}</span>
-        <span class="badge-ep">${anime.format === 'MOVIE' ? 'Movie' : `Tập ${anime.currentEpisode || anime.totalEpisodes || 'Full'}`}</span>
+        ${scoreText ? `<span class="badge-score">${scoreText}</span>` : ''}
+        <span class="badge-ep">${epText}</span>
       </div>
       <div class="anime-card-overlay">
         <div class="play-bubble">
@@ -416,8 +425,8 @@ function renderCard(anime) {
       </div>
     </div>
     <div class="anime-card-info">
-      <h3 class="anime-card-title">${anime.title.english || anime.title.vietnamese}</h3>
-      <span class="anime-card-sub">${anime.studio} · ${anime.year}${anime.seasons?.length > 1 ? ` · ${anime.seasons.length} mùa` : ''}</span>
+      <h3 class="anime-card-title">${mainTitle}</h3>
+      <span class="anime-card-sub">${subMeta || 'AniDoki'}${anime.seasons?.length > 1 ? ` · ${anime.seasons.length} mùa` : ''}</span>
     </div>
   `;
 
@@ -432,7 +441,9 @@ function renderCard(anime) {
   });
 
   card.addEventListener('click', () => {
-    router.navigate(`/anime/${anime.id}`);
+    if (anime.id) {
+      router.navigate(`/anime/${anime.id}`);
+    }
   });
 
   return card;
@@ -683,12 +694,13 @@ async function loadContinueWatching() {
 
   let history = [];
   try {
-    history = await LinimeAPI.getHistory();
+    const res = await LinimeAPI.getHistory();
+    history = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
   } catch {
     history = [];
   }
 
-  if (!history || history.length === 0) {
+  if (!Array.isArray(history) || history.length === 0) {
     if (section) section.style.display = 'none';
     if (grid) grid.innerHTML = '';
     return;
@@ -699,8 +711,19 @@ async function loadContinueWatching() {
 
   // Giới hạn tối đa 3 hàng (15 phim cho 5 cột)
   history.slice(0, 15).forEach(item => {
-    const anime = item.anime;
-    if (!anime) return;
+    let anime = item.anime;
+    if (typeof anime === 'string') {
+      try {
+        anime = JSON.parse(anime);
+      } catch {
+        anime = null;
+      }
+    }
+    anime = anime || {
+      id: item.animeId,
+      title: { english: item.animeId, vietnamese: item.animeId },
+      coverImage: '/poster-placeholder.svg'
+    };
 
     const hasProgress = Number(item.currentTime) > 0 && Number(item.duration) > 0;
     const progressPercent = hasProgress
@@ -710,12 +733,15 @@ async function loadContinueWatching() {
       ? `Tập ${item.episodeNumber} · ${formatTime(item.currentTime)}`
       : `Tập ${item.episodeNumber} · Tiếp tục xem`;
 
+    const titleText = anime.title?.english || anime.title?.vietnamese || (typeof anime.title === 'string' ? anime.title : 'Anime');
+    const coverSrc = anime.coverImage || anime.posterUrl || anime.poster_url || '/poster-placeholder.svg';
+
     const card = document.createElement('div');
     card.className = 'cw-card';
     card.innerHTML = `
-      <img class="cw-thumbnail" src="${anime.coverImage}" alt="${anime.title?.english || anime.title?.vietnamese || 'Anime'}">
+      <img class="cw-thumbnail" src="${coverSrc}" alt="${titleText}">
       <div class="cw-info">
-        <h4 class="cw-title">${anime.title?.english || anime.title?.vietnamese}</h4>
+        <h4 class="cw-title">${titleText}</h4>
         <span class="cw-ep">${epLabel}</span>
         ${hasProgress ? `
           <div class="cw-progress-bar">
@@ -1005,7 +1031,8 @@ function initDetailEvents() {
     if (LinimeAPI.getToken()) {
       try {
         const hist = await LinimeAPI.getHistory();
-        const found = hist.data?.find(h => h.animeId === anime.id);
+        const items = Array.isArray(hist) ? hist : (Array.isArray(hist?.data) ? hist.data : []);
+        const found = items.find(h => h.animeId === anime.id);
         if (found && found.episodeNumber) {
           targetEp = found.episodeNumber;
         }
@@ -1858,7 +1885,29 @@ async function loadLibraryView(tab = currentLibTab, query = currentLibQuery) {
     if (grid) {
       grid.innerHTML = '';
       items.forEach(item => {
-        const anime = item.anime || { id: item.animeId, title: { english: item.animeId }, coverImage: '/poster-placeholder.svg' };
+        let anime = item.anime;
+        if (!anime || typeof anime !== 'object' || !anime.title) {
+          if (item.title || item.coverImage || item.id) {
+            anime = { ...item };
+          } else {
+            anime = {
+              id: item.animeId || item.id || item.slug,
+              title: { english: item.animeId || item.id || 'Anime' },
+              coverImage: '/poster-placeholder.svg'
+            };
+          }
+        }
+
+        if (typeof anime.title === 'string') {
+          anime.title = { english: anime.title, vietnamese: anime.title };
+        } else if (!anime.title) {
+          const fallbackTitle = item.animeId || item.id || item.slug || 'Anime';
+          anime.title = { english: fallbackTitle, vietnamese: fallbackTitle };
+        }
+
+        anime.id = anime.id || item.animeId || item.id || item.slug;
+        anime.coverImage = anime.coverImage || anime.posterUrl || anime.poster_url || '/poster-placeholder.svg';
+
         const card = renderCard(anime);
 
         const statusMap = {
@@ -1866,9 +1915,10 @@ async function loadLibraryView(tab = currentLibTab, query = currentLibQuery) {
           watching: { label: 'Đang xem', bg: '#50e3c2' },
           completed: { label: 'Hoàn thành', bg: '#b8e986' }
         };
-        const info = statusMap[item.status] || { label: item.status, bg: '#888' };
+        const currentStatus = item.libraryStatus || (statusMap[item.status] ? item.status : 'plan_to_watch');
+        const info = statusMap[currentStatus] || { label: 'Muốn xem', bg: '#4a90e2' };
         const badge = document.createElement('div');
-        badge.style.cssText = `position: absolute; top: 8px; left: 8px; background: ${info.bg}; color: #000; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; z-index: 3;`;
+        badge.style.cssText = `position: absolute; top: 8px; left: 8px; background: ${info.bg}; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; z-index: 3;`;
         badge.textContent = info.label;
         card.querySelector('.anime-card-poster')?.appendChild(badge);
 

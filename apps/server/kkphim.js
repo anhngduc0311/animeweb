@@ -526,12 +526,25 @@ router.get('/library', requireAuth, async (req, res) => {
     sql += ' ORDER BY updated_at DESC';
     const result = await pool.query(sql, params);
 
-    let items = result.rows.map(r => ({
-      ...r.anime,
-      libraryStatus: r.status || 'plan_to_watch',
-      savedAt: r.created_at,
-      updatedAt: r.updated_at
-    }));
+    let items = result.rows.map(r => {
+      let animeObj = r.anime;
+      if (typeof animeObj === 'string') {
+        try { animeObj = JSON.parse(animeObj); } catch {}
+      }
+      animeObj = animeObj || {};
+      const libStatus = r.status || 'plan_to_watch';
+      return {
+        ...animeObj,
+        anime: animeObj,
+        animeId: r.slug || animeObj.id,
+        id: animeObj.id || r.slug,
+        libraryStatus: libStatus,
+        status: libStatus,
+        airingStatus: animeObj.status || '',
+        savedAt: r.created_at,
+        updatedAt: r.updated_at
+      };
+    });
 
     if (q && q.trim()) {
       const keyword = q.trim().toLowerCase();
