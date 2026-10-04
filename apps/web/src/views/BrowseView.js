@@ -2,7 +2,7 @@ import { AniDokiAPI } from '../api.js';
 import { router } from '../router.js';
 import { renderCard } from '../components/MovieCard.js';
 import { initBrowseFilters, syncBrowseFilters } from '../components/BrowseFilters.js';
-
+import { setBrowseSEO } from '../utils/seo.js';
 import { DEFAULT_GENRES } from '../components/Header.js';
 
 let browseGenreOptions = [...DEFAULT_GENRES];
@@ -103,6 +103,13 @@ export async function loadBrowseView(route) {
   if (statusSelect) statusSelect.value = status;
   if (sortSelect) sortSelect.value = sort;
   syncBrowseFilters();
+
+  const matchedGenre = browseGenreOptions.find(g => g.slug === category);
+  setBrowseSEO({
+    categoryName: matchedGenre ? matchedGenre.name : '',
+    queryText: q,
+    year
+  });
 
   renderBrowseChips(query);
 

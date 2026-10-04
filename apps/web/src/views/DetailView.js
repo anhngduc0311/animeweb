@@ -6,6 +6,7 @@ import { renderCard } from '../components/MovieCard.js';
 import { refreshWatchlistCount } from '../components/Header.js';
 import { openPlayerByRoute } from './PlayerView.js';
 import { seasonNumber } from '../../../../shared/series.js';
+import { setAnimeDetailSEO } from '../utils/seo.js';
 
 // ANIME DETAIL VIEW (1:1 VỚI BẢN ONE PIECE TRONG ẢNH)
 // ==========================================
@@ -25,7 +26,7 @@ export async function openAnimeDetail(animeId, pushRoute = true) {
   }
 
   state.currentDetailAnime = anime;
-  document.title = `${anime.title.vietnamese || anime.title.english} | anidoki`;
+  setAnimeDetailSEO(anime);
   void loadSeasonSelector(anime, request);
   const view = document.getElementById('detail-view');
 

@@ -5,6 +5,7 @@ import { showToast, formatTime } from '../utils/ui.js';
 import { openAnimeDetail } from './DetailView.js';
 import { loadContinueWatching } from './HomeView.js';
 import { validEmbed } from '../../../../shared/providers.js';
+import { setPlayerSEO } from '../utils/seo.js';
 
 // CINEMA VIDEO PLAYER (ANIDOKI EMBED)
 // ==========================================
@@ -78,7 +79,7 @@ async function openPlayer(anime, episodeIndex = 0, resumeTime = 0, pushRoute = t
   }
 
   document.getElementById('detail-view')?.classList.remove('active');
-  document.title = `${anime.title.vietnamese || anime.title.english} - Tập ${epNum} | anidoki`;
+  setPlayerSEO(anime, epNum);
 
   const modal = document.getElementById('player-modal');
   const title = document.getElementById('player-anime-name');

@@ -9,6 +9,7 @@ import { loadAccountView } from '../views/AccountView.js';
 import { loadHelpView } from '../views/HelpView.js';
 import { loadAdminView } from '../views/AdminView.js';
 
+import { setHomeSEO, updateSEO } from '../utils/seo.js';
 import { startSpotlightTimer } from '../views/HomeView.js';
 
 // SPA ROUTE REGISTRATION
@@ -17,12 +18,11 @@ export function registerRoutes() {
   router
     .addRoute('/', () => {
       switchView('view-home');
-      document.title = 'anidoki — Xem anime online';
+      setHomeSEO();
       startSpotlightTimer();
     })
     .addRoute('/browse', (route) => {
       switchView('view-browse');
-      document.title = 'Khám Phá Anime | anidoki';
       return loadBrowseView(route);
     })
     .addRoute('/anime/:slug', (route) => {
@@ -33,22 +33,34 @@ export function registerRoutes() {
     })
     .addRoute('/library', () => {
       switchView('view-library');
-      document.title = 'Thư Viện Của Tôi | anidoki';
+      updateSEO({
+        title: 'Thư Viện Anime Của Tôi | AniDoki',
+        description: 'Quản lý danh sách anime yêu thích, đang xem và xem sau của bạn tại AniDoki.'
+      });
       return loadLibraryView();
     })
     .addRoute('/history', () => {
       switchView('view-history');
-      document.title = 'Lịch Sử Xem Phim | anidoki';
+      updateSEO({
+        title: 'Lịch Sử Xem Phim Hoạt Hình | AniDoki',
+        description: 'Xem lại các tập anime bạn đã xem gần đây tại AniDoki.'
+      });
       return loadHistoryView();
     })
     .addRoute('/account', () => {
       switchView('view-account');
-      document.title = 'Tài Khoản & Tùy Chọn | anidoki';
+      updateSEO({
+        title: 'Tài Khoản & Thiết Lập | AniDoki',
+        description: 'Thiết lập thông tin tài khoản và tùy chọn giao diện AniDoki.'
+      });
       loadAccountView();
     })
     .addRoute('/help', () => {
       switchView('view-help');
-      document.title = 'Trung Tâm Trợ Giúp & Góp Ý | anidoki';
+      updateSEO({
+        title: 'Trung Tâm Trợ Giúp & Góp Ý | AniDoki',
+        description: 'Hướng dẫn sử dụng, giải đáp thắc mắc và đóng góp ý kiến xây dựng AniDoki.'
+      });
       loadHelpView();
     })
     .addRoute('/admin', () => {
