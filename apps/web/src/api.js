@@ -36,9 +36,9 @@ export const LinimeAPI = {
     }
   },
 
-  async getSeasonal() {
+  async getSeasonal(page = 1) {
     try {
-      const res = await fetch(`${API_BASE}/anime/seasonal`);
+      const res = await fetch(`${API_BASE}/anime/seasonal?page=${page}`);
       const data = await res.json();
       return data.success ? data.data : [];
     } catch (err) {

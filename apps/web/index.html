@@ -36,7 +36,7 @@
         <li><a href="#" class="nav-link active" data-nav="home">Trang chủ</a></li>
         <li><a href="#section-trending" class="nav-link" data-nav="trending">Thịnh hành</a></li>
         <li><a href="#section-recent" class="nav-link" data-nav="recent">Mới cập nhật</a></li>
-        <li><a href="#section-seasonal" class="nav-link" data-nav="seasonal">Anime mùa này</a></li>
+        <li><a href="#section-seasonal" class="nav-link" data-nav="seasonal">Tâm lý & Tình cảm</a></li>
         <li><a href="#section-movies" class="nav-link" data-nav="movies">Phim lẻ</a></li>
         <li><a href="#section-genres" class="nav-link" data-nav="genres">Thể loại</a></li>
       </ul>
@@ -163,9 +163,10 @@
           <h2 class="section-title">Khám phá anime</h2>
           <span class="section-subtitle">Tuyển chọn từ danh sách cập nhật KKPhim</span>
         </div>
-        <a href="#section-trending" class="section-link">Xem tất cả →</a>
+        <button type="button" class="section-link" id="view-all-trending">Xem tất cả →</button>
       </div>
       <div class="anime-grid" id="trending-grid"></div>
+      <button class="btn-secondary" id="load-more-trending" style="margin-top:24px" hidden>Xem thêm anime</button>
     </section>
 
     <!-- Genre Rails (Backdrop + Artwork Logo + Controls) -->
@@ -190,7 +191,7 @@
           <h2 class="section-title">Mới cập nhật</h2>
           <span class="section-subtitle">Các tập phim mới ra lò</span>
         </div>
-        <a href="#section-recent" class="section-link">Xem tất cả →</a>
+        <button type="button" class="section-link" id="view-all-recent">Xem tất cả →</button>
       </div>
       <div class="anime-grid" id="recent-grid"></div>
       <button class="btn-secondary" id="load-more-anime" style="margin-top:24px">Xem thêm anime</button>
@@ -211,16 +212,17 @@
       <div class="genre-rail" id="genre-romance-rail"></div>
     </section>
 
-    <!-- Seasonal Anime Section -->
+    <!-- Tâm lý & Tình cảm Anime Section -->
     <section class="home-section" id="section-seasonal">
       <div class="section-header">
         <div class="section-title-group">
-          <h2 class="section-title">Anime năm nay</h2>
-          <span class="section-subtitle">Anime Nhật Bản cập nhật từ KKPhim</span>
+          <h2 class="section-title">Anime Tâm lý & Tình cảm</h2>
+          <span class="section-subtitle">Phim hoạt hình tâm lý hoặc tình cảm mới cập nhật từ KKPhim</span>
         </div>
-        <a href="#section-seasonal" class="section-link">Xem tất cả →</a>
+        <button type="button" class="section-link" id="view-all-seasonal">Xem tất cả →</button>
       </div>
       <div class="anime-grid" id="seasonal-grid"></div>
+      <button class="btn-secondary" id="load-more-seasonal" style="margin-top:24px">Xem thêm anime tâm lý & tình cảm</button>
     </section>
 
     <!-- Anime Movies Section -->

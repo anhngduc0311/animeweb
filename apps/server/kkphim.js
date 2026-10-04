@@ -113,7 +113,31 @@ route('get','/catalog', async (req,res) => {
   const result = await listing({page:String(page)});
   res.json({success:true,data:result.items,pagination:result.pagination});
 });
-route('get','/anime/seasonal', async (req,res) => send(res,(await listing({limit:'36',year: new Intl.DateTimeFormat('en',{year:'numeric',timeZone:'Asia/Bangkok'}).format(new Date())})).items));
+route('get','/anime/seasonal', async (req,res) => {
+  const page = Math.min(100, Math.max(1, parseInt(req.query.page) || 1));
+  const [psychological, romance] = await Promise.all([
+    listing({ category: 'tam-ly', limit: '24', page: String(page) }),
+    listing({ category: 'tinh-cam', limit: '24', page: String(page) })
+  ]);
+  const seen = new Set();
+  const items = [];
+  for (const item of [...psychological.items, ...romance.items]) {
+    if (!seen.has(item.id)) {
+      seen.add(item.id);
+      items.push(item);
+    }
+  }
+  const totalPages = Math.max(
+    Number(psychological.pagination?.totalPages) || 1,
+    Number(romance.pagination?.totalPages) || 1
+  );
+  res.json({
+    success: true,
+    data: items,
+    total: items.length,
+    pagination: { page, totalPages, hasMore: page < totalPages }
+  });
+});
 route('get','/anime/movies', async (req,res) => {
   const result = await movieCatalog(req.query.page, req.query.limit);
   res.json({ success: true, ...result, total: result.data.length });

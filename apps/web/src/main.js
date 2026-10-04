@@ -288,9 +288,23 @@ async function loadCatalogs() {
     const grid = document.getElementById(id);
     if (!grid.children.length) grid.textContent = 'Chưa có dữ liệu phù hợp từ KKPhim.';
   }
+  // 1. Trending controls
+  const viewAllTrending = document.getElementById('view-all-trending');
+  viewAllTrending?.addEventListener('click', () => {
+    trendingGrid.innerHTML = '';
+    groupSeries(state.trending).forEach(anime => trendingGrid.appendChild(renderCard(anime)));
+    viewAllTrending.textContent = 'Đang hiển thị tất cả';
+    viewAllTrending.disabled = true;
+    viewAllTrending.style.opacity = '0.6';
+    showToast(`Đã mở rộng hiển thị ${trendingGrid.children.length} anime.`);
+  });
+
+  // 2. Recent controls
+  const viewAllRecent = document.getElementById('view-all-recent');
   const more = document.getElementById('load-more-anime');
   let page = 1;
-  more?.addEventListener('click', async () => {
+  const loadMoreRecent = async () => {
+    if (!more) return;
     more.disabled = true;
     more.textContent = 'Đang tải...';
     try {
@@ -310,6 +324,51 @@ async function loadCatalogs() {
     } catch { showToast('Không tải được thêm phim. Hãy thử lại.'); }
     more.disabled = false;
     more.textContent = 'Xem thêm anime';
+  };
+  more?.addEventListener('click', loadMoreRecent);
+  viewAllRecent?.addEventListener('click', () => {
+    recentGrid.innerHTML = '';
+    groupSeries(state.recent).forEach(anime => recentGrid.appendChild(renderCard(anime)));
+    void loadMoreRecent();
+  });
+
+  // 3. Seasonal (Tâm lý & Tình cảm) controls
+  const viewAllSeasonal = document.getElementById('view-all-seasonal');
+  const loadMoreSeasonal = document.getElementById('load-more-seasonal');
+  let seasonalPage = 1;
+  const loadMoreSeasonalFn = async () => {
+    if (!loadMoreSeasonal) return;
+    loadMoreSeasonal.disabled = true;
+    loadMoreSeasonal.textContent = 'Đang tải phim...';
+    try {
+      const moreItems = await LinimeAPI.getSeasonal(seasonalPage + 1);
+      if (!moreItems.length) {
+        loadMoreSeasonal.hidden = true;
+        showToast('Đã tải hết phim tâm lý & tình cảm.');
+        return;
+      }
+      seasonalPage++;
+      state.seasonal.push(...moreItems);
+      const groups = groupSeries(state.seasonal);
+      const existing = new Map([...seasonalGrid.children].map(card => [card.dataset.seriesKey, card]));
+      for (const anime of groups) {
+        const card = existing.get(seriesKey(anime));
+        if (!card) seasonalGrid.appendChild(renderCard(anime));
+        else card.querySelector('.anime-card-sub').textContent = `${anime.studio} · ${anime.year}${anime.seasons.length > 1 ? ` · ${anime.seasons.length} mùa` : ''}`;
+      }
+      showToast(`Đã tải thêm phim. Tổng cộng: ${seasonalGrid.children.length} anime.`);
+    } catch {
+      showToast('Không tải được thêm phim tâm lý & tình cảm.');
+    } finally {
+      loadMoreSeasonal.disabled = false;
+      loadMoreSeasonal.textContent = 'Xem thêm anime tâm lý & tình cảm';
+    }
+  };
+  loadMoreSeasonal?.addEventListener('click', loadMoreSeasonalFn);
+  viewAllSeasonal?.addEventListener('click', () => {
+    seasonalGrid.innerHTML = '';
+    groupSeries(state.seasonal).forEach(anime => seasonalGrid.appendChild(renderCard(anime)));
+    void loadMoreSeasonalFn();
   });
   renderGenreRails();
   await loadContinueWatching();

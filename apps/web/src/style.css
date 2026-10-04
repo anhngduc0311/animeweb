@@ -570,6 +570,11 @@ img {
 }
 
 .section-link {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
   font-size: 13px;
   font-weight: 600;
   color: var(--text-muted);
