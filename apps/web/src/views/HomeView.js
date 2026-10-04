@@ -43,14 +43,17 @@ export async function loadSpotlight() {
   startSpotlightTimer();
 
   const pause = document.getElementById('spotlight-pause');
-  pause?.addEventListener('click', () => {
-    const paused = pause.getAttribute('aria-pressed') !== 'true';
-    pause.setAttribute('aria-pressed', String(paused));
-    pause.setAttribute('aria-label', paused ? 'Tiếp tục chuyển phim' : 'Tạm dừng chuyển phim');
-    pause.textContent = paused ? '▷' : 'Ⅱ';
-    clearInterval(state.spotlightTimer);
-    if (!paused) startSpotlightTimer();
-  });
+  if (pause && !pause.dataset.bound) {
+    pause.dataset.bound = 'true';
+    pause.addEventListener('click', () => {
+      const paused = pause.getAttribute('aria-pressed') !== 'true';
+      pause.setAttribute('aria-pressed', String(paused));
+      pause.setAttribute('aria-label', paused ? 'Tiếp tục chuyển phim' : 'Tạm dừng chuyển phim');
+      pause.textContent = paused ? '▷' : 'Ⅱ';
+      clearInterval(state.spotlightTimer);
+      if (!paused) startSpotlightTimer();
+    });
+  }
 
   // Button actions
   document.getElementById('spotlight-watch-btn')?.addEventListener('click', () => {
@@ -124,16 +127,50 @@ function setSpotlightSlide(index) {
   });
 }
 
-function startSpotlightTimer() {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || document.getElementById('spotlight-pause')?.getAttribute('aria-pressed') === 'true') return;
-  state.spotlightTimer = setInterval(() => {
-    if (state.spotlights.length && !document.hidden && document.getElementById('view-home')?.classList.contains('active') && !document.querySelector('.spotlight-section:hover, .spotlight-section:focus-within')) {
-      setSpotlightSlide((state.spotlightIndex + 1) % state.spotlights.length);
-    }
-  }, 6500);
+let isSpotlightHovered = false;
+let spotlightEventsBound = false;
+
+function bindSpotlightHover() {
+  if (spotlightEventsBound) return;
+  const section = document.getElementById('spotlight-section');
+  if (!section) return;
+  spotlightEventsBound = true;
+
+  section.addEventListener('mouseenter', () => {
+    isSpotlightHovered = true;
+  });
+  section.addEventListener('mouseleave', () => {
+    isSpotlightHovered = false;
+  });
 }
 
-function resetSpotlightTimer() {
+export function startSpotlightTimer() {
+  clearInterval(state.spotlightTimer);
+  bindSpotlightHover();
+
+  if (document.getElementById('spotlight-pause')?.getAttribute('aria-pressed') === 'true') {
+    return;
+  }
+
+  state.spotlightTimer = setInterval(() => {
+    const homeView = document.getElementById('view-home');
+    const isHomeActive = !homeView || homeView.classList.contains('active') || homeView.style.display !== 'none';
+    const isPaused = document.getElementById('spotlight-pause')?.getAttribute('aria-pressed') === 'true';
+
+    if (
+      state.spotlights &&
+      state.spotlights.length > 1 &&
+      !document.hidden &&
+      isHomeActive &&
+      !isPaused &&
+      !isSpotlightHovered
+    ) {
+      setSpotlightSlide((state.spotlightIndex + 1) % state.spotlights.length);
+    }
+  }, 2000);
+}
+
+export function resetSpotlightTimer() {
   clearInterval(state.spotlightTimer);
   startSpotlightTimer();
 }
@@ -181,7 +218,7 @@ export async function loadCatalogs() {
   };
   renderSortedSeasonalGrid(false);
 
-  for (const id of ['trending-grid','recent-grid','seasonal-grid']) {
+  for (const id of ['trending-grid', 'recent-grid', 'seasonal-grid']) {
     const grid = document.getElementById(id);
     if (!grid.children.length) grid.textContent = 'Chưa có dữ liệu phù hợp từ AniDoki.';
   }

@@ -9,6 +9,8 @@ import { loadAccountView } from '../views/AccountView.js';
 import { loadHelpView } from '../views/HelpView.js';
 import { loadAdminView } from '../views/AdminView.js';
 
+import { startSpotlightTimer } from '../views/HomeView.js';
+
 // SPA ROUTE REGISTRATION
 // ==========================================
 export function registerRoutes() {
@@ -16,6 +18,7 @@ export function registerRoutes() {
     .addRoute('/', () => {
       switchView('view-home');
       document.title = 'anidoki — Xem anime online';
+      startSpotlightTimer();
     })
     .addRoute('/browse', (route) => {
       switchView('view-browse');
