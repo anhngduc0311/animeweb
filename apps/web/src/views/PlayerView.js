@@ -269,21 +269,6 @@ export function initPlayerControls() {
     showToast(modal.classList.contains('light-off') ? 'Đã tắt đèn làm dịu mắt' : 'Đã bật đèn');
   });
 
-  // Nút trở lại trang chi tiết từ trình phát
-  document.getElementById('watch-back-btn')?.addEventListener('click', () => {
-    ++streamRequest;
-    video.pause();
-    video.src = '';
-    iframe.src = '';
-    modal.classList.remove('active');
-    document.body.style.overflow = '';
-    if (state.currentVideoAnime) {
-      router.navigate(`/anime/${state.currentVideoAnime.id}`);
-    } else {
-      router.navigate('/');
-    }
-  });
-
   // Đóng player
   document.getElementById('close-player-btn')?.addEventListener('click', async () => {
     ++streamRequest;

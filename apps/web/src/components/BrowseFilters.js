@@ -115,5 +115,18 @@ export function initBrowseFilters() {
   label.textContent = 'Tìm kiếm anime';
   searchWrap.before(field);
   field.append(label, searchWrap);
+  const toggle = document.createElement('button');
+  toggle.type = 'button';
+  toggle.className = 'mobile-filter-toggle';
+  toggle.textContent = 'Bộ lọc & Sắp xếp';
+  toggle.setAttribute('aria-expanded', 'false');
+  toggle.setAttribute('aria-controls', controls.map(control => control.select.parentElement.id = control.select.id + '-field').join(' '));
+  field.after(toggle);
+  toggle.addEventListener('click', () => {
+    const expanded = toggle.getAttribute('aria-expanded') !== 'true';
+    toggle.setAttribute('aria-expanded', String(expanded));
+    document.getElementById('browse-filter-form').classList.toggle('filters-expanded', expanded);
+    if (!expanded) closeAll();
+  });
   syncBrowseFilters();
 }

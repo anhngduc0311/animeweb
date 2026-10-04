@@ -115,13 +115,15 @@ export class Router {
   }
 
   updateActiveNav(pathname) {
-    document.querySelectorAll('.nav-link').forEach(link => {
+    document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
       const href = link.getAttribute('href');
       if (!href) return;
 
       const isHome = (pathname === '/' || pathname === '') && (href === '/' || href === '#');
       const isMatch = href === pathname || (href !== '/' && pathname.startsWith(href));
       link.classList.toggle('active', isHome || isMatch);
+      if (isHome || isMatch) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
     });
   }
 }
