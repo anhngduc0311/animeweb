@@ -15,6 +15,7 @@ export function renderCard(anime) {
   const coverSrc = anime.coverImage || anime.posterUrl || anime.poster_url || '/poster-placeholder.svg';
   const scoreText = anime.score ? `★ ${anime.score}` : '';
   const epText = anime.format === 'MOVIE' ? 'Movie' : `Tập ${anime.currentEpisode || anime.totalEpisodes || 'Full'}`;
+  const seasonCount = anime.seasonCount ?? anime.seasons?.length ?? 0;
   const subMeta = [anime.studio, anime.year].filter(Boolean).join(' · ');
 
   card.setAttribute('aria-label', `Xem chi tiết ${mainTitle}`);
@@ -38,7 +39,7 @@ export function renderCard(anime) {
     </div>
     <div class="anime-card-info">
       <h3 class="anime-card-title">${mainTitle}</h3>
-      <span class="anime-card-sub">${subMeta || 'AniDoki'}${anime.seasons?.length > 1 ? ` · ${anime.seasons.length} mùa` : ''}</span>
+      <span class="anime-card-sub">${subMeta || 'AniDoki'}${seasonCount > 1 ? ` · ${seasonCount} mùa` : ''}</span>
     </div>
   `;
 

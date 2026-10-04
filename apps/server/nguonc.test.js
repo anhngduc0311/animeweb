@@ -6,6 +6,21 @@ import { mapMovie } from './services/kkphim.service.js';
 import { validEmbed } from '../../shared/providers.js';
 
 const base = 'honzuki-no-gekokujou-shisho-ni-naru-tame-ni-wa-shudan-wo-erandeiraremasen';
+test('same season from two providers stays one season despite conflicting years', () => {
+  const current = { id: 'a', title: { english: 'Example Season 2' }, source: 'AniDoki', seriesId: '123', year: 2022, seasonNumber: 2 };
+  const other = { ...current, id: 'b', source: 'NguonC', year: 2025 };
+  const result = mergeSeasons(current, [other, other, { ...other, id: 'remake', seriesId: '999' }]);
+  assert.equal(result.length, 1);
+  assert.equal(result[0].id, current.id);
+  assert.equal(result[0].sources.length, 2);
+  assert.equal(result[0].year, null);
+});
+test('Dress-Up Darling season 2 uses its verified release year', () => {
+  const anime = mapMovie({ slug: 'nang-bup-be-thu-do-cua-toi-biet-yeu-phan-2', year: 2022 });
+  assert.equal(anime.year, 2025);
+  assert.equal(anime.startDate, '2025');
+  assert.equal(anime.season, '2025');
+});
 test('Bookworm links four seasons and keeps the two 2026 sources in one season', () => {
   const current = mapMovie({ slug: 'co-nang-mot-sach', name: 'Cô Nàng Mọt Sách', year: 2026, tmdb: { type: 'tv', id: '91768', season: 2 } });
   const seasons = [base, base + '-2nd-season', base + '-3rd-season', 'honzuki-no-gekokujou-4th-season'].map((slug, i) => mapNguonc({ slug, name: slug, year: [2019, 2020, 2022, 2026][i] }));

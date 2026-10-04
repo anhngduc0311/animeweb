@@ -19,6 +19,11 @@ const bookwormSeasons = {
 // Explicit cross-provider mapping: this sequel's upstream TMDB season differs
 // from the four-part anime release order. Never infer this from a fuzzy title.
 export function normalizeProviderAnime(anime) {
+  // Season 2 aired in 2025; PhimAPI reports the series debut year (2022).
+  // https://bisquedoll-anime.com/news/?article_id=67897
+  if (anime.id === 'nang-bup-be-thu-do-cua-toi-biet-yeu-phan-2') {
+    anime = { ...anime, year: 2025, startDate: '2025', season: '2025' };
+  }
   const season = bookwormSeasons[anime.id.replace(/^nguonc-/, '')];
   return season ? { ...anime, seriesId: '91768', seasonNumber: season, seriesSearch: 'Honzuki' } : anime;
 }

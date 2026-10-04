@@ -30,3 +30,13 @@ export function seasonNumber(anime) {
   const explicit = `${anime.title?.vietnamese || ''} ${anime.title?.english || ''}`.match(/(?:season|phần|mùa|ss)\s*(\d+)/iu);
   return Number(explicit?.[1] || anime.seasonNumber) || 1;
 }
+
+const cleanTitle = title => seriesTitle(title.replace(/\b(\d+)(?:st|nd|rd|th)\s+season\b/gi, 'Season $1')).normalize('NFKC').toLocaleLowerCase('vi').replace(/[()]/g, '').replace(/\s+/g, ' ').trim();
+const aliases = anime => [...Object.values(anime.title || {}), ...(anime.aliases || [])].filter(Boolean).map(cleanTitle);
+export function sameSeries(a, b) {
+  if (a.isMovie || b.isMovie) return a.id === b.id;
+  if (a.seriesId && b.seriesId) return seriesKey(a) === seriesKey(b);
+  const titles = aliases(a);
+  return aliases(b).some(t => t.length > 3 && titles.includes(t));
+}
+

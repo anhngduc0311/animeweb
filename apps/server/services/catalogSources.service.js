@@ -1,26 +1,21 @@
 import { kkRequest, mapMovie, relatedSeasons } from './kkphim.service.js';
 import { searchNguonc } from './nguonc.service.js';
-import { seriesKey, seriesTitle, seasonNumber } from '../../../shared/series.js';
+import { seriesKey, seriesTitle, seasonNumber, sameSeries } from '../../../shared/series.js';
 import { AdminAnimeModel } from '../models/adminAnime.model.js';
 
-const cleanTitle = title => seriesTitle(title.replace(/\b(\d+)(?:st|nd|rd|th)\s+season\b/gi, 'Season $1')).normalize('NFKC').toLocaleLowerCase('vi').replace(/[()]/g, '').replace(/\s+/g, ' ').trim();
-const aliases = anime => [...Object.values(anime.title || {}), ...(anime.aliases || [])].filter(Boolean).map(cleanTitle);
-export function sameSeries(a, b) {
-  if (a.isMovie || b.isMovie) return a.id === b.id;
-  if (a.seriesId && b.seriesId) return seriesKey(a) === seriesKey(b);
-  const titles = aliases(a);
-  return aliases(b).some(t => t.length > 3 && titles.includes(t));
-}
+export { sameSeries } from '../../../shared/series.js';
 
 export function mergeSeasons(anime, candidates) {
   const seasons = new Map();
   for (const item of [anime, ...candidates]) {
     if (!sameSeries(anime, item)) continue;
     const number = seasonNumber(item);
-    // A differing release year may indicate a special/remake, so keep it separate.
-    const key = `${number}:${item.year || ''}`;
+    // Identity has already been checked. Providers sometimes use the series'
+    // first-air year for every season; year must not create duplicate seasons.
+    const key = number;
     if (!seasons.has(key)) seasons.set(key, { ...item, sources: [] });
     const season = seasons.get(key);
+    if (season.year && item.year && Number(season.year) !== Number(item.year)) season.year = null;
     if (!season.sources.some(s => s.id === item.id)) season.sources.push({ id: item.id, source: item.source });
   }
   return [...seasons.values()].sort((a, b) => seasonNumber(a) - seasonNumber(b) || a.year - b.year);

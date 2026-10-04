@@ -1,9 +1,10 @@
 import { pool } from '../db/db.js';
-import { seriesKey, seriesTitle, seasonNumber, groupSeries } from '../../../shared/series.js';
+import { seriesKey, seriesTitle, seasonNumber, groupSeries, sameSeries } from '../../../shared/series.js';
 import { AdminAnimeModel } from '../models/adminAnime.model.js';
 import { ConfigModel } from '../models/config.model.js';
 import { nguoncDetail, searchNguonc } from './nguonc.service.js';
 import { normalizeProviderAnime } from '../../../shared/providers.js';
+import { remember, cacheKey } from './cache.service.js';
 
 const cache = new Map();
 const pending = new Map();
@@ -287,97 +288,88 @@ export async function browseCatalog(params = {}) {
     console.error('Error fetching anime overrides for browse:', err);
   }
 
-  if (q && q.trim()) {
-    const keyword = q.trim().slice(0, 150);
-    const query = new URLSearchParams({ keyword, limit: '64', country: 'nhat-ban' });
-    const results = await Promise.allSettled([
-      kkRequest('/v1/api/tim-kiem?' + query), searchNguonc(keyword)
-    ]);
-    if (results.every(r => r.status === 'rejected')) throw new Error('Không tải được các nguồn phim');
-    let items = [
-      ...(results[0].value?.data?.items || []).filter(m => m.type === 'hoathinh').map(mapMovie),
-      ...(results[1].value || [])
-    ];
-
-    items = items.filter(m => !hiddenSet.has(m.id)).map(m => {
-      const o = overridesMap.get(m.id);
-      return o ? applyAnimeOverride(m, o) : m;
-    });
-
-    if (category) {
-      const catLower = category.toLowerCase();
-      items = items.filter(m => (m.genres || []).some(g => g.toLowerCase() === catLower || g.toLowerCase().includes(catLower)));
-    }
-    if (year) {
-      items = items.filter(m => String(m.year) === String(year));
-    }
-    if (status) {
-      if (status === 'completed') items = items.filter(m => m.status === 'Finished Airing');
-      else if (status === 'ongoing') items = items.filter(m => m.status === 'Currently Airing');
-    }
-
-    if (sort === 'score') {
-      items.sort((a, b) => (Number(b.score) || 0) - (Number(a.score) || 0));
-    } else if (sort === 'year') {
-      items.sort((a, b) => (Number(b.year) || 0) - (Number(a.year) || 0));
-    }
-
-    const totalItems = items.length;
-    const totalPages = Math.ceil(totalItems / limitNum) || 1;
-    const startIndex = (pageNum - 1) * limitNum;
-    const paginatedItems = items.slice(startIndex, startIndex + limitNum);
-
-    return {
-      items: paginatedItems,
-      pagination: {
-        page: pageNum,
-        totalPages,
-        totalItems,
-        limit: limitNum,
-        hasMore: pageNum < totalPages
-      }
-    };
-  } else {
-    const queryObj = {
-      country: 'nhat-ban',
-      limit: String(limitNum),
-      page: String(pageNum)
-    };
-    if (category) queryObj.category = category;
-    if (year) queryObj.year = year;
-
-    const query = new URLSearchParams(queryObj);
-    const json = await kkRequest('/v1/api/danh-sach/hoat-hinh?' + query);
-    let items = (json.data?.items || []).map(mapMovie);
-
-    items = items.filter(m => !hiddenSet.has(m.id)).map(m => {
-      const o = overridesMap.get(m.id);
-      return o ? applyAnimeOverride(m, o) : m;
-    });
-
-    if (status) {
-      if (status === 'completed') items = items.filter(m => m.status === 'Finished Airing');
-      else if (status === 'ongoing') items = items.filter(m => m.status === 'Currently Airing');
-    }
-
-    if (sort === 'score') {
-      items.sort((a, b) => (Number(b.score) || 0) - (Number(a.score) || 0));
-    } else if (sort === 'year') {
-      items.sort((a, b) => (Number(b.year) || 0) - (Number(a.year) || 0));
-    }
-
-    const totalPages = Number(json.data?.params?.pagination?.totalPages) || pageNum;
-    const totalItems = Number(json.data?.params?.pagination?.totalItems) || items.length;
-
-    return {
-      items,
-      pagination: {
-        page: pageNum,
-        totalPages,
-        totalItems,
-        limit: limitNum,
-        hasMore: pageNum < totalPages
-      }
-    };
+  const keyword = q.trim().slice(0, 150);
+  const query = { country: 'nhat-ban' };
+  if (category && !keyword) query.category = category;
+  if (year) query.year = year;
+  const path = keyword ? '/v1/api/tim-kiem' : '/v1/api/danh-sach/hoat-hinh';
+  if (keyword) query.keyword = keyword;
+  const results = await Promise.allSettled([
+    loadBrowseEntries(path, query),
+    keyword ? remember('nguonc-search:' + cacheKey(keyword), () => searchNguonc(keyword)) : Promise.resolve([])
+  ]);
+  if (results[0].status === 'rejected' && (!keyword || results[1].status === 'rejected')) throw new Error('Không tải được danh sách phim');
+  let items = [...(results[0].value || []), ...(results[1].value || [])];
+  items = items.filter(m => !hiddenSet.has(m.id)).map(m => {
+    const override = overridesMap.get(m.id);
+    return override ? applyAnimeOverride(m, override) : m;
+  });
+  if (keyword && category) {
+    const slug = text => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    items = items.filter(m => (m.genres || []).some(g => slug(g) === category));
   }
+  if (year) items = items.filter(m => String(m.year) === String(year));
+  if (status === 'completed') items = items.filter(m => m.status === 'Finished Airing');
+  if (status === 'ongoing') items = items.filter(m => m.status === 'Currently Airing');
+  // Key includes freshly applied overrides and upstream contents. Admin edits,
+  // hidden titles and refreshed data cannot reuse an obsolete grouped result.
+  const grouped = await remember('browse-grouped:' + cacheKey({ items, sort }),
+    async () => paginateBrowseSeries(items, { sort, page: 1, limit: Math.max(1, items.length) }).items);
+  const totalItems = grouped.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / limitNum));
+  return {
+    items: grouped.slice((pageNum - 1) * limitNum, pageNum * limitNum),
+    pagination: { page: pageNum, totalPages, totalItems, limit: limitNum, hasMore: pageNum < totalPages }
+  };
+}
+
+// Read all matching entries before grouping so a series cannot reappear on
+// another page. Requests share kkRequest's cache and use bounded concurrency.
+export async function loadBrowseEntries(path, params, request = kkRequest) {
+  const load = () => fetchBrowseEntries(path, params, request);
+  return request === kkRequest ? remember('browse-entries:' + cacheKey({ path, params }), load) : load();
+}
+
+async function fetchBrowseEntries(path, params, request) {
+  const getPage = async page => {
+    const result = await request(path + '?' + new URLSearchParams({ ...params, limit: '64', page: String(page), sort_field: 'modified.time', sort_type: 'desc' }));
+    if (!Array.isArray(result.data?.items)) throw new Error('Danh sách phim không hợp lệ');
+    return result.data;
+  };
+  const first = await getPage(1);
+  const pages = [first];
+  const totalPages = Number(first.params?.pagination?.totalPages) || 1;
+  for (let page = 2; page <= totalPages; page += 4) {
+    pages.push(...await Promise.all(Array.from({ length: Math.min(4, totalPages - page + 1) }, (_, i) => getPage(page + i))));
+  }
+  return pages.flatMap(page => page.items).filter(m => !m.type || m.type === 'hoathinh').map(mapMovie);
+}
+
+export function paginateBrowseSeries(items, { sort = 'updated', page = 1, limit = 24 } = {}) {
+  const updated = item => Date.parse(item.updatedAt) || 0;
+  const sorted = [...items].sort((a, b) => {
+    if (sort === 'score') return (Number(b.score) || 0) - (Number(a.score) || 0) || updated(b) - updated(a);
+    if (sort === 'year') return (Number(b.year) || 0) - (Number(a.year) || 0) || updated(b) - updated(a);
+    if (sort === 'title') return (a.title.english || a.title.vietnamese || '').localeCompare(b.title.english || b.title.vietnamese || '', 'vi');
+    return updated(b) - updated(a);
+  });
+  const groups = [];
+  for (const item of groupSeries(sorted)) {
+    // groupSeries already merged known IDs. Only compare aliases when one
+    // provider lacks an ID, avoiding repeated ID comparisons for the catalog.
+    const existing = item.isMovie ? null : groups.find(group => (!group.seriesId || !item.seriesId) && sameSeries(group, item));
+    if (existing) existing.seasons.push(...item.seasons);
+    else groups.push(item);
+  }
+  const grouped = groups.map(item => ({
+    ...item,
+    seasonCount: new Set(item.seasons.map(seasonNumber)).size,
+    title: item.isMovie ? item.title : Object.fromEntries(Object.entries(item.title).map(([key, title]) => [key, seriesTitle(title)]))
+  }));
+  const totalItems = grouped.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / limit));
+  return {
+    items: grouped.slice((page - 1) * limit, page * limit),
+    pagination: { page, totalPages, totalItems, limit, hasMore: page < totalPages }
+  };
 }
