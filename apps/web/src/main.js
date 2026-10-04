@@ -1,6 +1,6 @@
 import { LinimeAPI } from './api.js';
 import { groupSeries, seriesKey, seasonNumber } from '../../../shared/series.js';
-const INITIAL_ANIME_DATA = []; // No sample catalog fallback for live KKPhim data.
+const INITIAL_ANIME_DATA = []; // No sample catalog fallback for live AniDoki data.
 
 // Application State
 const state = {
@@ -214,14 +214,6 @@ async function refreshWatchlistCount() {
   }
 }
 
-function updateUserUI() {
-  const userText = document.getElementById('user-display-name');
-  if (state.user && state.user.name) {
-    userText.textContent = state.user.name;
-  } else {
-    userText.textContent = 'Đăng nhập';
-  }
-}
 
 // ==========================================
 // SPOTLIGHT HERO CAROUSEL
@@ -249,7 +241,7 @@ async function loadSpotlight() {
   });
 
   if (!state.spotlights.length) {
-    document.getElementById('spotlight-title').textContent = 'Chưa tải được phim từ KKPhim';
+    document.getElementById('spotlight-title').textContent = 'Chưa tải được phim từ AniDoki';
     document.getElementById('spotlight-desc').textContent = 'Vui lòng tải lại trang để thử kết nối lại.';
     document.querySelectorAll('.spotlight-actions button').forEach(button => { button.disabled = true; });
   }
@@ -425,7 +417,7 @@ async function loadCatalogs() {
 
   for (const id of ['trending-grid','recent-grid','seasonal-grid']) {
     const grid = document.getElementById(id);
-    if (!grid.children.length) grid.textContent = 'Chưa có dữ liệu phù hợp từ KKPhim.';
+    if (!grid.children.length) grid.textContent = 'Chưa có dữ liệu phù hợp từ AniDoki.';
   }
   // 1. Trending controls
   const viewAllTrending = document.getElementById('view-all-trending');
@@ -636,7 +628,8 @@ async function loadContinueWatching() {
   section.style.display = 'block';
   grid.innerHTML = '';
 
-  history.forEach(item => {
+  // Giới hạn tối đa 3 hàng (15 phim cho 5 cột)
+  history.slice(0, 15).forEach(item => {
     const anime = item.anime;
     if (!anime) return;
 
@@ -935,11 +928,11 @@ function initDetailEvents() {
 }
 
 // ==========================================
-// CINEMA VIDEO PLAYER (KKPHIM EMBED)
+// CINEMA VIDEO PLAYER (ANIDOKI EMBED)
 // ==========================================
 let streamRequest = 0;
 let lastProgressSave = 0;
-let activeProvider = 'KKPhim';
+let activeProvider = 'AniDoki';
 let activeLanguage = 'sub';
 
 
@@ -962,7 +955,7 @@ async function openPlayer(anime, episodeIndex = 0, resumeTime = 0) {
   }
 
   if (!state.currentEpisodes.length) {
-    showToast('KKPhim chưa có tập Vietsub cho phim này.');
+    showToast('AniDoki chưa có tập Vietsub cho phim này.');
     return;
   }
 
@@ -974,7 +967,7 @@ async function openPlayer(anime, episodeIndex = 0, resumeTime = 0) {
   modal.classList.add('active');
   document.body.style.overflow = 'hidden';
 
-  // Nạp iframe KKPhim từ máy chủ
+  // Nạp iframe AniDoki từ máy chủ
   await loadLiveAnimeStream(anime.id, epNum, activeProvider, activeLanguage, resumeTime);
 }
 
@@ -992,7 +985,7 @@ async function loadLiveAnimeStream(animeId, episodeNumber, provider, language, r
   iframe.style.display = 'none';
   if (controls) controls.style.display = 'none';
   document.getElementById('player-notice-banner')?.remove();
-  showToast('Đang tải nguồn KKPhim • Vietsub...');
+  showToast('Đang tải nguồn AniDoki • Vietsub...');
   try {
     const res = await fetch('/api/watch/sources', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -1003,11 +996,11 @@ async function loadLiveAnimeStream(animeId, episodeNumber, provider, language, r
     if (!res.ok || !data.success || data.type !== 'embed') throw new Error(data.message || 'Tập hoặc ngôn ngữ này chưa có nguồn phát.');
     const url = new URL(data.embed_url);
     if (url.origin !== ('https://player.phimapi.com')) throw new Error('Địa chỉ trình phát không hợp lệ.');
-    document.getElementById('player-source-label').textContent = 'KKPhim • Phụ đề Việt';
+    document.getElementById('player-source-label').textContent = 'AniDoki • Phụ đề Việt';
     iframe.src = url.href;
     iframe.style.display = 'block';
     LinimeAPI.saveProgress(animeId, episodeNumber, 0, 0);
-    // KKPhim owns playback controls; its public API does not document seeking.
+    // AniDoki owns playback controls; its public API does not document seeking.
     if (resumeTime > 0) showToast('Chọn vị trí xem tiếp trong trình phát.');
   } catch (err) {
     if (requestId === streamRequest) showPlayerNotice(err.message);
@@ -1311,12 +1304,169 @@ function initWatchlistDrawer() {
 }
 
 // ==========================================
-// LOGIN & SESSION MODAL (API POWERED)
+// LOGIN & SESSION MODAL (GOOGLE OAUTH & API POWERED)
 // ==========================================
+const GOOGLE_CLIENT_ID = '680572592219-jovd5g5n9p9k5r1ok4p81cpu5sr4hiu9.apps.googleusercontent.com';
+let googleTokenClient = null;
+
+function updateUserUI() {
+  const openLoginBtn = document.getElementById('open-login-btn');
+  const userDisplayName = document.getElementById('user-display-name');
+  const userDropdown = document.getElementById('user-dropdown');
+  const userAvatarImg = document.getElementById('user-avatar-img');
+  const userDropdownName = document.getElementById('user-dropdown-name');
+  const userDropdownEmail = document.getElementById('user-dropdown-email');
+  const loginIcon = document.getElementById('login-btn-icon');
+
+  if (state.user) {
+    const firstName = state.user.name ? state.user.name.split(' ').slice(-1)[0] : 'Tài khoản';
+    const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(state.user.name || 'User')}&background=e50914&color=fff&bold=true`;
+    const avatarSrc = state.user.avatar || fallbackAvatar;
+
+    if (userDisplayName) userDisplayName.textContent = firstName;
+    if (userDropdownName) userDropdownName.textContent = state.user.name || 'Người dùng AniDoki';
+    if (userDropdownEmail) userDropdownEmail.textContent = state.user.email || '';
+    
+    if (userAvatarImg) {
+      userAvatarImg.setAttribute('referrerpolicy', 'no-referrer');
+      userAvatarImg.setAttribute('crossorigin', 'anonymous');
+      userAvatarImg.onerror = () => { userAvatarImg.src = fallbackAvatar; };
+      userAvatarImg.src = avatarSrc;
+    }
+
+    // Hiển thị avatar tròn nhỏ trong nút đăng nhập
+    let thumb = openLoginBtn?.querySelector('.user-avatar-thumb');
+    if (!thumb && openLoginBtn) {
+      thumb = document.createElement('img');
+      thumb.className = 'user-avatar-thumb';
+      thumb.setAttribute('referrerpolicy', 'no-referrer');
+      thumb.setAttribute('crossorigin', 'anonymous');
+      thumb.onerror = () => { thumb.src = fallbackAvatar; };
+      thumb.src = avatarSrc;
+      thumb.alt = state.user.name || 'Avatar';
+      openLoginBtn.prepend(thumb);
+    } else if (thumb) {
+      thumb.setAttribute('referrerpolicy', 'no-referrer');
+      thumb.setAttribute('crossorigin', 'anonymous');
+      thumb.onerror = () => { thumb.src = fallbackAvatar; };
+      thumb.src = avatarSrc;
+    }
+    if (loginIcon) loginIcon.style.display = 'none';
+  } else {
+    if (userDisplayName) userDisplayName.textContent = 'Đăng nhập';
+    const thumb = openLoginBtn?.querySelector('.user-avatar-thumb');
+    if (thumb) thumb.remove();
+    if (loginIcon) loginIcon.style.display = 'inline-block';
+    if (userDropdown) userDropdown.hidden = true;
+  }
+}
+
+function initGoogleServices(onSuccess) {
+  if (window.google?.accounts?.oauth2) {
+    try {
+      googleTokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: GOOGLE_CLIENT_ID,
+        scope: 'email profile openid',
+        callback: async (tokenResponse) => {
+          if (tokenResponse && tokenResponse.access_token) {
+            const res = await LinimeAPI.googleLogin({ access_token: tokenResponse.access_token });
+            if (res.success) {
+              onSuccess(res.user);
+            } else {
+              showToast(res.message || 'Đăng nhập Google thất bại');
+            }
+          }
+        }
+      });
+    } catch (err) {
+      console.warn('Google Token Client init error:', err);
+    }
+  }
+
+  if (window.google?.accounts?.id) {
+    try {
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: async (response) => {
+          if (response && response.credential) {
+            const res = await LinimeAPI.googleLogin({ credential: response.credential });
+            if (res.success) {
+              onSuccess(res.user);
+            }
+          }
+        },
+        auto_select: false
+      });
+    } catch (err) {
+      console.warn('Google GSI init error:', err);
+    }
+  }
+}
+
 function initLoginModal() {
   const modal = document.getElementById('login-modal');
-  document.getElementById('open-login-btn')?.addEventListener('click', () => {
-    modal.classList.add('active');
+  const openLoginBtn = document.getElementById('open-login-btn');
+  const userDropdown = document.getElementById('user-dropdown');
+  const logoutBtn = document.getElementById('logout-btn');
+  const googleBtn = document.getElementById('google-login-btn');
+
+  // Khôi phục phiên đăng nhập trước đó nếu có
+  try {
+    const savedUser = localStorage.getItem('anidoki_user') || localStorage.getItem('linime_user');
+    if (savedUser) {
+      state.user = JSON.parse(savedUser);
+      updateUserUI();
+    }
+  } catch {
+    state.user = null;
+  }
+
+  const handleLoginSuccess = (user) => {
+    state.user = user;
+    localStorage.setItem('anidoki_user', JSON.stringify(user));
+    updateUserUI();
+    modal.classList.remove('active');
+    showToast(`Đăng nhập thành công! Chào mừng ${user.name}`);
+    if (googleBtn) {
+      googleBtn.disabled = false;
+      const span = googleBtn.querySelector('span');
+      if (span) span.textContent = 'Tiếp tục với Google';
+    }
+  };
+
+  // Khởi tạo Google SDK khi script đã tải
+  if (window.google) {
+    initGoogleServices(handleLoginSuccess);
+  } else {
+    window.addEventListener('load', () => initGoogleServices(handleLoginSuccess));
+  }
+
+  // Click nút User / Đăng nhập
+  openLoginBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (state.user) {
+      // Đã đăng nhập: toggle menu dropdown
+      userDropdown.hidden = !userDropdown.hidden;
+    } else {
+      // Chưa đăng nhập: mở modal đăng nhập
+      modal.classList.add('active');
+    }
+  });
+
+  // Đóng dropdown khi click bên ngoài
+  document.addEventListener('click', (e) => {
+    if (userDropdown && !userDropdown.hidden && !userDropdown.contains(e.target) && e.target !== openLoginBtn) {
+      userDropdown.hidden = true;
+    }
+  });
+
+  // Nút Đăng xuất
+  logoutBtn?.addEventListener('click', () => {
+    state.user = null;
+    localStorage.removeItem('anidoki_user');
+    localStorage.removeItem('linime_user');
+    updateUserUI();
+    showToast('Đã đăng xuất tài khoản.');
   });
 
   document.getElementById('close-login-btn')?.addEventListener('click', () => {
@@ -1327,19 +1477,28 @@ function initLoginModal() {
     if (e.target === modal) modal.classList.remove('active');
   });
 
-  document.getElementById('google-login-btn')?.addEventListener('click', async () => {
-    const res = await LinimeAPI.login({
-      provider: 'google',
-      name: 'Luffy Mũ Rơm',
-      email: 'luffy@onepiece.strawhat'
-    });
+  // Bấm Đăng nhập bằng Google
+  googleBtn?.addEventListener('click', async () => {
+    if (!googleTokenClient && window.google?.accounts?.oauth2) {
+      initGoogleServices(handleLoginSuccess);
+    }
 
-    if (res.success) {
-      state.user = res.user;
-      localStorage.setItem('linime_user', JSON.stringify(state.user));
-      updateUserUI();
-      modal.classList.remove('active');
-      showToast(`Đăng nhập thành công! Chào mừng ${res.user.name}`);
+    if (googleTokenClient) {
+      const span = googleBtn.querySelector('span');
+      if (span) span.textContent = 'Đang mở cửa sổ Google...';
+      googleTokenClient.requestAccessToken({ prompt: 'select_account' });
+    } else if (window.google?.accounts?.id) {
+      google.accounts.id.prompt();
+    } else {
+      // Fallback API trực tiếp
+      const res = await LinimeAPI.login({
+        provider: 'google',
+        name: 'Người dùng Google',
+        email: 'user@gmail.com'
+      });
+      if (res.success) {
+        handleLoginSuccess(res.user);
+      }
     }
   });
 }

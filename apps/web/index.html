@@ -24,6 +24,9 @@
 
   <link rel="stylesheet" href="/src/style.css">
   <link rel="stylesheet" href="/src/refinement.css">
+
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
 <body>
@@ -79,15 +82,35 @@
           <span class="badge-count" id="watchlist-count">0</span>
         </button>
 
-        <!-- User / Login Button -->
-        <button class="btn-login" id="open-login-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
-          <span id="user-display-name">Đăng nhập</span>
-        </button>
+        <!-- User / Login Menu Wrapper -->
+        <div class="user-menu-wrap" id="user-menu-wrap">
+          <button class="btn-login" id="open-login-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" id="login-btn-icon">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span id="user-display-name">Đăng nhập</span>
+          </button>
+          <div class="user-dropdown" id="user-dropdown" hidden>
+            <div class="user-dropdown-header">
+              <img id="user-avatar-img" class="user-avatar-large" src="" alt="Avatar" referrerpolicy="no-referrer" />
+              <div class="user-info">
+                <strong id="user-dropdown-name">Người dùng</strong>
+                <span id="user-dropdown-email">email@example.com</span>
+              </div>
+            </div>
+            <hr class="dropdown-divider" />
+            <button type="button" class="user-dropdown-item logout-btn" id="logout-btn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              <span>Đăng xuất</span>
+            </button>
+          </div>
+        </div>
 
         <!-- Mobile Menu Toggle -->
         <button class="icon-btn mobile-menu-btn" id="mobile-toggle-btn" aria-label="Menu di động"
@@ -249,7 +272,7 @@
       <div class="section-header">
         <div class="section-title-group">
           <h2 class="section-title">Anime Tâm lý & Tình cảm</h2>
-          <span class="section-subtitle">Phim hoạt hình tâm lý hoặc tình cảm mới cập nhật từ KKPhim</span>
+          <span class="section-subtitle">Phim hoạt hình tâm lý hoặc tình cảm mới cập nhật từ AniDoki</span>
         </div>
         <button type="button" class="section-link" id="view-all-seasonal">Xem tất cả →</button>
       </div>
@@ -495,7 +518,7 @@
     <div class="player-header">
       <div class="player-title">
         <span id="player-anime-name">One Piece</span>
-        <span class="server-tab active" id="player-source-label">KKPhim • Vietsub</span>
+        <span class="server-tab active" id="player-source-label">AniDoki • Vietsub</span>
       </div>
       <button class="icon-btn" id="close-player-btn" aria-label="Đóng trình phát">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -566,7 +589,7 @@
       <div class="watch-bottom-panel" id="watch-bottom-panel">
         <!-- Quick toggles row -->
         <div class="watch-quick-bar">
-          <label class="quick-toggle" title="Player KKPhim chưa hỗ trợ tự chuyển tập"><input type="checkbox"
+          <label class="quick-toggle" title="Player AniDoki chưa hỗ trợ tự chuyển tập"><input type="checkbox"
               id="chk-autonext" disabled> <span>Tự chuyển tập</span></label>
           <button class="quick-btn" id="btn-light">💡 Tắt đèn</button>
         </div>
@@ -594,7 +617,7 @@
             <div class="server-group">
               <span class="group-label">NGUỒN PHÁT</span>
               <div class="server-buttons">
-                <span class="prov-btn active">KKPhim</span>
+                <span class="prov-btn active">AniDoki</span>
 
               </div>
             </div>

@@ -163,6 +163,29 @@ export const LinimeAPI = {
   },
 
   // 6. User Auth API
+  async getAuthConfig() {
+    try {
+      const res = await fetch(`${API_BASE}/auth/config`);
+      return await res.json();
+    } catch {
+      return { clientId: '680572592219-jovd5g5n9p9k5r1ok4p81cpu5sr4hiu9.apps.googleusercontent.com' };
+    }
+  },
+
+  async googleLogin(authPayload) {
+    try {
+      const res = await fetch(`${API_BASE}/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(authPayload)
+      });
+      return await res.json();
+    } catch (err) {
+      console.error('googleLogin error:', err);
+      return { success: false, message: 'Lỗi kết nối máy chủ xác thực' };
+    }
+  },
+
   async login(userPayload) {
     try {
       const res = await fetch(`${API_BASE}/auth/login`, {

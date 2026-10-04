@@ -8,9 +8,9 @@ export async function kkRequest(path) {
   if (pending.has(path)) return pending.get(path);
   const task = (async () => {
     const r = await fetch('https://phimapi.com' + path, { signal: AbortSignal.timeout(15000) });
-    if (!r.ok) throw new Error('KKPhim HTTP ' + r.status);
+    if (!r.ok) throw new Error('AniDoki HTTP ' + r.status);
     const data = await r.json();
-    if (data.status === false || data.status === 'error') throw new Error('KKPhim không có dữ liệu');
+    if (data.status === false || data.status === 'error') throw new Error('AniDoki không có dữ liệu');
     if (cache.size >= 200) cache.delete(cache.keys().next().value);
     cache.set(path, { data, until: Date.now() + 300000 });
     return data;
@@ -31,13 +31,13 @@ export function mapMovie(m) {
     updatedAt: m.modified?.time || null,
     logo: /^tt\d+$/.test(m.imdb?.id || '') ? 'https://images.metahub.space/logo/medium/' + m.imdb.id + '/img' : null,
     coverImage: image(m.poster_url), bannerImage: image(m.thumb_url),
-    score: Number(m.imdb?.vote_average || m.tmdb?.vote_average || 0), studio: 'KKPhim',
+    score: Number(m.imdb?.vote_average || m.tmdb?.vote_average || 0), studio: 'AniDoki',
     genres: (m.category || []).map(x => x.name), format: movie ? 'MOVIE' : 'TV',
     duration: m.time || 'Đang cập nhật', status: m.status === 'completed' ? 'Finished Airing' : 'Currently Airing',
     year: m.year, startDate: String(m.year || ''), season: String(m.year || ''),
     totalEpisodes: Number(m.episode_total) || null, currentEpisode: m.episode_current?.match(/\d+/)?.[0] || '',
     nextAiring: null, description: (m.content || '').replace(/<[^>]*>/g, '').replace(/&quot;/g, '"').replace(/&amp;/g, '&'),
-    isMovie: movie, language: m.lang || '', source: 'KKPhim' };
+    isMovie: movie, language: m.lang || '', source: 'AniDoki' };
 }
 export function extractEpisodes(detail) {
   const server = detail.episodes?.find(s => /^vietsub$/i.test(s.server_name.trim()));
@@ -46,7 +46,7 @@ export function extractEpisodes(detail) {
   }).map((ep, index) => ({ number: index + 1, id: ep.slug, title: ep.name, embed: ep.link_embed, duration: detail.movie?.time || '' }));
 }
 export async function movieDetail(slug) {
-  if (!slugOK(slug)) throw new Error('Mã phim KKPhim không hợp lệ');
+  if (!slugOK(slug)) throw new Error('Mã phim AniDoki không hợp lệ');
   const detail = await kkRequest('/phim/' + slug);
   if (!detail.movie) throw new Error('Không tìm thấy phim');
   return { ...mapMovie(detail.movie), episodes: extractEpisodes(detail) };
@@ -168,7 +168,7 @@ export async function movieCatalog(page = 1, limit = 12, request = kkRequest) {
 }
 export const router = express.Router();
 const route = (method, path, fn) => router[method](path, async (req,res) => {
-  try { await fn(req,res); } catch (err) { console.warn('KKPhim:', err.message); res.status(err.status === 400 ? 400 : 502).json({ success:false, message:err.status === 400 ? err.message : 'Không tải được dữ liệu KKPhim. Hãy thử lại.' }); }
+  try { await fn(req,res); } catch (err) { console.warn('AniDoki:', err.message); res.status(err.status === 400 ? 400 : 502).json({ success:false, message:err.status === 400 ? err.message : 'Không tải được dữ liệu AniDoki. Hãy thử lại.' }); }
 });
 const send = (res, data) => res.json({ success:true, data, total: Array.isArray(data) ? data.length : undefined });
 route('get','/anime/spotlight', async (req,res) => {
@@ -237,8 +237,8 @@ route('post','/watch/sources', async (req,res) => {
   if (!slugOK(anime_id) || !Number.isInteger(Number(episode_number)) || Number(episode_number)<1) return res.status(400).json({success:false,message:'Phim hoặc tập không hợp lệ'});
   const movie = await movieDetail(anime_id);
   const ep = movie.episodes.find(ep => ep.number === Number(episode_number));
-  if (!ep) return res.status(404).json({success:false,message:'KKPhim chưa có tập Vietsub này.'});
-  res.json({success:true,type:'embed',provider:'KKPhim',language:'vi',embed_url:ep.embed});
+  if (!ep) return res.status(404).json({success:false,message:'AniDoki chưa có tập Vietsub này.'});
+  res.json({success:true,type:'embed',provider:'AniDoki',language:'vi',embed_url:ep.embed});
 });
 route('get','/search', async (req,res) => {
   const keyword = String(req.query.q || '').slice(0,150);

@@ -7,7 +7,7 @@ export function seriesKey(anime) {
   if (anime.isMovie || anime.format === 'MOVIE') return `movie:${anime.id}`;
   if (anime.seriesId) {
     const id = String(anime.seriesId);
-    // Some KKPhim entries append the season to the TMDB series ID.
+    // Some AniDoki entries append the season to the TMDB series ID.
     // Only strip a numeric suffix when it matches this entry's known season.
     const suffixed = id.match(/^(\d+)-(\d+)$/);
     const knownSeason = `${anime.title?.vietnamese || ''} ${anime.title?.english || ''}`.match(/(?:season|phần|mùa|ss)\s*(\d+)/iu)?.[1] || anime.seasonNumber;
