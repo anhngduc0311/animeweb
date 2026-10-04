@@ -1,4 +1,5 @@
 import { LinimeAPI } from './api.js';
+import { groupSeries, seriesKey, seasonNumber } from '../../../shared/series.js';
 const INITIAL_ANIME_DATA = []; // No sample catalog fallback for live KKPhim data.
 
 // Application State
@@ -94,7 +95,7 @@ function updateUserUI() {
 async function loadSpotlight() {
   try {
     const spotlights = await LinimeAPI.getSpotlight();
-    state.spotlights = spotlights.length ? spotlights : INITIAL_ANIME_DATA.filter(a => a.isSpotlight);
+    state.spotlights = groupSeries(spotlights.length ? spotlights : INITIAL_ANIME_DATA.filter(a => a.isSpotlight));
   } catch {
     state.spotlights = INITIAL_ANIME_DATA.filter(a => a.isSpotlight);
   }
@@ -202,6 +203,8 @@ function resetSpotlightTimer() {
 function renderCard(anime) {
   const card = document.createElement('div');
   card.className = 'anime-card';
+  card.dataset.seriesKey = seriesKey(anime);
+  card.dataset.animeId = anime.id;
   card.tabIndex = 0;
   card.setAttribute('role', 'button');
   card.setAttribute('aria-label', `Xem chi tiết ${anime.title.english || anime.title.vietnamese}`);
@@ -225,7 +228,7 @@ function renderCard(anime) {
     </div>
     <div class="anime-card-info">
       <h3 class="anime-card-title">${anime.title.english || anime.title.vietnamese}</h3>
-      <span class="anime-card-sub">${anime.studio} · ${anime.year}</span>
+      <span class="anime-card-sub">${anime.studio} · ${anime.year}${anime.seasons?.length > 1 ? ` · ${anime.seasons.length} mùa` : ''}</span>
     </div>
   `;
 
@@ -249,8 +252,8 @@ function renderCard(anime) {
 async function loadCatalogs() {
   try {
     const [trending, recent, seasonal, genres] = await Promise.all([
-      LinimeAPI.getTrending(12),
-      LinimeAPI.getRecentlyUpdated(12),
+      LinimeAPI.getTrending(24),
+      LinimeAPI.getRecentlyUpdated(24),
       LinimeAPI.getSeasonal(),
       LinimeAPI.getGenres()
     ]);
@@ -266,20 +269,20 @@ async function loadCatalogs() {
     state.seasonal = INITIAL_ANIME_DATA.filter(a => a.status === 'Currently Airing');
   }
 
-  // Trending Grid
+  // Trending Grid (2 hàng x 6 ô = 12 ô)
   const trendingGrid = document.getElementById('trending-grid');
   trendingGrid.innerHTML = '';
-  state.trending.forEach(anime => trendingGrid.appendChild(renderCard(anime)));
+  groupSeries(state.trending).slice(0, 12).forEach(anime => trendingGrid.appendChild(renderCard(anime)));
 
-  // Recent Grid
+  // Recent Grid (2 hàng x 6 ô = 12 ô)
   const recentGrid = document.getElementById('recent-grid');
   recentGrid.innerHTML = '';
-  state.recent.forEach(anime => recentGrid.appendChild(renderCard(anime)));
+  groupSeries(state.recent).slice(0, 12).forEach(anime => recentGrid.appendChild(renderCard(anime)));
 
-  // Seasonal Grid
+  // Seasonal Grid (2 hàng x 6 ô = 12 ô)
   const seasonalGrid = document.getElementById('seasonal-grid');
   seasonalGrid.innerHTML = '';
-  state.seasonal.forEach(anime => seasonalGrid.appendChild(renderCard(anime)));
+  groupSeries(state.seasonal).slice(0, 12).forEach(anime => seasonalGrid.appendChild(renderCard(anime)));
 
   for (const id of ['trending-grid','recent-grid','seasonal-grid']) {
     const grid = document.getElementById(id);
@@ -295,7 +298,14 @@ async function loadCatalogs() {
       const data = await response.json();
       if (!response.ok || !data.success) throw new Error();
       page++;
-      data.data.forEach(anime => recentGrid.appendChild(renderCard(anime)));
+      state.recent.push(...data.data);
+      const groups = groupSeries(state.recent);
+      const existing = new Map([...recentGrid.children].map(card => [card.dataset.seriesKey, card]));
+      for (const anime of groups) {
+        const card = existing.get(seriesKey(anime));
+        if (!card) recentGrid.appendChild(renderCard(anime));
+        else card.querySelector('.anime-card-sub').textContent = `${anime.studio} · ${anime.year}${anime.seasons.length > 1 ? ` · ${anime.seasons.length} mùa` : ''}`;
+      }
       more.hidden = page >= data.pagination.totalPages || !data.data.length;
     } catch { showToast('Không tải được thêm phim. Hãy thử lại.'); }
     more.disabled = false;
@@ -348,7 +358,7 @@ function renderGenreRails() {
   const romanceAnimes = state.genres['Romance'] || INITIAL_ANIME_DATA.filter(a => a.genres.includes('Romance') || a.genres.includes('Drama'));
 
   actionRail.innerHTML = '';
-  actionAnimes.forEach(anime => {
+  groupSeries(actionAnimes).forEach(anime => {
     const card = document.createElement('div');
     card.className = 'genre-card';
     card.innerHTML = `
@@ -369,7 +379,7 @@ function renderGenreRails() {
   });
 
   romanceRail.innerHTML = '';
-  romanceAnimes.forEach(anime => {
+  groupSeries(romanceAnimes).forEach(anime => {
     const card = document.createElement('div');
     card.className = 'genre-card';
     card.innerHTML = `
@@ -439,14 +449,18 @@ async function loadContinueWatching() {
 // ==========================================
 // ANIME DETAIL VIEW (1:1 VỚI BẢN ONE PIECE TRONG ẢNH)
 // ==========================================
+let detailRequest = 0;
 async function openAnimeDetail(animeId) {
+  const request = ++detailRequest;
   let anime = await LinimeAPI.getAnimeDetail(animeId);
+  if (request !== detailRequest) return;
   if (!anime) {
     anime = INITIAL_ANIME_DATA.find(a => a.id === animeId);
   }
   if (!anime) return;
 
   state.currentDetailAnime = anime;
+  void loadSeasonSelector(anime, request);
   const view = document.getElementById('detail-view');
 
   // Fill in Header & Posters
@@ -512,6 +526,7 @@ async function openAnimeDetail(animeId) {
   // Episodes List from API
   try {
     const epData = await LinimeAPI.getEpisodes(anime.id);
+    if (request !== detailRequest) return;
     state.currentEpisodes = epData.length ? epData : (anime.episodes || []);
   } catch {
     state.currentEpisodes = anime.episodes || [];
@@ -521,6 +536,52 @@ async function openAnimeDetail(animeId) {
   // Show View
   view.classList.add('active');
   document.body.style.overflow = 'hidden';
+}
+
+async function loadSeasonSelector(anime, request) {
+  const section = document.getElementById('detail-seasons');
+  const list = document.getElementById('detail-season-list');
+  const status = document.getElementById('detail-season-status');
+  section.hidden = anime.isMovie;
+  list.replaceChildren();
+  if (anime.isMovie) return;
+  status.textContent = 'Đang tìm các mùa của phim…';
+  try {
+    const response = await fetch(`/api/anime/${encodeURIComponent(anime.id)}/seasons`);
+    const result = await response.json();
+    if (request !== detailRequest) return;
+    if (!response.ok || !result.success || !Array.isArray(result.data)) throw new Error();
+    status.textContent = result.data.length > 1 ? `${result.data.length} mùa · Chọn mùa để xem danh sách tập` : 'Hiện có 1 mùa';
+    for (const season of result.data) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'season-option';
+      button.dataset.animeId = season.id;
+      button.textContent = `Mùa ${seasonNumber(season)}${season.year ? ` · ${season.year}` : ''}`;
+      button.title = season.title.vietnamese || season.title.english;
+      button.setAttribute('aria-pressed', String(season.id === anime.id));
+      button.addEventListener('click', async () => {
+        if (season.id === state.currentDetailAnime?.id) return;
+        button.disabled = true;
+        status.textContent = 'Đang chuyển mùa…';
+        await openAnimeDetail(season.id);
+        if (request === detailRequest || state.currentDetailAnime?.id !== season.id) {
+          button.disabled = false;
+          status.textContent = 'Không tải được mùa này. Hãy thử lại.';
+        }
+      });
+      list.appendChild(button);
+    }
+  } catch {
+    if (request !== detailRequest) return;
+    status.textContent = 'Không tải được các mùa phim.';
+    const retry = document.createElement('button');
+    retry.type = 'button';
+    retry.className = 'season-option';
+    retry.textContent = 'Thử lại';
+    retry.addEventListener('click', () => loadSeasonSelector(anime, request));
+    list.appendChild(retry);
+  }
 }
 
 function updateDetailBookmarkBtn(animeId) {
@@ -606,6 +667,7 @@ function renderDetailEpisodes(episodes, filterQuery = '') {
 
 function initDetailEvents() {
   document.getElementById('close-detail-btn')?.addEventListener('click', () => {
+    detailRequest++;
     document.getElementById('detail-view')?.classList.remove('active');
     document.body.style.overflow = '';
     if (state.countdownInterval) clearInterval(state.countdownInterval);

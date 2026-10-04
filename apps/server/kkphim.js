@@ -1,5 +1,6 @@
 import express from 'express';
 import { pool } from './db/db.js';
+import { seriesKey, seriesTitle, seasonNumber } from '../../shared/series.js';
 const cache = new Map(), pending = new Map();
 export async function kkRequest(path) {
   const hit = cache.get(path);
@@ -25,6 +26,8 @@ const image = value => {
 export function mapMovie(m) {
   const movie = m.tmdb?.type === 'movie' || m.type === 'single';
   return { id: m.slug, title: { english: m.origin_name || m.name, vietnamese: m.name, romaji: m.origin_name || m.name },
+    seriesId: !movie && m.tmdb?.type === 'tv' ? m.tmdb.id || null : null,
+    seasonNumber: !movie ? Number(m.tmdb?.season) || null : null,
     logo: /^tt\d+$/.test(m.imdb?.id || '') ? 'https://images.metahub.space/logo/medium/' + m.imdb.id + '/img' : null,
     coverImage: image(m.poster_url), bannerImage: image(m.thumb_url),
     score: Number(m.imdb?.vote_average || m.tmdb?.vote_average || 0), studio: 'KKPhim',
@@ -46,6 +49,25 @@ export async function movieDetail(slug) {
   const detail = await kkRequest('/phim/' + slug);
   if (!detail.movie) throw new Error('Không tìm thấy phim');
   return { ...mapMovie(detail.movie), episodes: extractEpisodes(detail) };
+}
+export async function relatedSeasons(anime, request = kkRequest) {
+  if (anime.isMovie) return [anime];
+  const keyword = seriesTitle(anime.title.vietnamese || anime.title.english);
+  const matches = new Map([[anime.id, anime]]);
+  let page = 1, totalPages = 1;
+  do {
+    const query = new URLSearchParams({ keyword, country: 'nhat-ban', limit: '64', page: String(page) });
+    const result = await request('/v1/api/tim-kiem?' + query);
+    if (!Array.isArray(result.data?.items)) throw new Error('Không tải được các mùa phim');
+    for (const raw of result.data.items) {
+      if (raw.type !== 'hoathinh') continue;
+      const candidate = mapMovie(raw);
+      if (seriesKey(candidate) === seriesKey(anime)) matches.set(candidate.id, candidate);
+    }
+    totalPages = Number(result.data.params?.pagination?.totalPages) || page;
+    page++;
+  } while (page <= totalPages);
+  return [...matches.values()].sort((a, b) => seasonNumber(a) - seasonNumber(b) || (a.year || 0) - (b.year || 0));
 }
 async function listing(params = {}) {
   const query = new URLSearchParams({ country: 'nhat-ban', limit: '24', ...params });
@@ -84,14 +106,14 @@ route('get','/anime/spotlight', async (req,res) => {
   const details = await Promise.allSettled(items.slice(0,4).map(m => movieDetail(m.id)));
   send(res, details.map((r,i) => r.status === 'fulfilled' ? r.value : items[i]));
 });
-route('get','/anime/trending', async (req,res) => send(res,(await listing()).items.slice(0,12)));
-route('get','/anime/recently-updated', async (req,res) => send(res,(await listing()).items));
+route('get','/anime/trending', async (req,res) => send(res,(await listing({limit:'36'})).items));
+route('get','/anime/recently-updated', async (req,res) => send(res,(await listing({limit:'36'})).items));
 route('get','/catalog', async (req,res) => {
   const page = Math.min(1000,Math.max(1,parseInt(req.query.page) || 1));
   const result = await listing({page:String(page)});
   res.json({success:true,data:result.items,pagination:result.pagination});
 });
-route('get','/anime/seasonal', async (req,res) => send(res,(await listing({year: new Intl.DateTimeFormat('en',{year:'numeric',timeZone:'Asia/Bangkok'}).format(new Date())})).items));
+route('get','/anime/seasonal', async (req,res) => send(res,(await listing({limit:'36',year: new Intl.DateTimeFormat('en',{year:'numeric',timeZone:'Asia/Bangkok'}).format(new Date())})).items));
 route('get','/anime/movies', async (req,res) => {
   const result = await movieCatalog(req.query.page, req.query.limit);
   res.json({ success: true, ...result, total: result.data.length });
@@ -101,6 +123,7 @@ route('get','/anime/genres', async (req,res) => {
   send(res,{Action:action.items,Romance:romance.items});
 });
 route('get','/anime/:id', async (req,res) => send(res,await movieDetail(req.params.id)));
+route('get','/anime/:id/seasons', async (req,res) => send(res,await relatedSeasons(await movieDetail(req.params.id))));
 route('get','/anime/:id/episodes', async (req,res) => send(res,(await movieDetail(req.params.id)).episodes));
 route('post','/watch/sources', async (req,res) => {
   const {anime_id,episode_number} = req.body;

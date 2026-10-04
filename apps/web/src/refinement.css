@@ -10,6 +10,15 @@
   --detail-sidebar: 240px;
 }
 body { background: var(--bg-primary); }
+.detail-seasons { margin: 24px 0; padding: 18px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 14px; }
+.detail-seasons[hidden] { display: none; }
+.detail-seasons h3 { font-size: 14px; color: var(--text-primary); }
+#detail-season-status { margin-top: 5px; font-size: 12px; color: var(--text-muted); }
+.detail-season-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.season-option { padding: 10px 14px; border: 1px solid #ffffff24; border-radius: 9px; font-size: 12px; }
+.season-option:hover { border-color: var(--accent-brand); }
+.season-option[aria-pressed="true"] { color: #171719; background: var(--accent-brand); border-color: var(--accent-brand); font-weight: 700; }
+.season-option:disabled { opacity: .5; cursor: wait; }
 .movies-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; margin-top: 24px; }
 .movies-controls button[hidden] { display: none; }
 ::selection { background: #f2f0e9; color: #171719; }
