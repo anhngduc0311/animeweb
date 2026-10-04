@@ -101,8 +101,9 @@ body {
 
 .genre-options label {
   display: flex;
-  gap: 9px;
   align-items: center;
+  justify-content: center;
+  text-align: center;
   min-height: 38px;
   padding: 8px 10px;
   border: 1px solid #ffffff12;
@@ -112,16 +113,18 @@ body {
 }
 
 .genre-options label:has(input:checked) {
-  background: #f2f0e911;
-  border-color: #f2f0e960;
+  background: #503346;
+  border-color: #c584a5;
   color: #fff;
 }
 
 .genre-options input {
-  accent-color: var(--accent-brand);
-  width: 15px;
-  height: 15px;
-  flex-shrink: 0;
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+  pointer-events: none;
 }
 
 #genre-apply {
