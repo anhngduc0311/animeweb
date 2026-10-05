@@ -92,6 +92,69 @@ export function updateSEO({
   }
 }
 
+export const SITE_NAVIGATION_SCHEMA = [
+  {
+    '@type': 'SiteNavigationElement',
+    'name': 'Trang Chủ',
+    'url': `${DOMAIN}/`
+  },
+  {
+    '@type': 'SiteNavigationElement',
+    'name': 'Khám Phá Anime',
+    'url': `${DOMAIN}/browse`
+  },
+  {
+    '@type': 'SiteNavigationElement',
+    'name': 'Mới Cập Nhật',
+    'url': `${DOMAIN}/browse?sort=updated`
+  },
+  {
+    '@type': 'SiteNavigationElement',
+    'name': 'Thịnh Hành & Điểm Cao',
+    'url': `${DOMAIN}/browse?sort=score`
+  },
+  {
+    '@type': 'SiteNavigationElement',
+    'name': 'Anime Đang Phát Sóng',
+    'url': `${DOMAIN}/browse?status=ongoing`
+  },
+  {
+    '@type': 'SiteNavigationElement',
+    'name': 'Anime Trọn Bộ',
+    'url': `${DOMAIN}/browse?status=completed`
+  },
+  {
+    '@type': 'SiteNavigationElement',
+    'name': 'Thể Loại Hành Động',
+    'url': `${DOMAIN}/browse?category=hanh-dong`
+  },
+  {
+    '@type': 'SiteNavigationElement',
+    'name': 'Thể Loại Phiêu Lưu',
+    'url': `${DOMAIN}/browse?category=phieu-luu`
+  },
+  {
+    '@type': 'SiteNavigationElement',
+    'name': 'Thể Loại Tình Cảm',
+    'url': `${DOMAIN}/browse?category=tinh-cam`
+  },
+  {
+    '@type': 'SiteNavigationElement',
+    'name': 'Thư Viện Phim',
+    'url': `${DOMAIN}/library`
+  },
+  {
+    '@type': 'SiteNavigationElement',
+    'name': 'Lịch Sử Xem',
+    'url': `${DOMAIN}/history`
+  },
+  {
+    '@type': 'SiteNavigationElement',
+    'name': 'Trợ Giúp & Góp Ý',
+    'url': `${DOMAIN}/help`
+  }
+];
+
 /**
  * 1. SEO Trang chủ
  */
@@ -101,12 +164,19 @@ export function setHomeSEO() {
   const canonical = `${DOMAIN}/`;
 
   const webSiteSchema = {
-    '@context': 'https://schema.org',
     '@type': 'WebSite',
+    '@id': `${DOMAIN}/#website`,
     'name': SITE_NAME,
+    'alternateName': ['anidoki', 'AniDoki Anime', 'AniDoki Vietsub', 'AniDoki Online'],
     'url': DOMAIN,
     'description': description,
     'inLanguage': 'vi',
+    'publisher': {
+      '@type': 'Organization',
+      'name': SITE_NAME,
+      'url': DOMAIN,
+      'logo': `${DOMAIN}/brand/anidoki-white.svg`
+    },
     'potentialAction': {
       '@type': 'SearchAction',
       'target': {
@@ -119,16 +189,24 @@ export function setHomeSEO() {
 
   const orgSchema = {
     '@type': 'Organization',
+    '@id': `${DOMAIN}/#organization`,
     'name': SITE_NAME,
     'url': DOMAIN,
     'logo': `${DOMAIN}/brand/anidoki-white.svg`
+  };
+
+  const breadcrumbsSchema = {
+    '@type': 'BreadcrumbList',
+    'itemListElement': [
+      { '@type': 'ListItem', 'position': 1, 'name': 'Trang chủ', 'item': `${DOMAIN}/` }
+    ]
   };
 
   updateSEO({
     title,
     description,
     canonical,
-    jsonLd: [webSiteSchema, orgSchema]
+    jsonLd: [webSiteSchema, orgSchema, breadcrumbsSchema, ...SITE_NAVIGATION_SCHEMA]
   });
 }
 

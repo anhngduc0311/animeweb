@@ -67,7 +67,14 @@ export function generateMainSitemap() {
   const now = new Date().toISOString().split('T')[0];
   const pages = [
     { url: '/', changefreq: 'daily', priority: '1.0' },
-    { url: '/browse', changefreq: 'daily', priority: '0.9' },
+    { url: '/browse', changefreq: 'daily', priority: '0.95' },
+    { url: '/browse?sort=updated', changefreq: 'daily', priority: '0.9' },
+    { url: '/browse?sort=score', changefreq: 'daily', priority: '0.9' },
+    { url: '/browse?status=ongoing', changefreq: 'daily', priority: '0.85' },
+    { url: '/browse?status=completed', changefreq: 'daily', priority: '0.85' },
+    { url: '/browse?category=hanh-dong', changefreq: 'daily', priority: '0.85' },
+    { url: '/browse?category=phieu-luu', changefreq: 'daily', priority: '0.85' },
+    { url: '/browse?category=tinh-cam', changefreq: 'daily', priority: '0.85' },
     { url: '/library', changefreq: 'weekly', priority: '0.6' },
     { url: '/history', changefreq: 'monthly', priority: '0.4' },
     { url: '/help', changefreq: 'monthly', priority: '0.5' }
@@ -79,7 +86,7 @@ export function generateMainSitemap() {
   for (const page of pages) {
     xml += `
   <url>
-    <loc>${DOMAIN}${page.url}</loc>
+    <loc>${escapeXml(DOMAIN + page.url)}</loc>
     <lastmod>${now}</lastmod>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>

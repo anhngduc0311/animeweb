@@ -40,17 +40,25 @@
 
   <meta name="theme-color" content="#101114">
 
-  <!-- Structured Data: WebSite & SearchAction -->
+  <!-- Structured Data: WebSite, Organization & SiteNavigationElement for Google Sitelinks -->
   <script type="application/ld+json" id="jsonld-structured-data">
   {
     "@context": "https://schema.org",
     "@graph": [
       {
         "@type": "WebSite",
+        "@id": "https://anidoki.com/#website",
         "name": "AniDoki",
+        "alternateName": ["anidoki", "AniDoki Anime", "AniDoki Vietsub", "AniDoki Online"],
         "url": "https://anidoki.com/",
-        "description": "Nền tảng xem anime online Vietsub Full HD chất lượng cao hoàn toàn miễn phí.",
+        "description": "Nền tảng xem anime online Vietsub Full HD chất lượng cao hoàn toàn miễn phí. Cập nhật nhanh nhất 2026!",
         "inLanguage": "vi",
+        "publisher": {
+          "@type": "Organization",
+          "name": "AniDoki",
+          "url": "https://anidoki.com/",
+          "logo": "https://anidoki.com/brand/anidoki-white.svg"
+        },
         "potentialAction": {
           "@type": "SearchAction",
           "target": {
@@ -62,9 +70,76 @@
       },
       {
         "@type": "Organization",
+        "@id": "https://anidoki.com/#organization",
         "name": "AniDoki",
         "url": "https://anidoki.com/",
         "logo": "https://anidoki.com/brand/anidoki-white.svg"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Trang chủ", "item": "https://anidoki.com/" }
+        ]
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "name": "Trang Chủ",
+        "url": "https://anidoki.com/"
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "name": "Khám Phá Anime",
+        "url": "https://anidoki.com/browse"
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "name": "Mới Cập Nhật",
+        "url": "https://anidoki.com/browse?sort=updated"
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "name": "Thịnh Hành & Điểm Cao",
+        "url": "https://anidoki.com/browse?sort=score"
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "name": "Anime Đang Phát Sóng",
+        "url": "https://anidoki.com/browse?status=ongoing"
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "name": "Anime Trọn Bộ",
+        "url": "https://anidoki.com/browse?status=completed"
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "name": "Thể Loại Hành Động",
+        "url": "https://anidoki.com/browse?category=hanh-dong"
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "name": "Thể Loại Phiêu Lưu",
+        "url": "https://anidoki.com/browse?category=phieu-luu"
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "name": "Thể Loại Tình Cảm",
+        "url": "https://anidoki.com/browse?category=tinh-cam"
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "name": "Thư Viện Phim",
+        "url": "https://anidoki.com/library"
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "name": "Lịch Sử Xem",
+        "url": "https://anidoki.com/history"
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "name": "Trợ Giúp & Góp Ý",
+        "url": "https://anidoki.com/help"
       }
     ]
   }
@@ -97,11 +172,11 @@
       </a>
 
       <!-- Navigation Links -->
-      <ul class="nav-links" id="main-navigation">
-        <li><a href="/" class="nav-link active" data-nav="home">Trang chủ</a></li>
-        <li><a href="/browse" class="nav-link" data-nav="browse">Khám phá</a></li>
-        <li><a href="/library" class="nav-link" data-nav="library">Thư viện</a></li>
-        <li><a href="/history" class="nav-link" data-nav="history">Lịch sử</a></li>
+      <ul class="nav-links" id="main-navigation" itemscope itemtype="https://schema.org/SiteNavigationElement">
+        <li><a href="/" class="nav-link active" data-nav="home" itemprop="url"><span itemprop="name">Trang chủ</span></a></li>
+        <li><a href="/browse" class="nav-link" data-nav="browse" itemprop="url"><span itemprop="name">Khám phá</span></a></li>
+        <li><a href="/library" class="nav-link" data-nav="library" itemprop="url"><span itemprop="name">Thư viện</span></a></li>
+        <li><a href="/history" class="nav-link" data-nav="history" itemprop="url"><span itemprop="name">Lịch sử</span></a></li>
         <li class="nav-genres">
           <button type="button" class="nav-link" id="genre-toggle" aria-expanded="false"
             aria-controls="genre-dropdown"><span>Thể loại</span><span id="genre-count" hidden></span>
@@ -2535,20 +2610,59 @@
   <!-- ==========================================
        SITE FOOTER
        ========================================== -->
-  <footer class="site-footer">
+  <footer class="site-footer" itemscope itemtype="https://schema.org/WPFooter">
     <div class="container footer-content">
-      <div class="brand">
-        <img class="brand-logo" src="/brand/anidoki-white.svg?v=6" alt="anidoki" width="1616" height="358">
+      <div class="footer-brand-col">
+        <div class="brand">
+          <a href="/" aria-label="AniDoki Trang chủ">
+            <img class="brand-logo" src="/brand/anidoki-white.svg?v=6" alt="anidoki" width="1616" height="358">
+          </a>
+        </div>
+        <p class="footer-disclaimer">
+          <strong>AniDoki</strong> là nền tảng xem phim anime Vietsub online Full HD chất lượng cao hoàn toàn miễn phí. Trang web hoạt động phi thương mại nhằm phục vụ cộng đồng đam mê hoạt hình anime.
+        </p>
       </div>
-      <p class="footer-disclaimer">
-        anidoki không lưu trữ bất kỳ tệp video nào trên máy chủ của mình. Tất cả nội dung được cung cấp bởi các bên thứ
-        ba không liên kết. Trang web hoạt động phi thương mại nhằm phục vụ cộng đồng người yêu thích hoạt hình anime.
-      </p>
-      <nav class="footer-links" aria-label="Liên kết cuối trang">
-        <a href="/browse">Khám phá</a><a href="/library">Thư viện của tôi</a><a href="/help">Trợ giúp & Góp ý</a>
+
+      <nav class="footer-nav-grid" itemscope itemtype="https://schema.org/SiteNavigationElement" aria-label="Điều hướng cuối trang">
+        <div class="footer-nav-col">
+          <h4>Khám Phá Phim</h4>
+          <ul>
+            <li><a href="/" itemprop="url"><span itemprop="name">Trang Chủ</span></a></li>
+            <li><a href="/browse" itemprop="url"><span itemprop="name">Khám Phá Toàn Bộ</span></a></li>
+            <li><a href="/browse?sort=updated" itemprop="url"><span itemprop="name">Anime Mới Cập Nhật</span></a></li>
+            <li><a href="/browse?sort=score" itemprop="url"><span itemprop="name">Anime Thịnh Hành</span></a></li>
+            <li><a href="/browse?status=ongoing" itemprop="url"><span itemprop="name">Anime Đang Phát Sóng</span></a></li>
+            <li><a href="/browse?status=completed" itemprop="url"><span itemprop="name">Anime Trọn Bộ</span></a></li>
+          </ul>
+        </div>
+
+        <div class="footer-nav-col">
+          <h4>Thể Loại Hot</h4>
+          <ul>
+            <li><a href="/browse?category=hanh-dong" itemprop="url"><span itemprop="name">Hành Động</span></a></li>
+            <li><a href="/browse?category=phieu-luu" itemprop="url"><span itemprop="name">Phiêu Lưu</span></a></li>
+            <li><a href="/browse?category=tinh-cam" itemprop="url"><span itemprop="name">Tình Cảm & Lãng Mạn</span></a></li>
+            <li><a href="/browse?category=tam-ly" itemprop="url"><span itemprop="name">Tâm Lý & Drama</span></a></li>
+            <li><a href="/browse?category=hai-huoc" itemprop="url"><span itemprop="name">Hài Hước</span></a></li>
+            <li><a href="/browse?category=vien-tuong" itemprop="url"><span itemprop="name">Khoa Học Viễn Tưởng</span></a></li>
+          </ul>
+        </div>
+
+        <div class="footer-nav-col">
+          <h4>Tiện Ích & Hỗ Trợ</h4>
+          <ul>
+            <li><a href="/library" itemprop="url"><span itemprop="name">Thư Viện Phim</span></a></li>
+            <li><a href="/history" itemprop="url"><span itemprop="name">Lịch Sử Xem Phim</span></a></li>
+            <li><a href="/help" itemprop="url"><span itemprop="name">Trung Tâm Trợ Giúp & FAQ</span></a></li>
+            <li><a href="/help#feedback" itemprop="url"><span itemprop="name">Đóng Góp Ý Kiến</span></a></li>
+            <li><a href="/sitemap.xml" target="_blank" rel="noopener"><span>Sitemap XML</span></a></li>
+          </ul>
+        </div>
       </nav>
-      <div class="footer-copy">© 2026 anidoki. Toàn bộ hình ảnh và dữ liệu bản quyền thuộc về tác giả và nhà sản xuất
-        gốc.</div>
+
+      <div class="footer-copy">
+        © 2026 AniDoki. Toàn bộ nội dung và bản quyền hình ảnh thuộc về các tác giả và nhà sản xuất gốc.
+      </div>
     </div>
   </footer>
 
