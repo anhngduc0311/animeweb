@@ -7,6 +7,7 @@ import { refreshWatchlistCount } from '../components/Header.js';
 import { groupSeries, seriesKey, seasonNumber } from '../../../../shared/series.js';
 import { openAnimeDetail } from './DetailView.js';
 import { openPlayerByRoute } from './PlayerView.js';
+import { POSTER_PLACEHOLDER } from '../utils/assets.js';
 
 // SPOTLIGHT HERO CAROUSEL
 // ==========================================
@@ -107,7 +108,7 @@ function setSpotlightSlide(index) {
   const title = document.getElementById('spotlight-title');
   const desc = document.getElementById('spotlight-desc');
 
-  bg.onerror = () => { bg.onerror = null; bg.src = anime.coverImage || '/poster-placeholder.svg'; };
+  bg.onerror = () => { bg.onerror = null; bg.src = anime.coverImage || POSTER_PLACEHOLDER; };
   bg.src = anime.bannerImage || anime.coverImage;
   status.textContent = anime.status === 'Currently Airing' ? 'ĐANG PHÁT SÓNG' : 'TRỌN BỘ';
   score.textContent = `★ ${anime.score}`;
@@ -458,7 +459,7 @@ export async function loadContinueWatching() {
     anime = anime || {
       id: item.animeId,
       title: { english: item.animeId, vietnamese: item.animeId },
-      coverImage: '/poster-placeholder.svg'
+      coverImage: POSTER_PLACEHOLDER
     };
 
     const hasProgress = Number(item.currentTime) > 0 && Number(item.duration) > 0;
@@ -470,7 +471,7 @@ export async function loadContinueWatching() {
       : `Tập ${item.episodeNumber} · Tiếp tục xem`;
 
     const titleText = anime.title?.english || anime.title?.vietnamese || (typeof anime.title === 'string' ? anime.title : 'Anime');
-    const coverSrc = anime.coverImage || anime.posterUrl || anime.poster_url || '/poster-placeholder.svg';
+    const coverSrc = anime.coverImage || anime.posterUrl || anime.poster_url || POSTER_PLACEHOLDER;
 
     const card = document.createElement('div');
     card.className = 'cw-card';

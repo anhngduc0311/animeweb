@@ -1,6 +1,14 @@
 import { defineConfig } from 'vite';
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+  // Enable the asset host only after its DNS and HTTPS are ready.
+  base: command === 'build' ? (process.env.WEB_ASSET_BASE || '/') : '/',
+  build: {
+    // Publish compiled assets without mappings back to the original source.
+    sourcemap: false,
+    minify: true,
+    cssMinify: true
+  },
   server: {
     host: true,
     port: 5173,
@@ -19,4 +27,4 @@ export default defineConfig({
       }
     }
   }
-});
+}));

@@ -65,6 +65,18 @@ npm install
 
 ## Chi tiết kỹ thuật & Tính năng
 
+### Tách tài nguyên sang static.anidoki.com
+
+Nginx đã có host riêng `static.anidoki.com` phục vụ cùng thư mục `dist`, có CORS cho JS modules và trả 404 cho trang HTML/API. Trong DevTools, JS/CSS và tài nguyên tĩnh sẽ nằm dưới host này; các trang và API vẫn dùng `anidoki.com`. Đây là cách phân phối tài nguyên, không phải cơ chế giấu mã frontend.
+
+1. Tạo DNS A/AAAA cho `static.anidoki.com` trỏ về máy chủ web (hoặc CNAME phù hợp với CDN đang dùng).
+2. Bật HTTPS cho subdomain ở reverse proxy/CDN. Nếu dùng Cloudflare, dùng chứng chỉ origin bao gồm subdomain và Full (strict); cấu hình Nginx trong container chỉ lắng nghe HTTP cổng 80.
+3. Kiểm tra `https://static.anidoki.com/startup-loader.js` và `https://static.anidoki.com/favicon.svg` trả 200 qua HTTPS.
+4. Thêm `WEB_ASSET_BASE=https://static.anidoki.com/` vào `.env` ở thư mục gốc trên server, rồi chạy `docker compose up -d --build web`.
+5. Mở DevTools trước khi tải lại trang và kiểm tra JS/CSS tải từ `static.anidoki.com` không có lỗi CORS.
+
+Nếu build trực tiếp, đặt biến môi trường `WEB_ASSET_BASE=https://static.anidoki.com/` khi chạy `npm run build`. Biến này được ghi vào bản build; đổi giá trị cần build lại. Mặc định `/` giữ tài nguyên cùng host để web hoạt động trước khi subdomain sẵn sàng. Để quay lại cùng host, đặt `WEB_ASSET_BASE=/` và build lại. API, đường dẫn trang, canonical URL và Google OAuth vẫn dùng tên miền chính.
+
 - **Frontend (`apps/web`)**: Chạy tại `http://localhost:5173`, tích hợp proxy tự động `/api` sang backend `http://localhost:3000`.
 - **Backend API (`apps/server`)**: Cung cấp dữ liệu anime qua KKPhim API (`https://phimapi.com`), quản lý watchlist và watch history bằng PostgreSQL.
 - **Turborepo Pipelines (`turbo.json`)**: Tối ưu hóa build cache, song song hóa dev/build/test pipelines.

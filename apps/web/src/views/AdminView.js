@@ -3,6 +3,7 @@ import { state } from '../store/state.js';
 import { switchView, showToast, showConfirmModal } from '../utils/ui.js';
 import { router } from '../router.js';
 import { updateUserUI } from '../components/AuthModal.js';
+import { POSTER_PLACEHOLDER } from '../utils/assets.js';
 
 // ==========================================
 let currentAdminTab = 'dashboard';
@@ -192,7 +193,7 @@ async function loadAdminAnimeList(page = 1) {
 
       tr.innerHTML = `
         <td>
-          <img class="admin-table-thumb" src="${anime.coverImage || '/poster-placeholder.svg'}" alt="${titleEn}" onerror="this.src='/poster-placeholder.svg'">
+          <img class="admin-table-thumb" src="${anime.coverImage || POSTER_PLACEHOLDER}" alt="${titleEn}" onerror="this.onerror=null;this.src='${POSTER_PLACEHOLDER}'">
         </td>
         <td>
           <div style="font-weight: 600; font-size: 13.5px; color: var(--text-primary);">${titleEn}</div>

@@ -17,6 +17,8 @@ COPY apps/web/ ./apps/web/
 
 # Build static assets
 WORKDIR /app/apps/web
+ARG WEB_ASSET_BASE=/
+ENV WEB_ASSET_BASE=${WEB_ASSET_BASE}
 RUN npm run build
 
 # Stage 2: Production Nginx Server

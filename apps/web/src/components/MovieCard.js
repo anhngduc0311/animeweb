@@ -1,5 +1,6 @@
 import { seriesKey } from '../../../../shared/series.js';
 import { router } from '../router.js';
+import { POSTER_PLACEHOLDER } from '../utils/assets.js';
 
 export function renderCard(anime) {
   const card = document.createElement('div');
@@ -12,7 +13,7 @@ export function renderCard(anime) {
   const engTitle = anime.title?.english || (typeof anime.title === 'string' ? anime.title : '');
   const vieTitle = anime.title?.vietnamese || '';
   const mainTitle = engTitle || vieTitle || 'Anime';
-  const coverSrc = anime.coverImage || anime.posterUrl || anime.poster_url || '/poster-placeholder.svg';
+  const coverSrc = anime.coverImage || anime.posterUrl || anime.poster_url || POSTER_PLACEHOLDER;
   const scoreText = anime.score ? `★ ${anime.score}` : '';
   const epText = anime.format === 'MOVIE' ? 'Movie' : `Tập ${anime.currentEpisode || anime.totalEpisodes || 'Full'}`;
   const seasonCount = anime.seasonCount ?? anime.seasons?.length ?? 0;
@@ -49,7 +50,7 @@ export function renderCard(anime) {
       poster.dataset.fallback = 'banner';
       poster.src = anime.bannerImage;
     } else {
-      poster.src = '/poster-placeholder.svg';
+      poster.src = POSTER_PLACEHOLDER;
     }
   });
 

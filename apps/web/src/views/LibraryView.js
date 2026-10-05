@@ -1,5 +1,6 @@
 import { AniDokiAPI } from '../api.js';
 import { renderCard } from '../components/MovieCard.js';
+import { POSTER_PLACEHOLDER } from '../utils/assets.js';
 
 let currentLibTab = 'all';
 let currentLibQuery = '';
@@ -102,7 +103,7 @@ export async function loadLibraryView(tab = currentLibTab, query = currentLibQue
             anime = {
               id: item.animeId || item.id || item.slug,
               title: { english: item.animeId || item.id || 'Anime' },
-              coverImage: '/poster-placeholder.svg'
+              coverImage: POSTER_PLACEHOLDER
             };
           }
         }
@@ -115,7 +116,7 @@ export async function loadLibraryView(tab = currentLibTab, query = currentLibQue
         }
 
         anime.id = anime.id || item.animeId || item.id || item.slug;
-        anime.coverImage = anime.coverImage || anime.posterUrl || anime.poster_url || '/poster-placeholder.svg';
+        anime.coverImage = anime.coverImage || anime.posterUrl || anime.poster_url || POSTER_PLACEHOLDER;
 
         const card = renderCard(anime);
 

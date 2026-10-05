@@ -6,6 +6,7 @@ import { renderCard } from './MovieCard.js';
 import { updateUserUI } from './AuthModal.js';
 import { seriesKey } from '../../../../shared/series.js';
 import { openAnimeDetail } from '../views/DetailView.js';
+import { POSTER_PLACEHOLDER } from '../utils/assets.js';
 
 // HEADER SCROLL & WATCHLIST BADGE
 // ==========================================
@@ -329,7 +330,7 @@ function createSuggestItem(anime, onSelect) {
     statusText = 'Đã hoàn thành';
   }
 
-  const coverSrc = anime.coverImage || anime.posterUrl || anime.poster_url || '/poster-placeholder.svg';
+  const coverSrc = anime.coverImage || anime.posterUrl || anime.poster_url || POSTER_PLACEHOLDER;
 
   item.innerHTML = `
     <img class="search-suggest-thumb" src="${coverSrc}" alt="${escapeHtml(title)}" loading="lazy" decoding="async">
@@ -345,7 +346,7 @@ function createSuggestItem(anime, onSelect) {
 
   const img = item.querySelector('img');
   img.addEventListener('error', () => {
-    img.src = '/poster-placeholder.svg';
+    img.src = POSTER_PLACEHOLDER;
   });
 
   item.addEventListener('click', () => {
@@ -724,5 +725,4 @@ export function initWatchlistDrawer() {
 
 
 // ==========================================
-
 

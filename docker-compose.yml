@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.web
+      args:
+        WEB_ASSET_BASE: ${WEB_ASSET_BASE:-/}
     container_name: anidoki_web
     restart: unless-stopped
     ports:

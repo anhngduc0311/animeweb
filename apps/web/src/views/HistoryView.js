@@ -1,6 +1,7 @@
 import { AniDokiAPI } from '../api.js';
 import { showToast, showConfirmModal, formatTime } from '../utils/ui.js';
 import { router } from '../router.js';
+import { POSTER_PLACEHOLDER } from '../utils/assets.js';
 
 let currentHistoryPage = 1;
 let onHistoryChangedCallback = () => {};
@@ -78,7 +79,7 @@ export async function loadHistoryView(page = 1, append = false) {
     if (!append && grid) grid.innerHTML = '';
 
     items.forEach(item => {
-      const anime = item.anime || { id: item.animeId, title: { english: item.animeId }, coverImage: '/poster-placeholder.svg' };
+      const anime = item.anime || { id: item.animeId, title: { english: item.animeId }, coverImage: POSTER_PLACEHOLDER };
       const hasProgress = Number(item.currentTime) > 0 && Number(item.duration) > 0;
       const progressPercent = hasProgress ? Math.min(100, Math.floor((item.currentTime / item.duration) * 100)) : 0;
       const timeStr = hasProgress ? `${formatTime(item.currentTime)} / ${formatTime(item.duration)}` : 'Tiếp tục xem';
