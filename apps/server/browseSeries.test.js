@@ -1,6 +1,23 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { paginateBrowseSeries, loadBrowseEntries } from './services/kkphim.service.js';
+import { groupSeries, sameSeries } from '../../shared/series.js';
+
+test('alias index preserves first-match grouping without merging different known IDs', () => {
+  const items = Array.from({ length: 120 }, (_, i) => ({
+    id: `entry-${i}`, seriesId: i % 3 ? String(i % 13) : null,
+    title: { english: `Anime ${i % 17} (Season ${i % 4 + 1})`, vietnamese: `Phim ${i % 19}` },
+    aliases: [`Alternate ${i % 11}`], isMovie: i % 10 === 0,
+  }));
+  const expected = [];
+  for (const item of groupSeries(items)) {
+    const match = item.isMovie ? null : expected.find(group => (!group.seriesId || !item.seriesId) && sameSeries(group, item));
+    if (match) match.seasons.push(...item.seasons);
+    else expected.push(item);
+  }
+  const actual = paginateBrowseSeries(items, { limit: 200 }).items;
+  assert.deepEqual(actual.map(g => g.seasons.map(s => s.id)), expected.map(g => g.seasons.map(s => s.id)));
+});
 
 const entry = (id, seriesId, season, year, updatedAt) => ({ id, seriesId, seasonNumber: season, year, updatedAt, title: { english: `Show ${seriesId} (Season ${season})` }, source: 'AniDoki' });
 test('browse groups before pagination, preserves sort and counts series rather than seasons', () => {

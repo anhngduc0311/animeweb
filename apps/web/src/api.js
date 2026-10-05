@@ -1,5 +1,6 @@
 // API Client - Giao tiếp với AniDoki Backend REST API
 const API_BASE = '/api';
+const browseCache = new Map();
 
 export const AniDokiAPI = {
   // 1. Catalog APIs
@@ -74,7 +75,7 @@ export const AniDokiAPI = {
     }
   },
 
-  async getBrowse(filters = {}) {
+  async getBrowse(filters = {}, { signal } = {}) {
     try {
       const cleanParams = new URLSearchParams();
       Object.entries(filters).forEach(([k, v]) => {
@@ -82,12 +83,19 @@ export const AniDokiAPI = {
           cleanParams.set(k, String(v).trim());
         }
       });
-      const res = await fetch(`${API_BASE}/browse?${cleanParams.toString()}`);
+      cleanParams.sort();
+      const key = cleanParams.toString();
+      const cached = browseCache.get(key);
+      if (cached?.expires > Date.now()) return cached.data;
+      const res = await fetch(`${API_BASE}/browse?${key}`, { signal });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.message || 'Lỗi tải danh sách phim');
+      browseCache.delete(key);
+      if (browseCache.size >= 12) browseCache.delete(browseCache.keys().next().value);
+      browseCache.set(key, { data, expires: Date.now() + 60000 });
       return data;
     } catch (err) {
-      console.error('getBrowse error:', err);
+      if (err.name !== 'AbortError') console.error('getBrowse error:', err);
       throw err;
     }
   },

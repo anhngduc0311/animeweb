@@ -1,5 +1,5 @@
 import { pool } from '../db/db.js';
-import { seriesKey, seriesTitle, seasonNumber, groupSeries, sameSeries } from '../../../shared/series.js';
+import { seriesKey, seriesTitle, seasonNumber, groupSeries, seriesAliases } from '../../../shared/series.js';
 import { AdminAnimeModel } from '../models/adminAnime.model.js';
 import { ConfigModel } from '../models/config.model.js';
 import { nguoncDetail, searchNguonc } from './nguonc.service.js';
@@ -336,7 +336,10 @@ export async function browseCatalog(params = {}) {
 // another page. Requests share kkRequest's cache and use bounded concurrency.
 export async function loadBrowseEntries(path, params, request = kkRequest) {
   const load = () => fetchBrowseEntries(path, params, request);
-  return request === kkRequest ? remember('browse-entries:' + cacheKey({ path, params }), load) : load();
+  return request === kkRequest ? remember('browse-entries:' + cacheKey({ path, params }), load, {
+    freshMs: 5 * 60 * 1000,
+    staleMs: 24 * 60 * 60 * 1000,
+  }) : load();
 }
 
 async function fetchBrowseEntries(path, params, request) {
@@ -363,12 +366,27 @@ export function paginateBrowseSeries(items, { sort = 'updated', page = 1, limit 
     return updated(b) - updated(a);
   });
   const groups = [];
+  const aliases = new Map();
+  const aliasesWithoutId = new Map();
   for (const item of groupSeries(sorted)) {
-    // groupSeries already merged known IDs. Only compare aliases when one
-    // provider lacks an ID, avoiding repeated ID comparisons for the catalog.
-    const existing = item.isMovie ? null : groups.find(group => (!group.seriesId || !item.seriesId) && sameSeries(group, item));
+    // Index normalized aliases once instead of normalizing every pair of titles.
+    // Preserve the first matching representative, and never merge distinct IDs.
+    const titles = seriesAliases(item).filter(title => title.length > 3);
+    const candidates = item.seriesId ? aliasesWithoutId : aliases;
+    let index = Infinity;
+    if (!item.isMovie) {
+      for (const title of titles) index = Math.min(index, candidates.get(title) ?? Infinity);
+    }
+    const existing = groups[index];
     if (existing) existing.seasons.push(...item.seasons);
-    else groups.push(item);
+    else {
+      const position = groups.length;
+      groups.push(item);
+      if (!item.isMovie) for (const title of titles) {
+        if (!aliases.has(title)) aliases.set(title, position);
+        if (!item.seriesId && !aliasesWithoutId.has(title)) aliasesWithoutId.set(title, position);
+      }
+    }
   }
   const grouped = groups.map(item => ({
     ...item,

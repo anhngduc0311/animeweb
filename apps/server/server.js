@@ -26,17 +26,19 @@ const isDirectRun = process.argv[1] && (
 if (isDirectRun) {
   let refreshingSearch = false;
   const refreshSearch = async () => {
-    if (refreshingSearch || !process.env.MEILI_MASTER_KEY) return;
+    if (refreshingSearch) return;
     refreshingSearch = true;
     try {
       const items = await loadBrowseEntries('/v1/api/danh-sach/hoat-hinh', { country: 'nhat-ban' });
-      const count = await syncPrimarySearch(items);
-      console.log(`Meilisearch: indexed ${count} anime entries`);
-    } catch (error) { console.warn('Meilisearch sync unavailable:', error.message); }
+      if (process.env.MEILI_MASTER_KEY) {
+        const count = await syncPrimarySearch(items);
+        console.log(`Meilisearch: indexed ${count} anime entries`);
+      }
+    } catch (error) { console.warn('Catalog refresh unavailable:', error.message); }
     finally { refreshingSearch = false; }
   };
   void refreshSearch();
-  setInterval(refreshSearch, 15 * 60 * 1000).unref();
+  setInterval(refreshSearch, 5 * 60 * 1000).unref();
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 AniDoki API Server is running on http://127.0.0.1:${PORT}`);
     console.log(`🐘 Connected to PostgreSQL (Docker container on port ${process.env.PGPORT || 5438})`);

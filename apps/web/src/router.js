@@ -95,7 +95,7 @@ export class Router {
         if (scrollY) Promise.resolve(result).then(() => {
           if (this.currentRoute === current) window.scrollTo({ top: scrollY, behavior: 'instant' });
         });
-        return;
+        return result;
       }
     }
 
@@ -108,10 +108,9 @@ export class Router {
       searchParams
     };
     this.updateActiveNav(pathname);
-    if (this.notFoundHandler) {
-      this.notFoundHandler(this.currentRoute);
-    }
+    const result = this.notFoundHandler?.(this.currentRoute);
     window.scrollTo({ top: 0, behavior: 'instant' });
+    return result;
   }
 
   updateActiveNav(pathname) {

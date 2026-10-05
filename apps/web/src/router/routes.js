@@ -10,15 +10,16 @@ import { loadHelpView } from '../views/HelpView.js';
 import { loadAdminView } from '../views/AdminView.js';
 
 import { setHomeSEO, updateSEO } from '../utils/seo.js';
-import { startSpotlightTimer } from '../views/HomeView.js';
+import { startSpotlightTimer, ensureHomeLoaded } from '../views/HomeView.js';
 
 // SPA ROUTE REGISTRATION
 // ==========================================
 export function registerRoutes() {
   router
-    .addRoute('/', () => {
+    .addRoute('/', async () => {
       switchView('view-home');
       setHomeSEO();
+      await ensureHomeLoaded();
       startSpotlightTimer();
     })
     .addRoute('/browse', (route) => {
@@ -26,10 +27,10 @@ export function registerRoutes() {
       return loadBrowseView(route);
     })
     .addRoute('/anime/:slug', (route) => {
-      openAnimeDetail(route.params.slug, false);
+      return openAnimeDetail(route.params.slug, false);
     })
     .addRoute('/watch/:slug/:episode', (route) => {
-      openPlayerByRoute(route.params.slug, route.params.episode);
+      return openPlayerByRoute(route.params.slug, route.params.episode);
     })
     .addRoute('/library', () => {
       switchView('view-library');
@@ -101,5 +102,3 @@ export function registerRoutes() {
       document.title = '404 - Không Tìm Thấy Trang | anidoki';
     });
 }
-
-

@@ -10,6 +10,15 @@ import { openPlayerByRoute } from './PlayerView.js';
 
 // SPOTLIGHT HERO CAROUSEL
 // ==========================================
+let homeReady;
+export function ensureHomeLoaded() {
+  if (!homeReady) {
+    initMovies();
+    homeReady = Promise.all([loadSpotlight(), loadCatalogs()]);
+  }
+  return homeReady;
+}
+
 export async function loadSpotlight() {
   try {
     const spotlights = await AniDokiAPI.getSpotlight();

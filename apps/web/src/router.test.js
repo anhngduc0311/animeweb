@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-globalThis.document = { addEventListener() {}, querySelectorAll: () => [] };
+globalThis.document = { addEventListener() {}, querySelectorAll: () => [], querySelector: () => null };
 globalThis.window = {
   addEventListener() {}, scrollY: 0,
   location: { pathname: '/', search: '' },
@@ -13,6 +13,15 @@ globalThis.window = {
   }
 };
 const { Router } = await import('./router.js');
+
+test('Initial loading can await the active route data', async () => {
+  let resolve;
+  const ready = new Promise(done => { resolve = done; });
+  const router = new Router().addRoute('/browse', () => ready);
+  assert.equal(router.handleRoute('/browse'), ready);
+  resolve();
+  await ready;
+});
 
 function setup(url = '/browse?category=hanh-dong&page=2', scrollY = 640) {
   window.history.replaceState({}, '', url);

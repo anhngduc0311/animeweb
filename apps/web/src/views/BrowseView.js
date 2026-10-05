@@ -6,8 +6,10 @@ import { setBrowseSEO } from '../utils/seo.js';
 import { DEFAULT_GENRES } from '../components/Header.js';
 
 let browseGenreOptions = [...DEFAULT_GENRES];
+let browseRequestId = 0;
+let browseController;
 
-export async function initBrowseView() {
+export function initBrowseView() {
   const genreSelect = document.getElementById('browse-genre-select');
   const form = document.getElementById('browse-filter-form');
   const resetBtn = document.getElementById('browse-reset-btn');
@@ -29,18 +31,18 @@ export async function initBrowseView() {
   // Render ngay danh sách mặc định
   renderSelectOptions(browseGenreOptions);
 
-  try {
-    const res = await fetch('/api/genre-options');
-    const json = await res.json();
+  // Default options and controls work immediately while fresh genres load.
+  void fetch('/api/genre-options', { signal: AbortSignal.timeout(8000) }).then(res => res.json()).then(json => {
     if (json.success && Array.isArray(json.data)) {
       browseGenreOptions = json.data;
       renderSelectOptions(browseGenreOptions);
     }
-  } catch (err) {
+  }).catch(err => {
     console.warn('Error loading browse genre options:', err);
-  }
+  });
 
   const applyFilters = () => {
+    clearTimeout(searchDebounce);
     const q = document.getElementById('browse-search-input')?.value?.trim() || '';
     const category = document.getElementById('browse-genre-select')?.value || '';
     const year = document.getElementById('browse-year-select')?.value || '';
@@ -83,6 +85,9 @@ export async function initBrowseView() {
 }
 
 export async function loadBrowseView(route) {
+  const requestId = ++browseRequestId;
+  browseController?.abort();
+  browseController = new AbortController();
   const query = route?.query || {};
   const q = query.q || '';
   const category = query.category || '';
@@ -120,12 +125,14 @@ export async function loadBrowseView(route) {
   const paginationWrap = document.getElementById('browse-pagination');
 
   if (countEl) countEl.textContent = 'Đang tìm kiếm anime...';
+  if (pageIndicator) pageIndicator.textContent = '';
   if (grid) grid.innerHTML = '';
   if (emptyEl) emptyEl.style.display = 'none';
   if (paginationWrap) paginationWrap.style.display = 'none';
 
   try {
-    const res = await AniDokiAPI.getBrowse({ q, category, year, status, sort, page, limit: 24 });
+    const res = await AniDokiAPI.getBrowse({ q, category, year, status, sort, page, limit: 24 }, { signal: browseController.signal });
+    if (requestId !== browseRequestId) return;
     const items = res.data || [];
     const pagination = res.pagination || { page: 1, totalPages: 1, totalItems: items.length, hasMore: false };
 
@@ -156,7 +163,8 @@ export async function loadBrowseView(route) {
       paginationWrap.style.display = 'flex';
       setupBrowsePagination(query, pagination);
     }
-  } catch {
+  } catch (error) {
+    if (requestId !== browseRequestId || error.name === 'AbortError') return;
     if (countEl) countEl.textContent = 'Lỗi tải danh sách phim';
     if (emptyEl) emptyEl.style.display = 'flex';
   }
