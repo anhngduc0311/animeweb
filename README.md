@@ -65,6 +65,12 @@ npm install
 
 ## Chi tiết kỹ thuật & Tính năng
 
+### Mã hoá HTML giao diện khi build
+
+`npm run build` tự động mã hoá phần thân trang bằng Base64 UTF-8. Bản `dist/index.html` chứa chuỗi mã hoá và đoạn khôi phục giao diện trước khi ứng dụng khởi chạy; các thẻ SEO và bundle JS/CSS vẫn ở phần head. Môi trường dev giữ HTML bình thường để chỉnh sửa.
+
+Đây là cách làm rối mã, không phải mã hoá bảo mật: trình duyệt có thể giải mã và người dùng vẫn xem được DOM trong Elements. Nội dung giao diện cần JavaScript để hiển thị; công cụ chỉ đọc HTML thô sẽ không thấy các liên kết và nội dung trong body. Không đặt mật khẩu hoặc dữ liệu bí mật trong HTML này.
+
 ### Tách tài nguyên sang static.anidoki.com
 
 Nginx đã có host riêng `static.anidoki.com` phục vụ cùng thư mục `dist`, có CORS cho JS modules và trả 404 cho trang HTML/API. Trong DevTools, JS/CSS và tài nguyên tĩnh sẽ nằm dưới host này; các trang và API vẫn dùng `anidoki.com`. Đây là cách phân phối tài nguyên, không phải cơ chế giấu mã frontend.
