@@ -13,7 +13,7 @@ export async function waitForStartupAssets() {
         document.fonts?.ready,
         ...images.map(image => image.decode()),
       ]),
-      new Promise(resolve => { timeout = window.setTimeout(resolve, 4000); }),
+      new Promise(resolve => { timeout = window.setTimeout(resolve, 1500); }),
     ]);
   } finally {
     window.clearTimeout(timeout);

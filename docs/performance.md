@@ -4,7 +4,7 @@
 
 ## Thay đổi
 
-- Bỏ overlay che toàn trang trong lúc chờ API, ảnh và font.
+- Giữ màn hình loading có logo khi mở trang theo yêu cầu. Trang chủ chỉ chờ tâm điểm và tài nguyên đầu màn hình (tối đa 1,5 giây cho tài nguyên), không chờ các danh mục phía dưới. Có giới hạn 6 giây để tránh kẹt loading khi mạng/API hoặc bundle lỗi.
 - Gọi API tâm điểm ngay từ head và preload banner đầu tiên khi nhận dữ liệu; banner có `fetchpriority="high"`.
 - API tâm điểm chỉ trả thông tin hiển thị, bỏ danh sách tập phim, stream, season lồng nhau và ghi chú quản trị. API chi tiết/phát phim giữ dữ liệu đầy đủ.
 - Banner đứng yên mặc định. Người dùng có thể chọn phim hoặc bật tự chuyển, với chu kỳ 8 giây. Carousel chỉ chạy khi trang chủ đang mở.

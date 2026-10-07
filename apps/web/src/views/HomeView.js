@@ -15,7 +15,9 @@ let homeReady;
 export function ensureHomeLoaded() {
   if (!homeReady) {
     initMovies();
-    homeReady = Promise.all([loadSpotlight(), loadCatalogs()]);
+    homeReady = loadSpotlight();
+    // Loading the initial hero must not wait for catalogs below the fold.
+    void loadCatalogs().catch(error => console.error('Không tải được danh mục trang chủ:', error));
   }
   return homeReady;
 }

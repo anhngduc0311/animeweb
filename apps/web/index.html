@@ -40,6 +40,31 @@
 
   <meta name="theme-color" content="#101114">
   <link rel="preconnect" href="https://phimimg.com">
+  <style>
+    #startup-loader { display: none; }
+    html.is-starting { overflow: hidden; }
+    html.is-starting:not(.startup-leaving) body > :not(#startup-loader):not(script) { visibility: hidden; }
+    html.is-starting #startup-loader {
+      position: fixed; inset: 0; z-index: 2147483647;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 24px; padding: 24px; background: #101114; color: #a5a5b0;
+      font: 14px/1.5 'Be Vietnam Pro', sans-serif;
+      opacity: 1; transition: opacity .3s ease;
+    }
+    html.is-starting #startup-loader.is-leaving { opacity: 0; pointer-events: none; }
+    #startup-loader .startup-logo {
+      width: 88px; height: 88px; object-fit: contain;
+      animation: startup-spin 1.8s linear infinite;
+      filter: drop-shadow(0 0 24px #b76e9133);
+    }
+    #startup-loader .startup-wordmark { width: 156px; height: auto; }
+    #startup-loader p { margin: 0; }
+    @keyframes startup-spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) {
+      #startup-loader .startup-logo { animation: none; }
+      html.is-starting #startup-loader { transition: none; }
+    }
+  </style>
   <script src="/startup-loader.js"></script>
 
   <!-- Structured Data: WebSite, Organization & SiteNavigationElement for Google Sitelinks -->
@@ -163,6 +188,11 @@
 </head>
 
 <body>
+  <div id="startup-loader" role="status" aria-live="polite" aria-label="Đang tải AniDoki">
+    <img class="startup-logo" src="/favicon-192x192.png" alt="" width="88" height="88">
+    <img class="startup-wordmark" src="/brand/anidoki-white.svg?v=6" alt="AniDoki" width="1616" height="358">
+    <p>Đang tải tài nguyên…</p>
+  </div>
   <!-- ==========================================
        SITE HEADER
        ========================================== -->
