@@ -25,7 +25,7 @@ export function renderCard(anime) {
   });
   card.innerHTML = `
     <div class="anime-card-poster">
-      <img src="${coverSrc}" alt="${mainTitle}" loading="lazy" decoding="async">
+      <img src="${coverSrc}" alt="${mainTitle}" loading="lazy" decoding="async" width="300" height="450">
       <div class="anime-card-badges">
         ${scoreText ? `<span class="badge-score">${scoreText}</span>` : ''}
         <span class="badge-ep">${epText}</span>

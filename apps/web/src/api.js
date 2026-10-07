@@ -6,8 +6,13 @@ export const AniDokiAPI = {
   // 1. Catalog APIs
   async getSpotlight() {
     try {
-      const res = await fetch(`${API_BASE}/anime/spotlight`);
-      const data = await res.json();
+      const prefetched = window.anidokiSpotlightRequest;
+      delete window.anidokiSpotlightRequest;
+      let data = prefetched ? await prefetched : null;
+      if (!data?.success) {
+        const res = await fetch(`${API_BASE}/anime/spotlight`, { signal: AbortSignal.timeout(10000) });
+        data = await res.json();
+      }
       return data.success ? data.data : [];
     } catch (err) {
       console.error('getSpotlight error:', err);

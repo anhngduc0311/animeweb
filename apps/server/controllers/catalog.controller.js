@@ -15,6 +15,7 @@ import {
 import { ConfigModel } from '../models/config.model.js';
 import { pool } from '../db/db.js';
 import { allRelatedSeasons } from '../services/catalogSources.service.js';
+import { spotlightSummary } from '../services/spotlight.service.js';
 
 const send = (res, data) => res.json({ success: true, data, total: Array.isArray(data) ? data.length : undefined });
 
@@ -33,7 +34,7 @@ export const CatalogController = {
         const details = await Promise.allSettled(customSlugs.map(slug => movieDetail(slug)));
         const fulfilled = details.filter(r => r.status === 'fulfilled' && r.value).map(r => r.value);
         if (fulfilled.length > 0) {
-          return send(res, fulfilled);
+          return send(res, fulfilled.map(spotlightSummary));
         }
       }
 
@@ -42,7 +43,7 @@ export const CatalogController = {
       const details = await Promise.allSettled(selected.map(m => movieDetail(m.id)));
       send(res, details.map((r, i) => r.status === 'fulfilled'
         ? { ...r.value, score: selected[i].score, updatedAt: selected[i].updatedAt }
-        : selected[i]));
+        : selected[i]).map(spotlightSummary));
     } catch (err) {
       console.warn('AniDoki Spotlight Error:', err.message);
       res.status(502).json({ success: false, message: 'Không tải được danh sách tâm điểm' });

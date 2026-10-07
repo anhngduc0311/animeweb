@@ -109,21 +109,27 @@ function setSpotlightSlide(index) {
   const desc = document.getElementById('spotlight-desc');
 
   bg.onerror = () => { bg.onerror = null; bg.src = anime.coverImage || POSTER_PLACEHOLDER; };
-  bg.src = anime.bannerImage || anime.coverImage;
+  bg.src = anime.bannerImage || anime.coverImage || POSTER_PLACEHOLDER;
   status.textContent = anime.status === 'Currently Airing' ? 'ĐANG PHÁT SÓNG' : 'TRỌN BỘ';
   score.textContent = `★ ${anime.score}`;
   format.textContent = anime.format;
   studio.textContent = anime.studio;
 
   title.textContent = anime.title.english || anime.title.vietnamese;
+  logo.style.display = 'none';
+  title.classList.remove('spotlight-title-hidden');
   if (anime.logo) {
-    logo.onerror = () => { logo.style.display = 'none'; title.style.display = 'block'; };
+    // Keep the title visible while a remote logo downloads or fails.
+    logo.onload = () => { logo.style.display = 'block'; title.classList.add('spotlight-title-hidden'); };
+    logo.onerror = () => { logo.style.display = 'none'; title.classList.remove('spotlight-title-hidden'); };
+    logo.alt = title.textContent;
     logo.src = anime.logo;
-    logo.style.display = 'block';
-    title.style.display = 'none';
   } else {
+    logo.onload = null;
+    logo.onerror = null;
+    logo.removeAttribute('src');
     logo.style.display = 'none';
-    title.style.display = 'block';
+    title.classList.remove('spotlight-title-hidden');
     title.textContent = anime.title.english || anime.title.vietnamese;
   }
 
@@ -162,7 +168,7 @@ export function startSpotlightTimer() {
 
   state.spotlightTimer = setInterval(() => {
     const homeView = document.getElementById('view-home');
-    const isHomeActive = !homeView || homeView.classList.contains('active') || homeView.style.display !== 'none';
+    const isHomeActive = homeView?.classList.contains('active');
     const isPaused = document.getElementById('spotlight-pause')?.getAttribute('aria-pressed') === 'true';
 
     if (
@@ -175,7 +181,7 @@ export function startSpotlightTimer() {
     ) {
       setSpotlightSlide((state.spotlightIndex + 1) % state.spotlights.length);
     }
-  }, 2000);
+  }, 8000);
 }
 
 export function resetSpotlightTimer() {
@@ -187,49 +193,41 @@ export function resetSpotlightTimer() {
 
 
 export async function loadCatalogs() {
-  try {
-    const [trending, recent, seasonal, genres] = await Promise.all([
-      AniDokiAPI.getTrendingCatalog().catch(() => null),
-      AniDokiAPI.getRecentlyUpdated(24),
-      AniDokiAPI.getSeasonal(),
-      AniDokiAPI.getGenres()
-    ]);
-
-    state.trending = trending?.data || [];
-    state.trendingPagination = trending?.pagination || { page: 0, hasMore: true };
-    state.recent = recent || [];
-    state.seasonal = seasonal || [];
-    state.genres = genres || {};
-  } catch (err) {
-    console.error('Error loading catalogs from API:', err);
-    state.trending = [];
-    state.recent = [];
-    state.seasonal = [];
-  }
-
-  // Trending Grid (2 hàng x 6 ô = 12 ô)
   const trendingGrid = document.getElementById('trending-grid');
-  trendingGrid.innerHTML = '';
-  groupSeries(state.trending).slice(0, 12).forEach(anime => trendingGrid.appendChild(renderCard(anime)));
-
-  // Recent Grid (2 hàng x 6 ô = 12 ô)
   const recentGrid = document.getElementById('recent-grid');
-  recentGrid.innerHTML = '';
-  groupSeries(state.recent).slice(0, 12).forEach(anime => recentGrid.appendChild(renderCard(anime)));
-
-  // Seasonal Grid (Anime Tâm lý & Tình cảm: sắp xếp năm mới nhất trước, 2 hàng x 6 ô = 12 ô)
   const seasonalGrid = document.getElementById('seasonal-grid');
-  const renderSortedSeasonalGrid = (all = false) => {
-    seasonalGrid.innerHTML = '';
-    const sorted = groupSeries(state.seasonal).sort((a, b) => (Number(b.year) || 0) - (Number(a.year) || 0));
-    (all ? sorted : sorted.slice(0, 12)).forEach(anime => seasonalGrid.appendChild(renderCard(anime)));
+  const renderGrid = (grid, items) => {
+    grid.replaceChildren(...items.map(anime => renderCard(anime)));
+    if (!items.length) grid.textContent = 'Chưa có dữ liệu phù hợp từ AniDoki.';
+    grid.setAttribute('aria-busy', 'false');
   };
-  renderSortedSeasonalGrid(false);
+  const renderSortedSeasonalGrid = (all = false) => {
+    const sorted = groupSeries(state.seasonal).sort((a, b) => (Number(b.year) || 0) - (Number(a.year) || 0));
+    renderGrid(seasonalGrid, all ? sorted : sorted.slice(0, 12));
+  };
+  [trendingGrid, recentGrid, seasonalGrid].forEach(grid => grid.setAttribute('aria-busy', 'true'));
 
-  for (const id of ['trending-grid', 'recent-grid', 'seasonal-grid']) {
-    const grid = document.getElementById(id);
-    if (!grid.children.length) grid.textContent = 'Chưa có dữ liệu phù hợp từ AniDoki.';
-  }
+  // Render each response independently; a slow secondary catalog cannot hold up recent releases.
+  await Promise.all([
+    AniDokiAPI.getRecentlyUpdated(24).catch(() => []).then(items => {
+      state.recent = items || [];
+      renderGrid(recentGrid, groupSeries(state.recent).slice(0, 12));
+    }),
+    AniDokiAPI.getTrendingCatalog().catch(() => null).then(result => {
+      state.trending = result?.data || [];
+      state.trendingPagination = result?.pagination || { page: 0, hasMore: true };
+      renderGrid(trendingGrid, groupSeries(state.trending).slice(0, 12));
+    }),
+    AniDokiAPI.getSeasonal().catch(() => []).then(items => {
+      state.seasonal = items || [];
+      renderSortedSeasonalGrid();
+    }),
+    AniDokiAPI.getGenres().catch(() => ({})).then(genres => {
+      state.genres = genres || {};
+      renderGenreRails();
+    }),
+  ]);
+
   // 1. Trending controls
   const viewAllTrending = document.getElementById('view-all-trending');
   const moreTrending = document.getElementById('load-more-trending');
@@ -331,7 +329,6 @@ export async function loadCatalogs() {
   viewAllSeasonal?.addEventListener('click', () => {
     router.navigate('/browse?category=tam-ly,tinh-cam');
   });
-  renderGenreRails();
   await loadContinueWatching();
 }
 
@@ -367,7 +364,16 @@ export function initMovies() {
     }
   }
   button.addEventListener('click', load);
-  void load();
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(entries => {
+      if (!entries.some(entry => entry.isIntersecting)) return;
+      observer.disconnect();
+      void load();
+    }, { rootMargin: '300px' });
+    observer.observe(document.getElementById('section-movies'));
+  } else {
+    void load();
+  }
 }
 
 function renderGenreRails() {
@@ -382,9 +388,9 @@ function renderGenreRails() {
     const card = document.createElement('div');
     card.className = 'genre-card';
     card.innerHTML = `
-      <img class="genre-card-backdrop" src="${anime.bannerImage || anime.coverImage}" alt="${anime.title.english}">
+      <img class="genre-card-backdrop" src="${anime.bannerImage || anime.coverImage}" alt="${anime.title.english}" loading="lazy" decoding="async" width="640" height="360">
       <div class="genre-card-shade"></div>
-      ${anime.logo ? `<img class="genre-card-logo" src="${anime.logo}" alt="Logo">` : ''}
+      ${anime.logo ? `<img class="genre-card-logo" src="${anime.logo}" alt="" loading="lazy" decoding="async">` : ''}
       <h4 class="genre-card-title">${anime.title.english}</h4>
     `;
     const cardLogo = card.querySelector('.genre-card-logo');
@@ -403,9 +409,9 @@ function renderGenreRails() {
     const card = document.createElement('div');
     card.className = 'genre-card';
     card.innerHTML = `
-      <img class="genre-card-backdrop" src="${anime.bannerImage || anime.coverImage}" alt="${anime.title.english}">
+      <img class="genre-card-backdrop" src="${anime.bannerImage || anime.coverImage}" alt="${anime.title.english}" loading="lazy" decoding="async" width="640" height="360">
       <div class="genre-card-shade"></div>
-      ${anime.logo ? `<img class="genre-card-logo" src="${anime.logo}" alt="Logo">` : ''}
+      ${anime.logo ? `<img class="genre-card-logo" src="${anime.logo}" alt="" loading="lazy" decoding="async">` : ''}
       <h4 class="genre-card-title">${anime.title.english}</h4>
     `;
     card.addEventListener('click', () => openAnimeDetail(anime.id));

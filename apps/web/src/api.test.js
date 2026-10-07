@@ -2,6 +2,28 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { AniDokiAPI } from './api.js';
 
+test('spotlight consumes early request without downloading the same catalog again', async t => {
+  globalThis.window = { anidokiSpotlightRequest: Promise.resolve({ success: true, data: [{ id: 'early' }] }) };
+  t.after(() => { delete globalThis.window; });
+  t.mock.method(globalThis, 'fetch', async () => { throw new Error('Duplicate request'); });
+  assert.deepEqual(await AniDokiAPI.getSpotlight(), [{ id: 'early' }]);
+  assert.equal(window.anidokiSpotlightRequest, undefined);
+});
+
+test('failed early spotlight request retries through the API with a timeout', async t => {
+  globalThis.window = { anidokiSpotlightRequest: Promise.resolve(null) };
+  t.after(() => { delete globalThis.window; });
+  let calls = 0;
+  t.mock.method(globalThis, 'fetch', async (url, options) => {
+    calls++;
+    assert.equal(url, '/api/anime/spotlight');
+    assert.ok(options.signal instanceof AbortSignal);
+    return { json: async () => ({ success: true, data: [{ id: 'retry' }] }) };
+  });
+  assert.deepEqual(await AniDokiAPI.getSpotlight(), [{ id: 'retry' }]);
+  assert.equal(calls, 1);
+});
+
 test('browse reuses identical filters but refetches after expiry or filter changes', async t => {
   let now = 0;
   const calls = [];

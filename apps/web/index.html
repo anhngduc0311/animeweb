@@ -39,32 +39,7 @@
   <meta name="twitter:image" content="https://anidoki.com/brand/anidoki-white.svg">
 
   <meta name="theme-color" content="#101114">
-  <link rel="preload" href="/favicon-192x192.png" as="image">
-  <style>
-    #startup-loader { display: none; }
-    html.is-starting { overflow: hidden; }
-    html.is-starting:not(.startup-leaving) body > :not(#startup-loader):not(script) { visibility: hidden; }
-    html.is-starting #startup-loader {
-      position: fixed; inset: 0; z-index: 2147483647;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 24px; padding: 24px; background: #101114; color: #a5a5b0;
-      font: 14px/1.5 'Be Vietnam Pro', sans-serif;
-      opacity: 1; transition: opacity .3s ease;
-    }
-    html.is-starting #startup-loader.is-leaving { opacity: 0; pointer-events: none; }
-    #startup-loader .startup-logo {
-      width: 88px; height: 88px; object-fit: contain;
-      animation: startup-spin 1.8s linear infinite;
-      filter: drop-shadow(0 0 24px #b76e9133);
-    }
-    #startup-loader .startup-wordmark { width: 156px; height: auto; }
-    #startup-loader p { margin: 0; }
-    @keyframes startup-spin { to { transform: rotate(360deg); } }
-    @media (prefers-reduced-motion: reduce) {
-      #startup-loader .startup-logo { animation: none; }
-      html.is-starting #startup-loader { transition: none; }
-    }
-  </style>
+  <link rel="preconnect" href="https://phimimg.com">
   <script src="/startup-loader.js"></script>
 
   <!-- Structured Data: WebSite, Organization & SiteNavigationElement for Google Sitelinks -->
@@ -188,11 +163,6 @@
 </head>
 
 <body>
-  <div id="startup-loader" role="status" aria-live="polite" aria-label="Đang tải AniDoki">
-    <img class="startup-logo" src="/favicon-192x192.png" alt="" width="88" height="88" fetchpriority="high">
-    <img class="startup-wordmark" src="/brand/anidoki-white.svg?v=6" alt="AniDoki" width="1616" height="358">
-    <p>Đang tải tài nguyên…</p>
-  </div>
   <!-- ==========================================
        SITE HEADER
        ========================================== -->
@@ -371,7 +341,7 @@
     <!-- SPOTLIGHT HERO CAROUSEL -->
     <section class="spotlight-section" id="spotlight-section">
       <div class="spotlight-backdrop">
-        <img id="spotlight-bg" src="" alt="Spotlight Banner">
+        <img id="spotlight-bg" alt="" width="1280" height="720" fetchpriority="high" decoding="async">
       </div>
       <div class="spotlight-gradient"></div>
 
@@ -387,7 +357,7 @@
 
           <!-- Logo Artwork or Title -->
           <div id="spotlight-brand-wrap">
-            <img class="spotlight-logo" id="spotlight-logo" src="" alt="Title Logo" style="display: none;">
+            <img class="spotlight-logo" id="spotlight-logo" decoding="async" alt="Title Logo" style="display: none;">
             <h1 class="spotlight-title" id="spotlight-title">Đang tải phim nổi bật...</h1>
           </div>
 
@@ -422,8 +392,8 @@
 
       <!-- Carousel Progress Indicators -->
       <div class="spotlight-controls">
-        <button class="spotlight-pause" id="spotlight-pause" type="button" aria-label="Tạm dừng chuyển phim"
-          aria-pressed="false">Ⅱ</button>
+        <button class="spotlight-pause" id="spotlight-pause" type="button" aria-label="Tiếp tục chuyển phim"
+          aria-pressed="true">▷</button>
         <div class="spotlight-nav" id="spotlight-nav"></div>
       </div>
     </section>

@@ -17,7 +17,6 @@ import { initBrowseView } from './views/BrowseView.js';
 import { initLibraryView } from './views/LibraryView.js';
 import { initHistoryView } from './views/HistoryView.js';
 import { initAdminView } from './views/AdminView.js';
-import { waitForStartupAssets } from './utils/startup.js';
 
 // ==========================================
 // STARTUP BOOTSTRAP
@@ -28,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initHeader();
     initGenreDropdown();
     await restoreUserSession();
-    await refreshWatchlistCount();
+    void refreshWatchlistCount();
     initDetailEvents();
     initPlayerControls();
     initReportModal();
@@ -55,10 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Kích hoạt route hiện tại trên URL
     await router.handleRoute();
-    await waitForStartupAssets();
   } catch (error) {
     console.error('Không thể hoàn tất khởi tạo AniDoki:', error);
-  } finally {
-    window.finishStartupLoading?.();
   }
 });
